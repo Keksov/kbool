@@ -1,0 +1,12 @@
+[submodule "ktests"]
+	path = ktests
+	url = https://github.com/Keksov/ktests.git
+[submodule "kcl"]
+	path = kcl
+	url = https://github.com/Keksov/kcl.git
+[submodule "kklass"]
+	path = kklass
+	url = https://github.com/Keksov/kklass.git
+[submodule "kkore"]
+	path = kkore
+	url = https://github.com/Keksov/kkore.git
