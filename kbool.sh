@@ -11,12 +11,20 @@
 #
 # The kbool root is this file's own folder, taken lexically from BASH_SOURCE (no
 # cd, no fork) and exported as KBOOL_HOME (P1: a unit outside the tree finds
-# kbool.sh through it). The system search path for `kk.uses NAME` is
-# $KBOOL_HOME/kkore, $KBOOL_HOME/kklass and every folder of $KBOOL_HOME/kcl (U4).
+# kbool.sh through it). KBOOL_HOME means only that (U38): a preset value naming
+# another folder is overwritten with one WARNING. The system search path for
+# `kk.uses NAME` is $KBOOL_HOME/kkore, $KBOOL_HOME/kklass and every folder of
+# $KBOOL_HOME/kcl (U4).
+#
+# Then the configuration is read (U1b, kuse.sh "Configuration"): the system
+# (/etc/kbool/config, else $ProgramData/kbool/config), user (~/.kbool/config,
+# else $USERPROFILE/.kbool/config) and $KBOOL_CONFIG levels; no config at all
+# means the built-in defaults (U4). kk.project adds the project level later.
 #
 # rc 0 = loaded (or already loaded); rc != 0 on EVERY failure path (P3) — a
-# missing or failing kkore module — with the registry emptied and KBOOL_HOME
-# restored, so the loader guard stays off and a later source can try again.
+# missing or failing kkore module, a KBOOL_CONFIG naming no file, an unreadable
+# config — with the registry emptied and KBOOL_HOME restored, so the loader
+# guard stays off and a later source can try again.
 
 # The loader guard (C3): non-empty __KK_UNITS (an assoc with the sentinel [kbool]).
 # A source of ANOTHER copy of kbool.sh while one is loaded is a no-op with one
@@ -71,7 +79,8 @@ kk._kbool_boot() {
         printf 'kbool: error: loading %s failed (rc=%s)\n' "$__kk_root/kkore/kuse.sh" "$__kk_rc" >&2
         return "$__kk_rc"
     }
-    if ! declare -F kk.unit kk.uses kk._unit_reset kk._unit_register kk._unit_lexnorm >/dev/null; then
+    if ! declare -F kk.unit kk.uses kk._unit_reset kk._unit_register kk._unit_lexnorm \
+            kk._cfg_boot >/dev/null; then
         printf 'kbool: error: %s does not define the unit loader\n' "$__kk_root/kkore/kuse.sh" >&2
         return 2
     fi
@@ -125,6 +134,14 @@ kk._kbool_boot() {
         fi
         kk._unit_register "$__kk_m" "$__kk_f"
     done
+    # the system units are not "used units" in the kk.project sense (U37), also
+    # once they carry headers (U3) and kk.unit registers them
+    __KK_UNIT_USED=""
+    # 5. the configuration (U1b): system, user and KBOOL_CONFIG levels; a
+    #    KBOOL_CONFIG naming no file or an unreadable config fails the load (P3)
+    if (( __kk_rc == 0 )); then
+        kk._cfg_boot || __kk_rc=$?
+    fi
     if (( __kk_rc != 0 )); then
         kk._unit_reset
         if [[ -n $__kk_hs ]]; then
@@ -135,6 +152,11 @@ kk._kbool_boot() {
         return "$__kk_rc"
     fi
     __KK_UNIT_DONE[kbool]=1
+    # U38: KBOOL_HOME is where THIS kbool lives; a preset naming another folder
+    # is overwritten with one WARNING (the config chain head is KBOOL_CONFIG)
+    if [[ -n $__kk_hv && $__kk_hv != "$__kk_root" && ! $__kk_hv -ef $__kk_root ]]; then
+        kk._unit_warn "KBOOL_HOME=$__kk_hv is ignored: kbool is loaded from $__kk_root"
+    fi
     return 0
 }
 
