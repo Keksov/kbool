@@ -79,7 +79,7 @@ kk._kbool_boot() {
         printf 'kbool: error: loading %s failed (rc=%s)\n' "$__kk_root/kkore/kuse.sh" "$__kk_rc" >&2
         return "$__kk_rc"
     }
-    if ! declare -F kk.unit kk.uses kk._unit_reset kk._unit_register kk._unit_lexnorm \
+    if ! declare -F kk.unit kk.uses kk._unit_reset kk._unit_register kk._unit_lexnorm kk._ns_declare \
             kk._cfg_boot >/dev/null; then
         printf 'kbool: error: %s does not define the unit loader\n' "$__kk_root/kkore/kuse.sh" >&2
         return 2
@@ -134,6 +134,15 @@ kk._kbool_boot() {
         fi
         kk._unit_register "$__kk_m" "$__kk_f"
     done
+    # the kkore function namespaces (uses U2b, U40): kklass refuses a class or an
+    # instance named like one (kuse.sh "Declared namespaces")
+    if (( __kk_rc == 0 )); then
+        kk._ns_declare kk kuse "$__kk_root/kkore/kuse.sh"
+        kk._ns_declare kl klib "$__kk_root/kkore/klib.sh"
+        kk._ns_declare ke kerr "$__kk_root/kkore/kerr.sh"
+        kk._ns_declare kv kvar "$__kk_root/kkore/kvar.sh"
+        kk._ns_declare kc kcfg "$__kk_root/kkore/kcfg.sh"
+    fi
     # the system units are not "used units" in the kk.project sense (U37), also
     # once they carry headers (U3) and kk.unit registers them
     __KK_UNIT_USED=""
