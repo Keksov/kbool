@@ -54,7 +54,8 @@ unset -f kk._kbool_sourced
 # not see a caller's `set_trap` (C10).
 kk._kbool_boot() {
     local __kk_src=$1 __kk_root __kk_n __kk_m __kk_f __kk_rc=0 \
-          __kk_hs=${KBOOL_HOME+1} __kk_hv=${KBOOL_HOME-}
+          __kk_hs=${KBOOL_HOME+1} __kk_hv=${KBOOL_HOME-} \
+          __kk_ds=${KK_UNIT_DIR+1} __kk_dv=${KK_UNIT_DIR-}
     set --
     case $__kk_src in
         */*|*\\*)
@@ -105,13 +106,26 @@ kk._kbool_boot() {
     __KK_UNITS[kbool]=$__kk_root/kbool.sh
     __KK_UNIT_SYS[kbool]=1
     declare -gA __KK_LOADED=([on]=1)
+    # U43: the files on the stack now (the script that loads kbool, the unit
+    # whose header bootstraps it) — a RELATIVE spelling is later resolved against
+    # this PWD, even after the script cd's
+    for __kk_f in "${BASH_SOURCE[@]}"; do
+        case $__kk_f in
+            ''|main|environment|/*|[A-Za-z]:*) ;;
+            *) __KK_FILE_PWD[$__kk_f]=$PWD ;;
+        esac
+    done
     __KK_UNIT_SYSPATH=("$__kk_root/kkore" "$__kk_root/kklass" "$__kk_root/kcl/*")
     kk._unit_register kuse "$__kk_root/kkore/kuse.sh"
 
-    # 4. the system units (U1), by plain source until they carry headers (U3).
-    #    After each one, one function it must define: a module whose own re-source
-    #    guard is already set (an inherited __KLIB_SOURCED=1) returns 0 having
-    #    defined nothing (C2).
+    # 4. the system units (U1). Since uses U3 klib, kerr, kvar and kcfg carry the
+    #    two unit header lines: line 1 passes (the guard holds from step 3), line
+    #    2 `kk.unit NAME` registers the unit while it loads (and sets KK_UNIT_DIR,
+    #    restored below); a header error makes the source return 2.
+    #    kk._unit_register then marks it complete and a system unit (a module
+    #    without a header would be registered here alone). After each one, one
+    #    function it must define: a module that returns 0 having defined nothing
+    #    fails the boot (C2).
     for __kk_m in klib:kk.isInt kerr:ke.setTrap kvar:kv.framePush kcfg:kc.alias; do
         __kk_n=${__kk_m#*:}
         __kk_m=${__kk_m%%:*}
@@ -135,17 +149,24 @@ kk._kbool_boot() {
         kk._unit_register "$__kk_m" "$__kk_f"
     done
     # the kkore function namespaces (uses U2b, U40): kklass refuses a class or an
-    # instance named like one (kuse.sh "Declared namespaces")
+    # instance named like one (kuse.sh "Declared namespaces"); and every system
+    # unit's own name, as kk.unit declares it for any unit — kuse has no header,
+    # and klib's own kk.unit runs before kk._is_ident exists (uses U3)
     if (( __kk_rc == 0 )); then
+        for __kk_m in kuse klib kerr kvar kcfg; do
+            kk._ns_declare "$__kk_m" "$__kk_m" "$__kk_root/kkore/$__kk_m.sh"
+        done
         kk._ns_declare kk kuse "$__kk_root/kkore/kuse.sh"
         kk._ns_declare kl klib "$__kk_root/kkore/klib.sh"
         kk._ns_declare ke kerr "$__kk_root/kkore/kerr.sh"
         kk._ns_declare kv kvar "$__kk_root/kkore/kvar.sh"
         kk._ns_declare kc kcfg "$__kk_root/kkore/kcfg.sh"
     fi
-    # the system units are not "used units" in the kk.project sense (U37), also
-    # once they carry headers (U3) and kk.unit registers them
+    # the system units are not "used units" in the kk.project sense (U37), though
+    # kk.unit registered them through their headers (U3)
     __KK_UNIT_USED=""
+    # their headers set KK_UNIT_DIR: the caller's value (or none) comes back
+    if [[ -n $__kk_ds ]]; then KK_UNIT_DIR=$__kk_dv; else unset KK_UNIT_DIR; fi
     # 5. the configuration (U1b): system, user and KBOOL_CONFIG levels; a
     #    KBOOL_CONFIG naming no file or an unreadable config fails the load (P3)
     if (( __kk_rc == 0 )); then
