@@ -18,6 +18,9 @@ documents the by-design string-eval APIs that must only receive trusted input.
   (Pascal `Format` semantics). Do not pass an untrusted format string.
 - **`kt_assert_success` / `kt_assert_failure` (ktests)** run their argument via
   `bash -c`. They are a test-author convenience; pass only trusted command strings.
+- **The unit loader and the configuration** (`kbool.sh`, `kk.uses`, `kk.project`,
+  config files, `KBOOL_HOME` / `KBOOL_CONFIG`): what is trusted and what is
+  treated as data is in [kkore/README.md §5](kkore/README.md#5-security-notes).
 
 ## Hardening applied
 
