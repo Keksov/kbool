@@ -402,6 +402,12 @@ bash kkore/tests/tests.sh -n 15              # only test file 015 (-n 1,3-5 list
   result. A test that needs a config installs its own. A suite file run
   on its own (`bash kkore/tests/011_ConfigProject.sh`) sees the environment
   as it is.
+* **No process may outlive a run**: the master sweep fails a suite that left
+  any process of its session running whose parent is gone (named, then
+  stopped); a TERM/Ctrl-C to the sweep stops the running suite too; and
+  `bash ktests/tools/strays.sh list` / `stop` finds and ends leftovers of a
+  killed run (once per bash runtime; unfiltered `stop` only touches orphans
+  older than 120 min) — see `ktests/tools/README.md`.
 * The examples on this page marked as runnable are run by
   `kkore/tests/015_DocExamples.sh`; the kklass book's by
   `kklass/tests/142_DocExamples.sh`.
