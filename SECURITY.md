@@ -37,6 +37,23 @@ documents the by-design string-eval APIs that must only receive trusted input.
   runner and fixtures (`printf %q`), so paths with quotes/spaces cannot break out.
 - **Secure temp files** — `tfile` encrypt/decrypt uses `mktemp` (unpredictable name,
   atomic replace) instead of a predictable `.$$` name.
+- **Class-build scratch file** — `kk._fn_text` (kklass round 5 / P14, the
+  fork-free `declare -f` capture) creates one file per shell under `$TMPDIR`,
+  named from `$SRANDOM` (not the seedable `$RANDOM`); a name where anything
+  exists (`-e`/`-L`) is skipped and the new descriptor must be a regular file
+  (noclobber refuses only an existing regular file). The file is deleted at
+  once with `command /usr/bin/rm` (else `/bin/rm`, else the rm PATH hashes —
+  a function cannot stand in for it); if the delete fails, that one file is
+  reported and the fast path is off for the shell. Only two READ descriptors
+  stay open (inherited by children); the write side is opened per capture or
+  per `build` and every capture is framed by a random marker, so a process
+  writing into the file cannot forge a capture (the marker must occur
+  exactly twice); the file is created under `umask 077` (mode 0600 — the
+  caller's umask is restored; on MSYS/Cygwin `noacl` mounts the ACL of
+  `$TMPDIR` applies), so a child running as another user cannot write it;
+  same-user children are trusted (they could edit the scripts); `-ef` before each capture
+  keeps a caller's reopened descriptor numbers out of it. The state is an
+  indexed array (arrays never come from the environment) bound to `$BASHPID`.
 - **Legacy prototypes** that did not validate names and could override the hardened
   `defineClass` were moved to `kklass/experimental/` (not sourced in production).
 
