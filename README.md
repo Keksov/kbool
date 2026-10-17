@@ -349,8 +349,10 @@ A unit is loaded once; there is no reload. The escape hatch for a prompt is
 `kk.unit --forget NAME`: the unit's registration — and the classes it declared —
 are dropped, so the next `source` or `kk.uses` loads it again (rc 0 forgotten,
 1 not registered, 2 a system unit or one being loaded right now). Live
-instances of a forgotten class are yours to delete. For one class of a file
-without a header: `kk.class --forget CLASS` (kklass).
+instances of a forgotten class are yours to delete (their names are no longer
+protected from a class declaration). For one class of a file
+without a header: `kk.class --forget CLASS` (kklass; a WARNING names its live
+instances).
 
 <!-- doctest -->
 ```bash
