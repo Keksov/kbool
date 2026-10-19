@@ -55,7 +55,8 @@ documents the by-design string-eval APIs that must only receive trusted input.
   keeps a caller's reopened descriptor numbers out of it. The state is an
   indexed array (arrays never come from the environment) bound to `$BASHPID`.
 - **Legacy prototypes** that did not validate names and could override the hardened
-  `defineClass` were moved to `kklass/experimental/` (not sourced in production).
+  `defineClass` were moved to `kklass/experimental/` (never sourced in production)
+  and deleted in kklass round 6 / P16 (they remain in the git history only).
 
 ## Reporting
 
