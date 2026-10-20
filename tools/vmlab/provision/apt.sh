@@ -6,6 +6,7 @@
 set -eu
 [ "$(id -u)" = 0 ] || { echo "apt.sh: must run as root" >&2; exit 2; }
 
+export PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH   # guest control's root has no sbin in PATH
 LABUSER=${LABUSER:-kb}
 # CORE: a missing name is fatal. OPTIONAL: installed one by one; a missing
 # name is reported ("apt.sh: MISSING <pkg>") and skipped, never substituted.
@@ -35,11 +36,23 @@ if [ -x /usr/bin/mawk ]; then update-alternatives --set awk /usr/bin/mawk; fi
 if [ -x /bin/nc.openbsd ]; then update-alternatives --set nc /bin/nc.openbsd; fi
 
 # locales (needed for the locale-dependent tests)
-# shellcheck disable=SC2086
-locale-gen $LOCALES
+. /etc/os-release
+if [ "$ID" = debian ]; then
+  # Debian's locale-gen takes no arguments: it generates what /etc/locale.gen lists
+  for l in $LOCALES; do
+    sed -i "s/^# *\($l UTF-8\)\$/\1/" /etc/locale.gen
+    grep -qx "$l UTF-8" /etc/locale.gen || { echo "apt.sh: $l missing in /etc/locale.gen" >&2; exit 1; }
+  done
+  locale-gen
+else
+  # shellcheck disable=SC2086
+  locale-gen $LOCALES
+fi
 
-# no background apt activity while a gate runs
-systemctl disable --now unattended-upgrades.service apt-daily.timer apt-daily-upgrade.timer 2>&1 || true
+# no background apt activity while a gate runs (Debian has no unattended-upgrades by default)
+for u in unattended-upgrades.service apt-daily.timer apt-daily-upgrade.timer; do
+  if systemctl cat "$u" >/dev/null 2>&1; then systemctl disable --now "$u" 2>&1 || true; fi
+done
 
 # ssh: key only
 mkdir -p /etc/ssh/sshd_config.d

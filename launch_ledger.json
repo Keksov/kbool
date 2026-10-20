@@ -161,6 +161,15 @@
         "L1.2"
       ],
       "card": "ready after L1.2",
+      "status": "PARTIAL 2026-10-20 (Sonnet): kb-debian DONE (Debian 13.7, bash 5.2.37, kernel 6.12.107, AMD-V, snapshot clean; SV verified live); kb-fedora BLOCKED: VBox 7.1.12 unattended does not know Fedora major version 44 (deterministic) -> L1.3b cloud image + cloud-init NoCloud via SMBIOS serial"
+    },
+    "L1.3b": {
+      "executor": "S",
+      "title": "kb-fedora from the Fedora Cloud image + cloud-init NoCloud (DMI serial, host HTTP seed)",
+      "dep": [
+        "L1.3"
+      ],
+      "card": "ready",
       "status": "planned"
     },
     "L1.4": {

@@ -296,3 +296,149 @@ after `--` the string is the remote command line, sent verbatim (pipes, `;`,
 `run kb-ubuntu -- 'uname -a | head -1; echo $0'`. With TWO OR MORE arguments
 each word is quoted with `printf %q` and nothing is interpreted:
 `run kb-ubuntu -- echo 'a b;c'` prints `a b;c`.
+
+## kb-debian
+
+Debian 13 "trixie" lab VM (name `kb-debian`, ssh port 2222, user `kb`, bash
+`/usr/bin/bash`, snapshot `clean`). Created 2026-10-20 by `create/debian.sh`
+(+ `provision/apt.sh`); VM and ISO live in `C:\var\vbox\kb-lab\` (ISO
+`iso\debian-13.7.0-amd64-netinst.iso` from
+`https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/`, checked against
+`iso\SHA256SUMS.debian` = that folder's `SHA256SUMS`; the plain `SHA256SUMS`
+in `iso\` is the Ubuntu one). The VM is not part of the repository.
+
+```
+bash tools/vmlab/create/debian.sh                  # whole recipe, ~12 min; leaves the VM running
+bash tools/vmlab/vmlab.sh snapshot kb-debian clean
+```
+
+Same structure as `create/ubuntu.sh` (refuses with rc 13 if the VM exists,
+random one-shot password file, `--finish PWFILE`, port forward
+`ssh,tcp,127.0.0.1,2222,,22`, 4096 MB / 4 CPUs / 20 GB). Differences, all verified
+on VirtualBox 7.1.12 + Debian 13.7 (preseed):
+
+* `unattended install ... --package-selection-adjustment=minimal`: without it the
+  preseed installs the default task set (a desktop); with it `tasksel minimal` +
+  `openssh-server`. The VM has 369 packages, 1.5 GB used.
+* The stock post-install template is used unchanged: its `usermod -a -G vboxsf kb`
+  runs from the preseed `late_command`, after the user exists (no Ubuntu-style
+  failure; `/var/log/vboxpostinstall.log` ends `Final exit code: 0`).
+* The preseed sets the root password to the user's password, so guest control logs
+  in as `root`. A minimal install has no `sudo` and `kb` is in no sudo group, hence
+  the script installs `sudo` and `openssh-server` as root through guest control,
+  puts the lab key into `/home/kb/.ssh`, and runs `provision/apt.sh` as root through
+  guest control (it writes `/etc/sudoers.d/kb`); `vmlab.sh run` works afterwards.
+* The guest additions' run level 2 was reached 451 s after the start (same retry
+  loop as for Ubuntu).
+
+`provision/apt.sh` became distro-aware, Ubuntu behaviour unchanged:
+`export PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH` (the root of guest control has
+no sbin in PATH); on Debian (`ID=debian` in `/etc/os-release`) the locales are
+enabled by uncommenting `en_US.UTF-8 de_DE.UTF-8 ru_RU.UTF-8` in `/etc/locale.gen`
+and running `locale-gen` without arguments (Debian's `locale-gen` takes none); the
+`systemctl disable --now` of `unattended-upgrades.service`, `apt-daily.timer`,
+`apt-daily-upgrade.timer` is done per unit and only for units that exist (Debian
+has no `unattended-upgrades`).
+
+Execution engine, from `C:\var\vbox\kb-lab\kb-debian\Logs\VBox.log`:
+
+```
+HM: HMR3Init: AMD-V w/ nested paging
+HM: Using AMD-V implementation 2.0
+```
+
+### Versions recorded at creation (2026-10-20)
+
+`cat /etc/debian_version`: `13.7` (`Debian GNU/Linux 13 (trixie)`); kernel
+`6.12.107+deb13-amd64`; guest additions 7.1.12 (`vboxadd-service` active).
+`bash --version | head -1`: `GNU bash, version 5.2.37(1)-release (x86_64-pc-linux-gnu)`.
+`dpkg-query -W` (all of the `apt.sh` list installed; no name was missing):
+
+```
+bash 5.2.37-2+b10          git 1:2.47.3-0+deb13u1        coreutils 9.7-3
+sed 4.9-2+deb13u1          grep 3.11-4                   findutils 4.10.0-3
+diffutils 1:3.10-4         gawk 1:5.2.1-2+b1             mawk 1.3.4.20250131-1
+procps 2:4.0.4-9           util-linux 2.41.5-0+deb13u1   perl 5.40.1-6+deb13u1
+curl 8.14.1-2+deb13u7      openssl 3.5.7-1~deb13u3       netcat-openbsd 1.229-1
+tzdata 2026c-0+deb13u1     locales 2.41-12+deb13u4       socat 1.8.0.3-1+deb13u1
+ncat 7.95+dfsg-3           netcat-traditional 1.10-50    nodejs 20.19.2+dfsg-1+deb13u3
+python3 3.13.5-1           uuid-runtime 2.41.5-0+deb13u1 openssh-server 1:10.0p1-7+deb13u4
+sudo 1.9.16p2-3+deb13u2
+```
+
+* `awk` -> `/usr/bin/mawk` (manual mode; gawk would be the "best version").
+* `readlink -f "$(command -v nc)"` -> `/usr/bin/nc.openbsd`; `update-alternatives --display nc`:
+  `nc - manual mode ... link currently points to /bin/nc.openbsd`.
+* `locale -a`: `C C.utf8 de_DE.utf8 en_US.utf8 POSIX ru_RU.utf8`.
+* `LC_ALL=ru_RU.UTF-8 bash -c 'echo $EPOCHREALTIME'` -> `1792528394,107867` (a comma).
+* sshd: `sshd -T` shows `passwordauthentication no`, `kbdinteractiveauthentication no`;
+  `apt-daily.timer` and `apt-daily-upgrade.timer` disabled; `/etc/sudoers.d/kb` is
+  `kb ALL=(ALL) NOPASSWD:ALL` (0440); login shell of `kb` is `/bin/bash`.
+* A minimal Debian has no `lsb_release`: use `/etc/os-release`.
+
+## kb-fedora -- manual install
+
+**Status (2026-10-20): the unattended install is impossible with VirtualBox
+7.1.12.** `create/fedora.sh` and `provision/dnf.sh` are written but were never run
+past this point (untested). With the Fedora Server 44 netinst ISO
+(`Fedora-Server-netinst-x86_64-44-1.7.iso`) `VBoxManage unattended install`
+detects `RedHat_64`, version `44`, and `ConstructMedia()` fails deterministically
+(also with `--script-template` and `--post-install-template` given, with and
+without `--install-additions`, with `--start-vm=none`):
+
+```
+VBoxManage.exe: error: Unknown guest OS major version '44'
+VBoxManage.exe: error: Details: code E_FAIL (0x80004005), component UnattendedWrap, interface IUnattended ...
+VBoxManage.exe: error: Context: "ConstructMedia()" at line 2574 of file VBoxManageMisc.cpp
+```
+
+(its RHEL-family code only knows old major versions; `--dry-run` passes but
+builds nothing). Use this checklist until a VirtualBox that knows Fedora 44 exists
+or the owner chooses another route.
+
+Where things are: ISO `C:\var\vbox\kb-lab\iso\Fedora-Server-netinst-x86_64-44-1.7.iso`
+(sha256 `ae20c06bea746913cadea7d80463e13f4bf55bee4df2918111c921c674b70283`, checked against
+`Fedora-Server-44-1.7-x86_64-CHECKSUM` in the same folder); VM folder
+`C:\var\vbox\kb-lab\`; ssh key `~/.ssh/kbool_vmlab` (+ `.pub`).
+
+1. VirtualBox: new VM `kb-fedora`, folder `C:\var\vbox\kb-lab`, type Linux / Fedora
+   (64-bit), 4096 MB RAM, 4 CPUs, a new 20 GB dynamic VDI on a SATA controller, the
+   ISO above in the optical drive. Network adapter 1 = NAT with port forward `ssh`,
+   TCP, host `127.0.0.1`:2223 -> guest 22; Audio off; USB off. (CLI equivalent: the
+   `createvm`/`modifyvm`/`createmedium`/`storagectl`/`storageattach` lines of
+   `create/fedora.sh` with `--ostype Fedora_64`, port 2223; then
+   `storageattach kb-fedora --storagectl SATA --port 1 --device 0 --type dvddrive --medium <iso>`
+   and `startvm kb-fedora`.)
+2. Install Fedora Server 44 with: language English (US), keyboard US, time zone UTC,
+   installation destination = the 20 GB disk with automatic partitioning, network
+   DHCP, host name `kb-fedora.lab`, installation source = the network default,
+   software selection = Fedora Server (minimal is fine), root account: set a password
+   (keep it); create user `kb`, **administrator (wheel) = yes**, a password (keep it:
+   needed once, below).
+3. Reboot into the installed system, log in as `kb` on the console and make sure sshd
+   runs: `sudo systemctl enable --now sshd`.
+4. Put the lab key in (from the host, Git-bash; the password is asked once):
+   `ssh-copy-id -i ~/.ssh/kbool_vmlab.pub -p 2223 kb@127.0.0.1`, then on the VM
+   `restorecon -R ~/.ssh` (SELinux), then
+   `bash tools/vmlab/vmlab.sh up kb-fedora && bash tools/vmlab/vmlab.sh run kb-fedora -- true` must succeed.
+5. Provision (the first sudo asks the password once; later NOPASSWD):
+   ```
+   bash tools/vmlab/vmlab.sh run kb-fedora -- sh -c 'cat > /tmp/dnf.sh' < tools/vmlab/provision/dnf.sh
+   ssh -t -i ~/.ssh/kbool_vmlab -p 2223 kb@127.0.0.1 'sudo bash /tmp/dnf.sh'     # asks the password once
+   bash tools/vmlab/vmlab.sh run kb-fedora -- rm -f /tmp/dnf.sh
+   ```
+   `dnf.sh` installs `bash git-core coreutils sed grep findutils diffutils gawk
+   procps-ng util-linux perl-interpreter perl-POSIX curl openssl nmap-ncat netcat
+   tzdata glibc-langpack-en glibc-langpack-de glibc-langpack-ru` (a missing name is
+   fatal), then one by one `socat nodejs python3` (a missing name is printed as
+   `dnf.sh: MISSING <pkg>`), sets `kb ALL=(ALL) NOPASSWD:ALL`, disables
+   `dnf-makecache.timer`, sets sshd to key-only and makes bash the login shell of `kb`.
+6. Record the versions into this README (a section "kb-fedora -- versions"):
+   ```
+   bash tools/vmlab/vmlab.sh run kb-fedora -- 'cat /etc/fedora-release; bash --version | head -1; rpm -q bash git-core coreutils sed grep findutils diffutils gawk procps-ng util-linux perl-interpreter perl-POSIX curl openssl nmap-ncat netcat tzdata glibc-langpack-en glibc-langpack-de glibc-langpack-ru socat nodejs python3 openssh-server sudo'
+   bash tools/vmlab/vmlab.sh run kb-fedora -- 'readlink -f "$(command -v nc)"; nc -h 2>&1 | head -2; locale -a; LC_ALL=ru_RU.UTF-8 bash -c "echo \$EPOCHREALTIME"'
+   ```
+7. Snapshot: `bash tools/vmlab/vmlab.sh snapshot kb-fedora clean`.
+8. Check: `bash tools/vmlab/vmlab.sh status` shows `kb-fedora poweroff ... clean`; `reset` +
+   `up` + `run kb-fedora -- 'bash --version | head -1; sudo -n true && echo sudo-ok'` + `down` works;
+   `sync kb-fedora` then `run kb-fedora -- 'ls ~/kbool'`.
