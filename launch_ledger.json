@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L0.1-L0.4 + L1.1 DONE; L0.5 (Opus) running",
+  "status": "in progress — L0 analysis done; L1.2 (kb-ubuntu) running; next L0.7 in a VM-free gap, L1.3/L1.4",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -105,7 +105,7 @@
         "L0.4"
       ],
       "card": null,
-      "status": "dispatched 2026-10-20 (Opus)"
+      "status": "DONE 2026-10-20 (Opus): docs/dev/PORTING.md 419 lines; SV spot-checked H1 (strays.sh /proc winpid), H4 (gate.sh env --default-signal), H6 (s/\r$//), H7 (EPOCHREALTIME comma confirmed on this machine under ru_RU), shebang-asserting tests"
     },
     "L0.6": {
       "executor": "SV",
@@ -114,6 +114,15 @@
         "L0.5"
       ],
       "card": null,
+      "status": "DONE 2026-10-20: plan + cards updated from PORTING.md §7/§9 (package lists, locales, fdescfs, L2.1 scope H1/H4-H8, L2.2 scope, L2.4 de_DE run, L2.5 nc backend, L2.8 §2.7 walk, L4.2 5.0/4.4 library runs, new L0.7)"
+    },
+    "L0.7": {
+      "executor": "S",
+      "title": "comma-locale fix EPOCHREALTIME (R1-R3), gates C + ru_RU",
+      "dep": [
+        "L0.6"
+      ],
+      "card": "ready (no lab VM running)",
       "status": "planned"
     },
     "L1.1": {
@@ -133,7 +142,7 @@
         "L0.6"
       ],
       "card": "ready after L0.6",
-      "status": "planned"
+      "status": "dispatched 2026-10-20 (Sonnet), package list updated mid-task"
     },
     "L1.3": {
       "executor": "S",
@@ -204,7 +213,8 @@
       "dep": [
         "L2.1",
         "L2.2",
-        "L2.3"
+        "L2.3",
+        "L0.7"
       ],
       "card": "draft",
       "status": "planned"

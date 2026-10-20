@@ -25,7 +25,11 @@ The code is ready; the first five minutes of a stranger are not:
 | 32 tracked files stored CRLF (found by L0.1): 26 × `kcl/tdirectory/tests/*.sh` start with `#!/bin/bash\r`, plus 2 LICENSE, ledgers, a doc | those tests cannot run on Linux; fixed in L0.1 |
 | no bash version guard in `kbool.sh` | on an old bash: an obscure error instead of "bash ≥ X needed" |
 | version features in use: 5.0 `EPOCHREALTIME` (22 files), 5.1 features (9 places), 5.2 only `patsub_replacement` (already handled) | 5.1 support (RHEL 9, Ubuntu 22.04) looks cheap — to be measured |
-| `thttpserver` is built around GNU netcat 0.7.1 | GNU netcat is absent from Debian, Fedora, Alpine, FreeBSD (they ship OpenBSD nc / ncat / busybox nc) |
+| `thttpserver` is built around GNU netcat 0.7.1 | GNU netcat is absent from Ubuntu, Debian, Fedora, Alpine (they ship OpenBSD nc / ncat / busybox nc); on them the suite fails instead of SKIPping |
+| *(L0.5, [PORTING.md](docs/dev/PORTING.md))* the ktests harness reads cygwin-only `/proc/PID/{ppid,pgid,sid,winpid}` (H1) | on Linux the stray check is blind (`strays: none` proves nothing); FreeBSD/macOS have no `/proc` |
+| *(L0.5)* `gate.sh` starts every segment with `env --default-signal` (H4, GNU coreutils ≥ 8.31) | no gate starts on Alpine-clean, FreeBSD, macOS |
+| *(L0.5, confirmed on this machine)* `EPOCHREALTIME` has a **comma** under `ru_RU`/`de_DE` locales; `${EPOCHREALTIME/./}` and friends (≈45 code sites: harness, tstopwatch, thttpserver, dateutils) then compute garbage (H7) | wrong timings / hangs for every user with a comma locale — **on Windows too**; English-locale CI never shows it |
+| *(L0.5)* the 5.0 floor comes from the harness and a few kcl units; kkore and the kklass runtime need at most 4.4 statically | the library floor could sit below the harness floor (L4 measures) |
 | no CI (`.github` absent in all five repos) | no public proof that it works |
 | no LICENSE in kbool, kkore, ktests (kcl, kklass: MIT) | legally unusable |
 | no tag / release in any repo | nothing to announce, no compatibility promise |
@@ -95,7 +99,8 @@ Rules:
 | L0.3 | S | external-tool table per unit `docs/dev/launch/tools.tsv` (static) | L0.2 |
 | L0.4 | S | bash feature map by version `docs/dev/launch/bashfeatures.tsv` | L0.2 |
 | L0.5 | O | `docs/dev/PORTING.md`: ranked hazards from L0.2–L0.4, the netcat question, OG1 options with data; final package lists for L1 provisioning | L0.2–L0.4 |
-| L0.6 | SV | review + commit; finalize the L1 cards' package lists from L0.5 | L0.5 |
+| L0.6 | SV | review + commit; finalize the L1 cards' package lists from L0.5; fold PORTING.md §9 into this plan | L0.5 |
+| L0.7 | S | **comma-locale fix** (H7): every `EPOCHREALTIME` decimal-point split made locale-proof by fixed rewrite rules; Windows gate under `LC_ALL=ru_RU.UTF-8` | L0.6; runs in a gap with no lab VM running |
 
 ### L1 — the VM lab (`tools/vmlab/`)
 
@@ -106,20 +111,24 @@ Rules:
 | L1.3 | S | create + provision **kb-debian**, **kb-fedora** (same recipe as L1.2) | L1.2 |
 | L1.4 | S | create + provision **kb-freebsd**, **kb-alpine** (official image / console scripting, timeboxed; else manual checklist); snapshots `clean` (no GNU tools) and `clean-gnu` | L1.2 |
 | L1.5 | OW | manual installs for whatever L1.2–L1.4 could not automate (checklists from S) | as needed |
-| L1.6 | SV | acceptance: `vmlab.sh run` + `sync` + `fetch` on all five; `gate` attempted (its harness may not work on Linux yet — that is L2.1) | L1.2–L1.5 |
+| L1.6 | SV | acceptance: `vmlab.sh run` + `sync` + `fetch` on all five; `gate` attempted (its harness may not work on Linux yet — that is L2.1). **Until L2.1 lands, a VM's `strays: none` and STRAY-free cells are no evidence** (H1) | L1.2–L1.5 |
+
+Provisioning content per OS = PORTING.md §7 (locales `en_US`/`de_DE`/`ru_RU.UTF-8`,
+tzdata, perl, curl, openssl, the nc flavours for the L2.5 probes; FreeBSD:
+`fdescfs` on `/dev/fd` in both snapshots, H14).
 
 ### L2 — Linux (Ubuntu, Debian, Fedora)
 
 | id | ex | task | dep |
 |---|---|---|---|
-| L2.1 | O | the **test harness on Linux**: `gate.sh`, `suitejob.sh`, `strays.sh`, the ktests runner (process listing, `/proc` vs cygwin `ps`, paths); Windows behaviour unchanged | L1.6 |
-| L2.2 | S | shebangs → `#!/usr/bin/env bash`; exec bit (`git update-index --chmod=+x`) for every tracked file starting with `#!` | L0.6 |
+| L2.1 | O | the **test harness on Linux and FreeBSD** (PORTING.md §3): process table without cygwin `/proc` fields (H1), `env --default-signal` (H4), the harness one-liners H5–H8 (BSD `sed -i`, `s/\r$//` under BSD sed, …); Windows behaviour unchanged. L3.1 depends on H4 | L1.6 |
+| L2.2 | S | shebangs → `#!/usr/bin/env bash`; exec bit for every tracked file starting with `#!`; **plus** the 3 header tests that assert `#!/bin/bash` (kcl/tests/001:67, kklass/tests/141:85, kkore/tests/013:46) and the shebang strings the kklass generators emit (kklass_compiler.sh:260, kklass_kkp.sh:336/346) — a literal-string substitution, so S despite DL9 | L0.6 |
 | L2.3 | S | bash version guard at the top of `kbool.sh` (exact code in the card; floor 5.2 until OG2) | L2.2 |
-| L2.4 | S | gate on kb-ubuntu, kb-debian, kb-fedora → `docs/dev/launch/L2_failures.tsv` (+ minimal repro per failure); **no fixes** | L2.1–L2.3 |
-| L2.5 | O | triage of L2_failures: cause per row, fix rule per row, batches; thttpserver netcat design (OpenBSD nc / ncat / busybox nc, or detect + SKIP) | L2.4 |
+| L2.4 | S | gate on kb-ubuntu, kb-debian, kb-fedora → `docs/dev/launch/L2_failures.tsv` (+ minimal repro per failure); plus one run on kb-debian under `LC_ALL=de_DE.UTF-8`; **no fixes** | L2.1–L2.3, L0.7 |
+| L2.5 | O | triage of L2_failures: cause per row, fix rule per row, batches; thttpserver: detect + SKIP as the floor plus a second backend (OpenBSD nc if the probe passes, else socat — PORTING.md §4); until then its suite SKIPs on the Linux VMs | L2.4 |
 | L2.6 | S | fix batches (card template L*.fix), one batch per dispatch; Windows 5.2 + 5.3 gate stays green | L2.5 |
 | L2.7 | O | fixes the triage assigned to O (core layers, netcat) | L2.5 |
-| L2.8 | SV | closing gate: Windows ×2 + three VMs; re-run `scan.sh`, diff vs L0 inventory; commit | L2.6, L2.7 |
+| L2.8 | SV | closing gate: Windows ×2 + three VMs; re-run `scan.sh`, diff vs L0 inventory, **and walk the PORTING.md §2.7 list of lexical misses by hand** (the scan cannot see them); commit | L2.6, L2.7 |
 
 ### L3 — non-GNU userland (Alpine/busybox, FreeBSD)
 
@@ -137,7 +146,7 @@ Rules:
 | id | ex | task | dep |
 |---|---|---|---|
 | L4.1 | S | build bash 5.1.16, 5.0.18, 4.4.23, 3.2.57 from GNU tarballs (signature checked) in kb-debian under `/opt/bash-X`; snapshot `clean-bashes` | L2.8 |
-| L4.2 | S | gate on 5.1.16 → `L4_failures.tsv`, each row mapped to a `bashfeatures.tsv` feature; guard check script `tools/vmlab/checks/guard.sh` run on 3.2/4.4/5.0/5.1 | L4.1, L2.3 |
+| L4.2 | S | gate on 5.1.16 → `L4_failures.tsv`, each row mapped to a `bashfeatures.tsv` feature; the kkore + kklass suites also on 5.0.18 and 4.4.23 (can the library floor sit below the harness floor?); guard check script `tools/vmlab/checks/guard.sh` run on 3.2/4.4/5.0/5.1 | L4.1, L2.3 |
 | L4.3 | O | cost report (fix size, speed impact, risk) + recommendation | L4.2 |
 | L4.4 | OW | **OG2** | L4.3 |
 | L4.5 | O → S | if 5.1: fixes (O for core, S batches) + 5.1 joins the gate permanently; guard floor set | L4.4 |

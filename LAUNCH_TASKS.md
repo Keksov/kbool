@@ -306,6 +306,41 @@ flavours exist on each target), OG1 options with numbers, and the **final
 package lists** per OS for L1 (`apt`, `dnf`, `apk` for `clean-gnu`, `pkg`
 for `clean-gnu`). SV pastes the package lists into cards L1.2–L1.4.
 
+### L0.7 — comma-locale fix for EPOCHREALTIME  [S] ready (run with no lab VM running)
+
+**Goal.** Under a locale whose decimal separator is a comma (`ru_RU`, `de_DE`)
+bash prints `EPOCHREALTIME` as `1792492915,887987`; every split on `.` then
+computes garbage (PORTING.md H7). Make every split locale-proof.
+**Read.** `docs/dev/PORTING.md` (H7 only), `ktests/docs/GATE_FOR_AGENTS.md`.
+**Write scope.** tracked `*.sh` files of the five repos — only the
+expressions the rules below name.
+**Rules** (the tree already uses the safe forms `${EPOCHREALTIME/[.,]/}` ×13
+and `${EPOCHREALTIME//[!0-9]/}` ×30 — keep them):
+- R1 `${EPOCHREALTIME/./}` → `${EPOCHREALTIME/[.,]/}` (28 sites at kbool 2817b2b).
+- R2 for a variable NAME assigned from `$EPOCHREALTIME` / `${EPOCHREALTIME}`
+  in the same file: `${NAME/./}` → `${NAME/[.,]/}`, `${NAME//./}` →
+  `${NAME//[.,]/}`, `${NAME%.*}` → `${NAME%[.,]*}`, `${NAME#*.}` → `${NAME#*[.,]}`,
+  `${NAME%%.*}` → `${NAME%%[.,]*}`.
+- R3 `${EPOCHREALTIME%.*}` / `${EPOCHREALTIME#*.}` / `%%.*` → the `[.,]` forms as in R2.
+- Anything else where the separator of an EPOCHREALTIME value matters
+  (passed to `printf %f`, awk, bc, compared as a string, `${X/,/.}`
+  conversions, a NAME assigned in another file) → **do not change**; list it
+  (file:line, the line) in the report under OPEN.
+**Steps.**
+1. Red first: with no change yet, run the gate under the comma locale on the
+   suites `ktests kcl/tstopwatch kcl/thttpserver kcl/dateutils`:
+   `LC_ALL=ru_RU.UTF-8 bash $G --out "$SCRATCH/g_red" ktests kcl/tstopwatch kcl/thttpserver kcl/dateutils`
+   (first check that the gate passes `LC_ALL` into its cells — read gate.sh's
+   env handling; if it scrubs it → BLOCKED). Record the verdict and the
+   [FAIL] lines (a red result is expected but not required — record what is).
+2. Apply R1–R3; list every change (file:line, before → after).
+**Acceptance.**
+- `git grep -nE 'EPOCHREALTIME/\./|EPOCHREALTIME%\.|EPOCHREALTIME#\*\.'` in all five repos → no hits
+- full phase gate, both runtimes, English/C locale: `bash $G --rerun-failed 1 --compare LAST all` → PASS, totals unchanged
+- full phase gate, both runtimes, comma locale: `LC_ALL=ru_RU.UTF-8 bash $G --rerun-failed 1 all` → PASS (any FAIL: report it with its [FAIL] lines; do not fix beyond R1–R3)
+- the red-first record from step 1 next to the green results.
+**Timebox.** 1 h + three gates (~1.5 h).
+
 ---
 
 ## L1 — the VM lab
@@ -413,10 +448,17 @@ one submodule in `$SCRATCH` for this — never modify the real tree), and no
    sshd `PasswordAuthentication no`; `apt-get clean`; the login shell of `kb`
    is bash (`chsh -s /usr/bin/bash kb` if `getent passwd kb` shows another) —
    on EVERY lab VM, because `vmlab.sh run` quotes with `printf %q`.
-   PKG (SV fills from PORTING.md at L0.6; default):
-   `bash git gawk sed grep coreutils findutils diffutils procps netcat-openbsd tar gzip xz-utils ca-certificates curl`.
+   PKG (final, from PORTING.md §7 at L0.6):
+   `bash git coreutils sed grep findutils diffutils gawk procps util-linux perl curl openssl netcat-openbsd tzdata locales socat ncat netcat-traditional nodejs python3 uuid-runtime`
+   — a missing name among the last six is recorded, not substituted; any other
+   missing name → BLOCKED. mawk stays the default `awk`. `nc` must still
+   resolve to OpenBSD nc after ncat/netcat-traditional are installed
+   (`update-alternatives --set nc /bin/nc.openbsd` if not; record it).
+   Locales: `locale-gen en_US.UTF-8 de_DE.UTF-8 ru_RU.UTF-8`.
 7. Record versions into the README section: `lsb_release -d`, `bash --version | head -1`,
-   `dpkg-query -W gawk sed grep coreutils findutils netcat-openbsd`.
+   `dpkg-query -W` of every installed package of the list, `locale -a`,
+   `readlink -f "$(command -v nc)"`, and the output of
+   `LC_ALL=ru_RU.UTF-8 bash -c 'echo $EPOCHREALTIME'` (must show a comma).
 8. `vmlab.sh snapshot kb-ubuntu clean`.
 **Stop if.** Unattended install fails twice (VM never reaches step 4/5 in
 45 min) → delete only `kb-ubuntu` (`unregistervm kb-ubuntu --delete`), write
@@ -441,7 +483,7 @@ As L1.2 with these differences; reuse `create/ubuntu.sh` structure as
 | ISO | newest `debian-13.*-amd64-netinst.iso` from `https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/` + `SHA256SUMS` there | newest Fedora Server `*-x86_64-*.iso` (netinst) from `https://download.fedoraproject.org/pub/fedora/linux/releases/<newest>/Server/x86_64/iso/` + its `*-CHECKSUM` |
 | ostype | `Debian_64` | `Fedora_64` |
 | port | 2222 | 2223 |
-| packages | as kb-ubuntu, without `unattended-upgrades` handling (disable `apt-daily*` timers only) | `bash git gawk sed grep coreutils findutils diffutils procps-ng nmap-ncat tar gzip xz curl`; `systemctl disable --now dnf-makecache.timer` |
+| packages | as kb-ubuntu (same list and rules; locales through `/etc/locale.gen` + `locale-gen`; minimal installs lack `sudo` — install it first via `su -` on the console or the unattended post-install), without `unattended-upgrades` handling (disable `apt-daily*` timers only) | `bash git-core coreutils sed grep findutils diffutils gawk procps-ng util-linux perl-interpreter perl-POSIX curl openssl nmap-ncat netcat tzdata glibc-langpack-en glibc-langpack-de glibc-langpack-ru socat nodejs python3` (last three: record if missing); record which binary `nc` is; `systemctl disable --now dnf-makecache.timer` |
 | versions recorded | `cat /etc/debian_version`, `dpkg-query -W …` | `cat /etc/fedora-release`, `rpm -q …` |
 
 Write scope, stop rule, acceptance: as L1.2 per VM. **Timebox.** 3 h.
@@ -476,9 +518,13 @@ beyond bash+git) and `clean-gnu` (GNU tools added).
    `provision/pkg.sh` with `sudo` (sshd
    `PasswordAuthentication no`, `pkg clean -y`); check `sudo -n true`;
    `vmlab.sh snapshot kb-freebsd clean`.
-5. `clean-gnu`: from `clean`, `sudo pkg install -y coreutils gsed gawk findutils gnugrep diffutils`
-   (+ the netcat package PORTING.md names); a package that does not exist is
-   recorded, not substituted; `vmlab.sh snapshot kb-freebsd clean-gnu`.
+   **Before** the `clean` snapshot: add `fdesc /dev/fd fdescfs rw 0 0` to
+   `/etc/fstab` and `sudo mount /dev/fd` (process substitution needs it, H14);
+   check `bash -c 'cat <(echo ok)'` → `ok`.
+5. `clean-gnu`: from `clean`, `sudo pkg install -y coreutils gsed gawk findutils gnugrep diffutils netcat curl perl5 socat`;
+   a package that does not exist is recorded, not substituted; record the
+   binary names (`ghead gstat gsed gfind ggrep`/`grep`, the netcat binary);
+   `vmlab.sh snapshot kb-freebsd clean-gnu`.
 **kb-alpine.**
 1. ISO: newest `alpine-virt-*-x86_64.iso` from
    `https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/` + its `.sha256`.
@@ -508,7 +554,8 @@ beyond bash+git) and `clean-gnu` (GNU tools added).
 4. `provision/apk.sh` via ssh + `doas` (setup-alpine `-a` makes kb an admin
    with doas): `apk add bash git`; kb's login shell → `/bin/bash`
    (`doas sed -i 's#^\(kb:.*:\)[^:]*$#\1/bin/bash#' /etc/passwd`, checked with
-   `grep '^kb:' /etc/passwd`); `clean`. Then `apk add coreutils findutils gawk sed grep diffutils procps netcat-openbsd` → `clean-gnu`.
+   `grep '^kb:' /etc/passwd`); `clean`. Then `apk add coreutils sed grep findutils diffutils gawk procps-ng util-linux perl curl openssl netcat-openbsd tzdata`
+   (`procps-ng` missing → try `procps` and record it) → `clean-gnu`.
 **Stop if.** Either VM is not reachable by SSH after 90 min of attempts →
 delete only that VM, write its manual checklist section, report BLOCKED
 (the other VM may still be DONE).
@@ -527,7 +574,13 @@ delete only that VM, write its manual checklist section, report BLOCKED
 **Read.** `docs/dev/launch/inventory.tsv` (P01 rows).
 **Write scope.** line 1 of every tracked file whose line 1 is exactly
 `#!/bin/bash`, in all five repos; the index mode of every tracked file whose
-first two bytes are `#!`.
+first two bytes are `#!`; *(added at L0.6 from PORTING.md)* the literal
+string `#!/bin/bash` → `#!/usr/bin/env bash` in: the header assertions
+`kcl/tests/001_UnitFiles.sh:67`, `kklass/tests/141_UnitHeaders.sh:85`,
+`kkore/tests/013_SystemUnitHeaders.sh:46`, and the emitted shebangs in
+`kklass/kklass_compiler.sh:260`, `kklass/kklass_kkp.sh:336`, `:346` (line
+numbers as of kbool 2817b2b — locate by content). Any OTHER test that fails
+after the change because it expects `#!/bin/bash` → BLOCKED with the list.
 **Steps.**
 1. Per repo R (`.`, `kcl`, `kklass`, `kkore`, `ktests`):
    `git -C R ls-files -z` → files whose first line is exactly `#!/bin/bash`
