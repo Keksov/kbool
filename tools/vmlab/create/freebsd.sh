@@ -103,7 +103,7 @@ vbm clonemedium "$(wp "$VMDK")" "$(wp "$VDIP")" --format VDI >/dev/null || { err
 vbm closemedium disk "$(wp "$VMDK")" >/dev/null 2>&1   # clonemedium registered the source; the file stays
 vbm modifymedium disk "$(wp "$VDIP")" --resize 20480 || exit 10
 vbm createvm --name "$NAME" --ostype FreeBSD_64 --basefolder "$(wp "$LAB")" --register >/dev/null || exit 10
-vbm modifyvm "$NAME" --memory 4096 --cpus 4 --firmware bios --nic1 nat \
+vbm modifyvm "$NAME" --memory 4096 --cpus 4 --firmware bios --rtc-use-utc on --nic1 nat \
     --nat-pf1 "ssh,tcp,127.0.0.1,$PORT,,22" --nat-localhostreachable1 on \
     --audio-enabled off --usb off || exit 10
 vbm storagectl "$NAME" --name SATA --add sata --controller IntelAhci --portcount 2 || exit 10

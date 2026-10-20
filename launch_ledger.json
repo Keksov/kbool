@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L1.2-L1.4 DONE: five lab VMs; next L1.6 acceptance (SV), then L2.1 (Opus harness on Linux/FreeBSD), L2.2/L2.3 (Sonnet)",
+  "status": "in progress — L1 DONE (five VMs, gate pipeline works); next L2.2 (shebang+exec bit), L2.3 (guard), then L2.1 (Opus harness)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -197,7 +197,7 @@
         "L1.4"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-10-21 (SV): vmlab gate kkore end-to-end on all VMs. Linux (ubuntu 5.2.21, debian 5.2.37, fedora 5.3.9) + alpine clean-gnu: 691/698 (fedora 690: +1 timing), the 7 = Windows-path tests (C: drive spelling, uf_win) -> L2.4; strays are blind (H1). FreeBSD clean-gnu + Alpine clean: no segment starts (env --default-signal: BSD env illegal option -d, busybox unrecognized) = H4 confirmed -> L2.1. Found+fixed: kb-freebsd RTC was local time (FreeBSD_64 default rtcuseutc off; guest clock +3h): create/freebsd.sh --rtc-use-utc on, snapshots rebuilt (clean-gnu deleted, clean replaced, pkg.sh --gnu, clean-gnu retaken)"
     },
     "L2.1": {
       "executor": "O",
