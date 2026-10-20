@@ -1,0 +1,32 @@
+P01 shebang /bin/bash  core=46 wrapper=8 harness=5 test=677 bench=19 docs=67
+P02 sed -i  core=0 wrapper=1 harness=1 test=14 bench=0 docs=0
+P03 sed GNU options  core=0 wrapper=2 harness=0 test=88 bench=9 docs=0
+P04 stat GNU  core=6 wrapper=0 harness=0 test=58 bench=0 docs=6
+P05 date GNU  core=4 wrapper=0 harness=0 test=28 bench=0 docs=0
+P06 readlink -f / realpath  core=3 wrapper=0 harness=0 test=1 bench=0 docs=3
+P07 find GNU  core=4 wrapper=0 harness=1 test=9 bench=0 docs=0
+P08 grep GNU  core=0 wrapper=0 harness=0 test=1 bench=0 docs=2
+P09 sort -V / GNU sort  core=0 wrapper=0 harness=0 test=1 bench=0 docs=0
+P10 mktemp  core=6 wrapper=0 harness=1 test=17 bench=8 docs=14
+P11 timeout  core=1 wrapper=0 harness=14 test=170 bench=1 docs=4
+P12 netcat  core=2 wrapper=0 harness=3 test=74 bench=3 docs=6
+P13 /proc  core=12 wrapper=0 harness=21 test=70 bench=0 docs=3
+P14 Windows branches  core=3 wrapper=0 harness=18 test=76 bench=2 docs=13
+P15 Windows paths  core=0 wrapper=0 harness=0 test=167 bench=2 docs=109
+P16 gawk-only  core=0 wrapper=25 harness=0 test=173 bench=16 docs=4
+P17 xargs GNU  core=0 wrapper=0 harness=0 test=0 bench=0 docs=0
+P18 head/tail GNU  core=0 wrapper=0 harness=0 test=15 bench=2 docs=0
+P19 cp/mv/ln GNU  core=0 wrapper=0 harness=0 test=0 bench=0 docs=0
+P20 GNU-only tools  core=0 wrapper=0 harness=3 test=4 bench=0 docs=4
+P21 base64 options  core=0 wrapper=0 harness=0 test=0 bench=0 docs=0
+P22 ps/pgrep/pkill  core=0 wrapper=0 harness=0 test=8 bench=0 docs=2
+P23 wc output parse  core=0 wrapper=0 harness=0 test=36 bench=0 docs=4
+P24 touch GNU  core=0 wrapper=0 harness=0 test=17 bench=0 docs=1
+P25 du/df/ls GNU  core=0 wrapper=0 harness=0 test=1 bench=0 docs=0
+P26 other interpreters  core=0 wrapper=0 harness=2 test=27 bench=0 docs=11
+P27 /dev special  core=0 wrapper=0 harness=0 test=22 bench=1 docs=0
+P28 hardcoded /tmp  core=13 wrapper=0 harness=7 test=75 bench=9 docs=29
+P29 fractional sleep  core=6 wrapper=0 harness=3 test=93 bench=0 docs=1
+P30 tput/stty  core=0 wrapper=0 harness=0 test=0 bench=0 docs=0
+P31 uname/hostname/id  core=0 wrapper=0 harness=0 test=38 bench=0 docs=2
+P32 CR handling  core=19 wrapper=1 harness=6 test=179 bench=9 docs=1

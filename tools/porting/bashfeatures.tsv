@@ -1,0 +1,29 @@
+id	min	feature	regex
+F01	4.0	associative arrays	declare[[:space:]]+-[a-zA-Z]*A|local[[:space:]]+-[a-zA-Z]*A
+F02	4.0	case modification	\$\{[^}]*(,,|\^\^)
+F03	4.0	coproc	\bcoproc\b
+F04	4.0	;& / ;;&	;;&|;&
+F05	4.0	BASHPID	BASHPID
+F06	4.1	{var}> fd allocation	\{[a-zA-Z_][a-zA-Z0-9_]*\}[<>]
+F07	4.2	declare -g	declare[[:space:]]+-[a-zA-Z]*g
+F08	4.2	test -v	\[\[?[[:space:]]+-v[[:space:]]
+F09	4.2	printf %(fmt)T	%\([^)]*\)T
+F10	4.2	lastpipe	lastpipe
+F11	4.3	namerefs	(declare|local|typeset)[[:space:]]+-[a-zA-Z]*n
+F12	4.3	wait -n	wait[[:space:]]+-n
+F13	4.3	negative subscripts	\[-[0-9]+\]
+F14	4.4	@Q @E @P @A @a transforms	@[QEPAa]\}
+F15	4.4	local -	local[[:space:]]+-([[:space:]]|$)
+F16	4.4	mapfile -d / readarray -d	(mapfile|readarray)[^;|&]*-d
+F17	4.4	inherit_errexit	inherit_errexit
+F18	5.0	EPOCHREALTIME / EPOCHSECONDS	EPOCH(REALTIME|SECONDS)
+F19	5.0	BASH_ARGV0	BASH_ARGV0
+F20	5.0	localvar_inherit / assoc_expand_once	localvar_inherit|assoc_expand_once
+F21	5.1	wait -p	wait[[:space:]][^;|&]*-p
+F22	5.1	@U @u @L @K transforms	@[UuLK]\}
+F23	5.1	SRANDOM	SRANDOM
+F24	5.2	@k transform	@k\}
+F25	5.2	patsub_replacement	patsub_replacement
+F26	5.2	globskipdots / varredir_close / noexpand_translation	globskipdots|varredir_close|noexpand_translation
+F27	5.3	${ cmd; } / ${| cmd; } funsub	\$\{[[:space:]|]
+F28	5.3	BASH_MONOSECONDS / GLOBSORT / array_expand_once	BASH_MONOSECONDS|GLOBSORT|array_expand_once|BASH_TRAPSIG

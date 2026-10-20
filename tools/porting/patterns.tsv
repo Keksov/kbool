@@ -1,0 +1,33 @@
+id	name	regex	note
+P01	shebang /bin/bash	^#!/bin/bash	hardcoded bash path (not env bash)
+P02	sed -i	\bsed\b[^|;&]*[[:space:]]-[a-zA-Z]*i	in-place sed differs on BSD/macOS
+P03	sed GNU options	\bsed\b[^|;&]*[[:space:]](-r\b|-z\b|--[a-z])	GNU-only sed options
+P04	stat GNU	\bstat\b[^|;&]*(-c\b|--format|--printf)	stat format syntax differs on BSD
+P05	date GNU	\bdate\b[^|;&]*(-d\b|--date|-r\b|--iso)	GNU date options
+P06	readlink -f / realpath	readlink[[:space:]]+-[a-z]*f|\brealpath\b	not on stock macOS/BSD
+P07	find GNU	\bfind\b.*(-printf|-regextype|-maxdepth|-mindepth|-delete|-readable|-writable|-executable)	GNU find options
+P08	grep GNU	\bgrep\b[^|;&]*(-P\b|--perl|-z\b|--null-data|--color)	GNU grep options
+P09	sort -V / GNU sort	\bsort\b[^|;&]*(-V\b|--version-sort|-h\b|-z\b)	GNU sort options
+P10	mktemp	\bmktemp\b	mktemp template/flag differences
+P11	timeout	\btimeout\b	coreutils timeout not on stock macOS
+P12	netcat	(^|[^a-zA-Z_.-])nc\b	nc variants differ
+P13	/proc	/proc/	Linux procfs
+P14	Windows branches	cygpath|MSYSTEM|OSTYPE|[Mm][Ss][Yy][Ss]|[Cc]ygwin|[Mm]ingw	Windows-specific branch
+P15	Windows paths	/c/|[Cc]:[/\\]	hardcoded Windows path
+P16	gawk-only	gensub|strftime|systime|asort|PROCINFO|@include|BEGINFILE|ENDFILE|--re-interval|\bgawk\b	gawk extensions
+P17	xargs GNU	\bxargs\b[^|;&]*(-d\b|-r\b|--)	GNU xargs options
+P18	head/tail GNU	\b(head|tail)\b[^|;&]*(-n[[:space:]]*-[0-9]|-c[[:space:]]*-[0-9]|--[a-z])	GNU head/tail options
+P19	cp/mv/ln GNU	\b(cp|mv|ln)\b[^|;&]*(-T\b|-r\b.*\bln\b|--[a-z])	GNU cp/mv/ln options
+P20	GNU-only tools	\b(tac|shuf|stdbuf|nproc|md5sum|sha1sum|sha256sum|flock|setsid|truncate|numfmt)\b	tools absent on BSD/macOS
+P21	base64 options	\bbase64\b[^|;&]*(-w\b|-d\b|--)	base64 option differences
+P22	ps/pgrep/pkill	\b(ps|pgrep|pkill|killall)\b	process tools differ
+P23	wc output parse	\$\([[:space:]]*wc\b	wc output padding on BSD
+P24	touch GNU	\btouch\b[^|;&]*(-d\b|--date)	GNU touch options
+P25	du/df/ls GNU	\b(du[^|;&]*-b\b|df[^|;&]*--output|ls[^|;&]*--)	GNU du/df/ls options
+P26	other interpreters	\b(python3?|perl|node|ruby|php)\b	external interpreter dependency
+P27	/dev special	/dev/(shm|fd/|tcp/|udp/|stdin|stdout|stderr)	platform-specific /dev nodes
+P28	hardcoded /tmp	/tmp\b	hardcoded temp dir
+P29	fractional sleep	\bsleep[[:space:]]+[0-9]*\.[0-9]	fractional sleep not POSIX
+P30	tput/stty	\b(tput|stty)\b	terminal tools
+P31	uname/hostname/id	\b(uname|hostname|whoami|id[[:space:]]+-[a-z])\b	platform probing
+P32	CR handling	\\r|\$'\\r'	carriage-return handling

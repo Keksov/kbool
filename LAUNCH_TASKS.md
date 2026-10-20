@@ -221,18 +221,27 @@ At the timebox report PARTIAL with what is done and what is left.
    iconv diff cmp patch tar gzip xz curl wget git python python3 perl node ruby
    tput stty uname hostname whoami id getconf flock setsid nohup stdbuf seq shuf
    printf echo test true false yes tee`.
-   A hit = the word at a command position: after line start, `;`, `|`, `&`,
-   `(`, `$(`, `` ` ``, `then`, `do`, `else`, `&&`, `||`, `exec`, `command`,
-   optionally preceded by `VAR=value ` assignments; comment lines skipped.
+   A **direct** hit = the word at a command position: after line start, `;`,
+   `|`, `&`, `(`, `$(`, `` ` ``, `then`, `do`, `else`, `if`, `elif`, `while`,
+   `until`, `!`, `{`, `&&`, `||`, `exec`, `command`, optionally preceded by
+   `VAR=value ` assignments; comment lines skipped.
+   An **indirect** hit *(amended 2026-10-20: thttpserver runs `"$__ths_nc"`,
+   tsed its sed through a variable)* = the word as the whole right-hand side
+   of an assignment (`NAME=cmd`, quoted or not, also after
+   `local`/`declare`/`readonly`/`export`), as a `${X:-cmd}` / `${X-cmd}` /
+   `${X:=cmd}` / `${X=cmd}` default, or as an argument of `type -P|-p|-t`,
+   `command -v|-V`, `hash`, `which`.
    `printf echo test true false` are bash builtins — count them but mark
-   `builtin=yes`.
+   `builtin=yes`. The table is a candidate list: lexical, false positives
+   expected (no quote stripping — it would lose `"$(…)"` calls).
 2. Output `docs/dev/launch/tools.tsv`, header
-   `unit<TAB>class<TAB>command<TAB>builtin<TAB>hits<TAB>files` (files = up to 5
-   paths, `;`-separated, `+N` if more); `class` collapsed to `code` (core,
-   wrapper, harness) and `test` (test, bench, docs).
+   `unit<TAB>class<TAB>command<TAB>via<TAB>builtin<TAB>hits<TAB>files` (via =
+   `direct`|`indirect`; files = up to 5 paths, `;`-separated, `+N` if more);
+   `class` collapsed to `code` (core, wrapper, harness) and `test` (test,
+   bench, docs).
 **Acceptance.**
-- `awk -F'\t' '$1=="kcl/tsed" && $2=="code" && $3=="sed"' docs/dev/launch/tools.tsv` → one row
-- `awk -F'\t' '$1=="kcl/thttpserver" && $3=="nc"' docs/dev/launch/tools.tsv` → at least one row
+- `awk -F'\t' '$1=="kcl/tsed" && $2=="code" && $3=="sed"' docs/dev/launch/tools.tsv` → rows shown
+- `awk -F'\t' '$1=="kcl/thttpserver" && $3=="nc" && $4=="indirect"' docs/dev/launch/tools.tsv` → at least one row
 - list of every `(unit, command)` with `class=code`, `builtin=no` for units
   `kkore`, `kklass` shown in the report (expected short; SV reads it)
 - identical output under both runtimes (as in L0.2).

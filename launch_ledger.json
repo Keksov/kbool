@@ -1,0 +1,570 @@
+{
+  "schema_version": 1,
+  "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
+  "created": "2026-10-20",
+  "updated": "2026-10-20",
+  "status": "in progress — L0.1-L0.4 DONE + committed; next L0.5 (Opus, PORTING.md)",
+  "plan": "LAUNCH_PLAN.md",
+  "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
+  "decisions": {
+    "DL1": "owner 2026-10-20: VM matrix Ubuntu 24.04, Debian 13, Fedora (current), Alpine (current), FreeBSD (current RELEASE, 15.x preferred); exact versions recorded at L1; other releases in CI",
+    "DL2": "owner 2026-10-20: measure bash 5.1 (L4), then decide 5.1 vs 5.2",
+    "DL3": "owner 2026-10-20: internal development files -> docs/dev/ of each repo",
+    "DL4": "owner 2026-10-20: AI-assisted development told openly (README section + announcement)",
+    "DL5": "default: macOS only via GitHub Actions; FreeBSD lab as BSD-userland rehearsal",
+    "DL6": "default: dedicated lab VMs kb-<os>, NAT+SSH forward, snapshot clean; owner's existing VMs untouched (Ubuntu 24.02.2, OLHCV, <inaccessible>)",
+    "DL7": "default: MIT for kbool, kkore, ktests",
+    "DL8": "default: lab tooling in kbool/tools/vmlab/, portability scanner in kbool/tools/porting/; host side plain bash (Git-bash) + VBoxManage.exe + OpenSSH",
+    "DL9": "owner 2026-10-20: well-specified technical tasks -> Sonnet 5.5 effort high (Agent model sonnet, effort high), brief = LAUNCH_TASKS.md §0 + one card; design/core layers/triage/public prose -> Opus worker; SV reviews every task"
+  },
+  "pending_owner_decisions": {
+    "OG1": "L3: GNU-tool policy (recommended: core tool-free; wrappers require GNU tool, resolved by name gsed/gawk/gfind/ggrep; missing tool -> clear error, tests SKIP)",
+    "OG2": "L4: minimum bash 5.1 or 5.2, from the cost report",
+    "OG3": "L5: allow pushing branch launch-ci for CI iteration",
+    "OG4": "L6: GitHub descriptions + topics text",
+    "OG5": "L8: version number (v1.0.0 vs 0.9.0)",
+    "OG6": "L8: announcement texts, venues, timing (owner posts)"
+  },
+  "baseline": {
+    "platforms_tested": [
+      "Windows Git-bash 5.2.37",
+      "Windows MSYS2 5.3.9"
+    ],
+    "shebang_bin_bash": 813,
+    "shebang_env_bash": 1,
+    "version_guard": false,
+    "ci": false,
+    "license_missing": [
+      "kbool",
+      "kkore",
+      "ktests"
+    ],
+    "tags": 0,
+    "host": "VirtualBox 7.1.12, 16 cores, 28 GB RAM, 199 GB free on C:",
+    "exec_bit_files": 0,
+    "gitattributes": false,
+    "thttpserver_needs": "GNU netcat 0.7.1 (absent on Debian/Fedora/Alpine/FreeBSD)"
+  },
+  "tasks_file": "LAUNCH_TASKS.md",
+  "tasks": {
+    "L0.1": {
+      "executor": "S",
+      "title": "LICENSE x3 + .gitattributes x5",
+      "dep": [],
+      "card": "ready",
+      "status": "DONE 2026-10-20 (Sonnet; BLOCKED once on 32 CRLF files -> amended card, Option B)",
+      "commits": {
+        "kcl": "f5d74f3",
+        "kklass": "c79f61c",
+        "kkore": "65800f0",
+        "ktests": "fa8455f",
+        "kbool": "5f0edb6"
+      },
+      "gate": "kcl/tdirectory x2 runtimes PASS 640/640 (SV re-run, kt-gate/20261020-130841-118048)"
+    },
+    "L0.2": {
+      "executor": "S",
+      "title": "tools/porting/scan.sh + inventory.tsv (P01-P32)",
+      "dep": [],
+      "card": "ready",
+      "status": "DONE 2026-10-20 (Sonnet)"
+    },
+    "L0.3": {
+      "executor": "S",
+      "title": "tools.sh + tools.tsv (external commands per unit)",
+      "dep": [
+        "L0.2"
+      ],
+      "card": "ready",
+      "status": "DONE 2026-10-20 (Sonnet; PARTIAL once: hit rule missed calls through variables -> card amended: via column direct|indirect, if/elif/while/until/!/{ positions); limit: wrapper units pass the tool name as a constructor argument (TSed: parent.constructor sed) - unit name = tool for the wrapper family"
+    },
+    "L0.4": {
+      "executor": "S",
+      "title": "bashfeat.sh + bashfeatures.tsv (F01-F28)",
+      "dep": [
+        "L0.2"
+      ],
+      "card": "ready",
+      "status": "DONE 2026-10-20 (Sonnet); 5.1/5.2-only features in code = none unguarded; F27 funsub kklass.sh:1694 gated by BASH_VERSINFO>=5.3 (5.2 scratch-file path), F23 SRANDOM kklass.sh:940 has fallback to $( ); F01/F07/F11/F14 = the 4.x surface"
+    },
+    "L0.5": {
+      "executor": "O",
+      "title": "docs/dev/PORTING.md, netcat question, OG1 options, package lists",
+      "dep": [
+        "L0.2",
+        "L0.3",
+        "L0.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L0.6": {
+      "executor": "SV",
+      "title": "review + commit; package lists into L1 cards",
+      "dep": [
+        "L0.5"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L1.1": {
+      "executor": "S",
+      "title": "vmlab.sh core + dry-run tests",
+      "dep": [
+        "L0.1"
+      ],
+      "card": "ready",
+      "status": "planned"
+    },
+    "L1.2": {
+      "executor": "S",
+      "title": "kb-ubuntu create + provision, snapshot clean",
+      "dep": [
+        "L1.1",
+        "L0.6"
+      ],
+      "card": "ready after L0.6",
+      "status": "planned"
+    },
+    "L1.3": {
+      "executor": "S",
+      "title": "kb-debian, kb-fedora",
+      "dep": [
+        "L1.2"
+      ],
+      "card": "ready after L1.2",
+      "status": "planned"
+    },
+    "L1.4": {
+      "executor": "S",
+      "title": "kb-freebsd, kb-alpine (clean + clean-gnu)",
+      "dep": [
+        "L1.2"
+      ],
+      "card": "ready after L1.2",
+      "status": "planned"
+    },
+    "L1.5": {
+      "executor": "OW",
+      "title": "manual installs where automation failed",
+      "dep": [],
+      "card": null,
+      "status": "planned"
+    },
+    "L1.6": {
+      "executor": "SV",
+      "title": "lab acceptance on five VMs",
+      "dep": [
+        "L1.2",
+        "L1.3",
+        "L1.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L2.1": {
+      "executor": "O",
+      "title": "ktests harness on Linux (gate, suitejob, strays, runner)",
+      "dep": [
+        "L1.6"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L2.2": {
+      "executor": "S",
+      "title": "shebangs -> env bash, exec bit",
+      "dep": [
+        "L0.6"
+      ],
+      "card": "ready",
+      "status": "planned"
+    },
+    "L2.3": {
+      "executor": "S",
+      "title": "bash version guard in kbool.sh (floor 5.2)",
+      "dep": [
+        "L2.2"
+      ],
+      "card": "ready",
+      "status": "planned"
+    },
+    "L2.4": {
+      "executor": "S",
+      "title": "gate on 3 Linux VMs -> L2_failures.tsv, no fixes",
+      "dep": [
+        "L2.1",
+        "L2.2",
+        "L2.3"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L2.5": {
+      "executor": "O",
+      "title": "triage -> fix batches; thttpserver netcat design",
+      "dep": [
+        "L2.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L2.6": {
+      "executor": "S",
+      "title": "fix batches (L*.fix template)",
+      "dep": [
+        "L2.5"
+      ],
+      "card": "template",
+      "status": "planned"
+    },
+    "L2.7": {
+      "executor": "O",
+      "title": "core / netcat fixes",
+      "dep": [
+        "L2.5"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L2.8": {
+      "executor": "SV",
+      "title": "closing gate Windows x2 + 3 VMs, rescan, commit",
+      "dep": [
+        "L2.6",
+        "L2.7"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L3.1": {
+      "executor": "S",
+      "title": "gate alpine/freebsd clean + clean-gnu -> L3_failures.tsv",
+      "dep": [
+        "L2.8"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L3.2": {
+      "executor": "SV/OW",
+      "title": "OG1 GNU-tool policy",
+      "dep": [
+        "L3.1"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L3.3": {
+      "executor": "O",
+      "title": "kkore tool-resolution helper",
+      "dep": [
+        "L3.2"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L3.4": {
+      "executor": "S",
+      "title": "wrapper units onto the helper",
+      "dep": [
+        "L3.3"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L3.5": {
+      "executor": "O->S",
+      "title": "remaining L3 triage + batches",
+      "dep": [
+        "L3.1"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L3.6": {
+      "executor": "SV",
+      "title": "closing gate Windows x2 + 5 VMs, commit",
+      "dep": [
+        "L3.4",
+        "L3.5"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L4.1": {
+      "executor": "S",
+      "title": "build bash 5.1.16/5.0.18/4.4.23/3.2.57 in kb-debian",
+      "dep": [
+        "L2.8"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L4.2": {
+      "executor": "S",
+      "title": "gate on 5.1 -> L4_failures.tsv; guard checks",
+      "dep": [
+        "L4.1",
+        "L2.3"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L4.3": {
+      "executor": "O",
+      "title": "5.1 cost report + recommendation",
+      "dep": [
+        "L4.2"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L4.4": {
+      "executor": "OW",
+      "title": "OG2 minimum bash",
+      "dep": [
+        "L4.3"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L4.5": {
+      "executor": "O->S",
+      "title": "5.1 fixes if chosen",
+      "dep": [
+        "L4.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L5.1": {
+      "executor": "S",
+      "title": "ci.yml matrix",
+      "dep": [
+        "L3.6"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L5.2": {
+      "executor": "OW",
+      "title": "OG3 allow push of launch-ci",
+      "dep": [
+        "L5.1"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L5.3": {
+      "executor": "S",
+      "title": "CI failures -> L5_failures.tsv",
+      "dep": [
+        "L5.2"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L5.4": {
+      "executor": "O->S",
+      "title": "CI/macOS triage + batches",
+      "dep": [
+        "L5.3"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L5.5": {
+      "executor": "SV",
+      "title": "badge; owner merges",
+      "dep": [
+        "L5.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L6.1": {
+      "executor": "S",
+      "title": "mdlinks.sh link checker",
+      "dep": [
+        "L0.1"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L6.2": {
+      "executor": "S",
+      "title": "internal files -> docs/dev, links fixed",
+      "dep": [
+        "L6.1"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L6.3": {
+      "executor": "S",
+      "title": "README reference -> docs/reference.md",
+      "dep": [
+        "L6.2"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L6.4": {
+      "executor": "S",
+      "title": "numbers.json",
+      "dep": [
+        "L5.5"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L6.5": {
+      "executor": "O",
+      "title": "README front door, comparison, how it was built",
+      "dep": [
+        "L6.3",
+        "L6.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L6.6": {
+      "executor": "S",
+      "title": "stale paths, submodule READMEs",
+      "dep": [
+        "L6.2"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L6.7": {
+      "executor": "S",
+      "title": "CHANGELOG drafts",
+      "dep": [
+        "L6.2"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L6.8": {
+      "executor": "O",
+      "title": "fresh-reader critic",
+      "dep": [
+        "L6.5",
+        "L6.6",
+        "L6.7"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L6.9": {
+      "executor": "SV/OW",
+      "title": "OG4 descriptions + topics",
+      "dep": [
+        "L6.5"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L7.1": {
+      "executor": "SV",
+      "title": "demo spec",
+      "dep": [
+        "L6.5"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L7.2": {
+      "executor": "S",
+      "title": "demo + test",
+      "dep": [
+        "L7.1"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L7.3": {
+      "executor": "S",
+      "title": "terminal recording",
+      "dep": [
+        "L7.2"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L7.4": {
+      "executor": "S",
+      "title": "benchmark runs",
+      "dep": [
+        "L5.5"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L7.5": {
+      "executor": "O",
+      "title": "benchmarks page",
+      "dep": [
+        "L7.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L8.1": {
+      "executor": "S",
+      "title": "literal fresh install from GitHub",
+      "dep": [
+        "L6.8"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L8.2": {
+      "executor": "O->S",
+      "title": "fixes from L8.1",
+      "dep": [
+        "L8.1"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L8.3": {
+      "executor": "OW",
+      "title": "OG5 version",
+      "dep": [
+        "L8.2"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L8.4": {
+      "executor": "S",
+      "title": "tags + releases prepared; run on owner go",
+      "dep": [
+        "L8.3"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L8.5": {
+      "executor": "O",
+      "title": "announcement drafts",
+      "dep": [
+        "L8.2"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L8.6": {
+      "executor": "OW",
+      "title": "OG6 + posting",
+      "dep": [
+        "L8.5"
+      ],
+      "card": null,
+      "status": "planned"
+    }
+  }
+}
