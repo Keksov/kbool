@@ -510,6 +510,74 @@ As L1.2 with these differences; reuse `create/ubuntu.sh` structure as
 
 Write scope, stop rule, acceptance: as L1.2 per VM. **Timebox.** 3 h.
 
+### L1.3b — kb-fedora from the cloud image  [S] ready
+
+**Why.** VBox 7.1.12 `unattended install` rejects Fedora 44 ("Unknown guest OS
+major version '44'", deterministic — L1.3). No installer: boot the official
+cloud image; cloud-init takes its config from a host HTTP server named in the
+VM's SMBIOS serial number (NoCloud datasource).
+**Read.** `tools/vmlab/README.md` (kb-ubuntu, kb-debian sections),
+`tools/vmlab/create/debian.sh`, the untracked drafts
+`tools/vmlab/create/fedora.sh` + `tools/vmlab/provision/dnf.sh` (L1.3, never run).
+**Write scope.** `tools/vmlab/create/fedora.sh` (rewrite), `tools/vmlab/provision/dnf.sh`,
+`tools/vmlab/README.md` (section kb-fedora; keep "kb-fedora -- manual install"
+as the fallback); outside: `C:\var\vbox\kb-lab\` (`kb-fedora\`, `img\`), the
+lab known_hosts entry for port 2223, `$SCRATCH`.
+**Steps.**
+1. Image: from `https://download.fedoraproject.org/pub/fedora/linux/releases/44/Cloud/x86_64/images/`
+   the `Fedora-Cloud-Base-Generic-44-*.x86_64.qcow2` and its `*-CHECKSUM`;
+   `sha256sum -c --ignore-missing` → OK; into `C:\var\vbox\kb-lab\img\`.
+2. Convert to VDI: first `VBoxManage clonemedium <qcow2> <vdi> --format VDI`.
+   If VirtualBox cannot read it: convert inside **kb-ubuntu** —
+   `vmlab.sh reset kb-ubuntu && up`, `sudo apt-get install -y qemu-utils`,
+   copy the qcow2 in (scp with the lab key, port 2221), `qemu-img convert -O vdi`,
+   copy the VDI back, then `vmlab.sh reset kb-ubuntu` (restores `clean`, so
+   kb-ubuntu is unchanged) and `down`. No other converter; no binaries
+   downloaded to the host.
+3. VM: `createvm --name kb-fedora --ostype Fedora_64 --basefolder C:\var\vbox\kb-lab --register`;
+   4096 MB, 4 CPUs, BIOS firmware, `--nic1 nat --nat-pf1 "ssh,tcp,127.0.0.1,2223,,22"`,
+   audio/usb off; serial console to a file for debugging:
+   `--uart1 0x3F8 4 --uart-mode1 file <$SCRATCH win path>\fedora-serial.log`;
+   the VDI moved into the VM folder, `modifymedium --resize 20480`, attached on SATA.
+4. Seed: `$SCRATCH/seed/meta-data` (`instance-id: kb-fedora-1`, `local-hostname: kb-fedora`)
+   and `$SCRATCH/seed/user-data`:
+   ```
+   #cloud-config
+   users:
+     - name: kb
+       shell: /bin/bash
+       sudo: "ALL=(ALL) NOPASSWD:ALL"
+       lock_passwd: true
+       ssh_authorized_keys:
+         - <the line of ~/.ssh/kbool_vmlab.pub>
+   ssh_pwauth: false
+   ```
+   `VBoxManage setextradata kb-fedora "VBoxInternal/Devices/pcbios/0/Config/DmiSystemSerial" "ds=nocloud;s=http://10.0.2.2:8099/"`.
+   Host server (the only background process of this card): one
+   `run_in_background` call `timeout -k 5 1800 python -m http.server 8099 --bind 127.0.0.1 --directory <seed dir>`;
+   record its pid; stop it (by that pid) as soon as cloud-init has fetched the
+   seed (its log shows `GET /user-data` and `GET /meta-data`).
+5. `vmlab.sh up kb-fedora` (raise `VMLAB_BOOT_WAIT` to 900 for this first
+   boot); check VBox.log for `AMD-V`; then over ssh: `provision/dnf.sh` with
+   sudo (the L1.3 list: `bash git-core coreutils sed grep findutils diffutils gawk procps-ng util-linux perl-interpreter perl-POSIX curl openssl nmap-ncat netcat tzdata glibc-langpack-en glibc-langpack-de glibc-langpack-ru socat nodejs python3`
+   — last three recorded if missing; `systemctl disable --now dnf-makecache.timer`);
+   record which binary `nc` is; SELinux mode (`getenforce`, leave as shipped);
+   then `sudo cloud-init clean` is NOT run (keep the instance); remove the
+   DMI serial extradata (`setextradata kb-fedora "VBoxInternal/Devices/pcbios/0/Config/DmiSystemSerial"` with no value) so later boots do not look for the seed; `vmlab.sh snapshot kb-fedora clean`.
+6. README section "kb-fedora": the recipe, versions (`cat /etc/fedora-release`,
+   kernel, `bash --version`, `rpm -q` of the list, `locale -a`, the ru_RU
+   `EPOCHREALTIME` line, `getenforce`), the VBox.log engine line.
+**Stop if.** cloud-init never fetches the seed within 15 min of boot (read
+`fedora-serial.log` and the HTTP server log) after one retry with a fixed
+cause → delete only kb-fedora, report BLOCKED with the serial-log excerpt.
+**Acceptance.** As L1.2 for kb-fedora (status `kb-fedora poweroff clean`;
+reset/up/run `'echo "$0 $BASH_VERSION"; sudo -n true && echo sudo-ok'`/down;
+up/sync/run `'ls ~/kbool; grep -rlI $(printf "\r") ~/kbool --include=*.sh | wc -l'`/down);
+the HTTP server pid is gone; kb-ubuntu still `poweroff clean` (if step 2's
+fallback was used: `run kb-ubuntu -- 'command -v qemu-img || echo absent'` after
+reset → `absent`).
+**Timebox.** 2 h.
+
 ### L1.4 — kb-freebsd, kb-alpine  [S] ready after L1.2
 
 **Goal.** The two non-GNU VMs, each with snapshots `clean` (no GNU tools

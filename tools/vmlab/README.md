@@ -376,11 +376,118 @@ sudo 1.9.16p2-3+deb13u2
   `kb ALL=(ALL) NOPASSWD:ALL` (0440); login shell of `kb` is `/bin/bash`.
 * A minimal Debian has no `lsb_release`: use `/etc/os-release`.
 
+## kb-fedora
+
+Fedora 44 lab VM (name `kb-fedora`, ssh port 2223, user `kb`, bash `/usr/bin/bash`,
+snapshot `clean`). Created 2026-10-21 by `create/fedora.sh` (+ `provision/dnf.sh`)
+from the official **Fedora Cloud Base** image, not from an installer: VirtualBox
+7.1.12 `unattended install` rejects Fedora 44 (see "kb-fedora -- manual install").
+VM, image and checksum live in `C:\var\vbox\kb-lab\` (`img\Fedora-Cloud-Base-Generic-44-1.7.x86_64.qcow2`
+and `img\Fedora-Cloud-44-1.7-x86_64-CHECKSUM` from
+`https://download.fedoraproject.org/pub/fedora/linux/releases/44/Cloud/x86_64/images/`;
+`sha256sum -c --ignore-missing` says `OK`). The VM is not part of the repository.
+
+```
+# put the qcow2 and its CHECKSUM into C:\var\vbox\kb-lab\img\ first (not into iso\)
+bash tools/vmlab/create/fedora.sh                  # whole recipe, ~8 min; leaves the VM powered OFF
+bash tools/vmlab/vmlab.sh snapshot kb-fedora clean
+```
+
+The script (refuses with rc 13 if `kb-fedora` exists):
+
+1. checks the qcow2 against the CHECKSUM file next to it;
+2. `VBoxManage clonemedium <qcow2> kb-fedora.vdi --format VDI` (VirtualBox reads
+   qcow2 itself; no `qemu-img` needed) and `modifymedium --resize 20480` (cloud-init
+   grows the btrfs root: 20 GB);
+3. `createvm --ostype Fedora_64`, 4096 MB, 4 CPUs, BIOS, NAT with
+   `ssh,tcp,127.0.0.1,2223,,22` and `--nat-localhostreachable1 on`, audio/USB off,
+   the VDI on SATA, and a serial console written to `$KB_SCRATCH/fedora-serial.log`
+   (`--uart1 0x3F8 4 --uart-mode1 file ...`) for debugging;
+4. the cloud-init **NoCloud** seed: `meta-data` (`instance-id: kb-fedora-1`,
+   `local-hostname: kb-fedora`), an empty `vendor-data`, and `user-data` (`#cloud-config`:
+   user `kb`, `/bin/bash`, `sudo: ALL=(ALL) NOPASSWD:ALL`, locked password, the line of
+   `~/.ssh/kbool_vmlab.pub`, `ssh_pwauth: false`). The VM's SMBIOS serial number names it:
+   `setextradata kb-fedora VBoxInternal/Devices/pcbios/0/Config/DmiSystemSerial "ds=nocloud;s=http://10.0.2.2:8099/"`;
+   the guest sees the host's `127.0.0.1` as `10.0.2.2`. The host side is
+   `timeout -k 5 1800 python -u -m http.server 8099 --bind 127.0.0.1 --directory <seed>`
+   (`-u`: the "Serving HTTP" line must not sit in a buffer). Its pid is printed
+   and the server is stopped (by that pid, also on any failure or interrupt) as soon
+   as the first boot answered ssh and the log shows `GET /meta-data` and `GET /user-data`;
+5. `vmlab.sh up` with `VMLAB_BOOT_WAIT=900` (first boot: cloud-init creates `kb`,
+   resizes the disk, writes the key), then `provision/dnf.sh` through `sudo -n` (kb has
+   NOPASSWD from the seed);
+6. `vmlab.sh down`, then the DMI extradata is removed (later boots do not look for a
+   seed; `ds-identify` then disables cloud-init: `cloud-init status` says `disabled`)
+   and the serial port switched off. The VM is left powered off.
+
+`dnf.sh`: `dnf install` of `bash git-core coreutils sed grep findutils diffutils gawk
+procps-ng util-linux perl-interpreter perl-POSIX curl openssl nmap-ncat netcat tzdata
+glibc-langpack-en glibc-langpack-de glibc-langpack-ru` (a missing name is fatal), then
+one by one `socat nodejs python3` (a missing name would print `dnf.sh: MISSING <pkg>`;
+none was missing), `kb ALL=(ALL) NOPASSWD:ALL`, `dnf-makecache.timer` disabled, sshd
+key-only (`00-kbool-lab.conf`), login shell of `kb` bash. SELinux stays as shipped.
+
+Things found on VirtualBox 7.1.12 + the Fedora 44 cloud image:
+
+* `clonemedium` converts the qcow2 directly (it also registers the qcow2 as a medium:
+  `closemedium disk <qcow2>` without `--delete` unregisters it again).
+* The first attempt: cloud-init sat in its network stage for ~40 s, "Getting data from
+  DataSourceNoCloudNet failed", **no request reached the host server** (HTTP log empty,
+  `Datasource DataSourceNone`), although `showvminfo` already said
+  `localhostReachable="1"`. The same VM with `modifyvm --nat-localhostreachable1 on` set
+  explicitly fetched the seed at once (`Datasource DataSourceNoCloudNet
+  [seed=dmi,http://10.0.2.2:8099/]`), and so did the full script run (it now sets the
+  option). The root cause of the first failure was not isolated; the explicit option is
+  the only difference found.
+* Host proxy variables (`HTTP_PROXY`) apply to `curl` on the host: to test the seed
+  server by hand use `curl --noproxy '*'` (a plain `curl http://127.0.0.1:8099/` got a
+  502 from the proxy and never reached the server).
+* cloud-init asks for `/network-config` (404, retried ten times, ~10 s) before
+  `meta-data`/`user-data`; harmless. `vendor-data` is served empty to avoid ten more.
+* The image has no guest additions: `down` works through the ACPI power button.
+
+Execution engine, from `C:\var\vbox\kb-lab\kb-fedora\Logs\VBox.log`:
+
+```
+HM: HMR3Init: AMD-V w/ nested paging
+HM: Using AMD-V implementation 2.0
+```
+
+### Versions recorded at creation (2026-10-21)
+
+`cat /etc/fedora-release`: `Fedora release 44 (Forty Four)`; kernel
+`6.19.10-300.fc44.x86_64`. `bash --version | head -1`:
+`GNU bash, version 5.3.9(1)-release (x86_64-redhat-linux-gnu)`. `getenforce`: `Enforcing`.
+`rpm -q` (everything installed; `rpm -q nodejs` alone says "not installed": the package
+is `nodejs22`, which provides it):
+
+```
+bash 5.3.9-3.fc44            git-core 2.56.0-1.fc44       coreutils 9.10-3.fc44
+sed 4.9-7.fc44               grep 3.12-3.fc44             findutils 4.10.0-7.fc44
+diffutils 3.12-5.fc44        gawk 5.3.2-3.fc44            procps-ng 4.0.6-1.fc44
+util-linux 2.41.3-12.fc44    perl-interpreter 5.42.3-525  perl-POSIX 2.23-525
+curl 8.18.0-4.fc44           openssl 3.5.5-1.fc44         nmap-ncat 7.92-11.fc44
+netcat 1.237-3.fc44          tzdata 2026a-1.fc44          glibc-langpack-{en,de,ru} 2.43-2.fc44
+socat 1.8.1.1-1.fc44         nodejs22 22.23.1-2.fc44 (node v22.23.1)
+python3 3.14.3-2.fc44        openssh-server 10.2p1-7.fc44 sudo 1.9.17-7.p2.fc44
+```
+
+* `awk` -> `/usr/bin/gawk`.
+* `nc`: `/usr/bin/nc -> /etc/alternatives/nc -> /usr/bin/netcat` (the OpenBSD-derived
+  `netcat` package; its usage line lists `-C certfile -e name -H hash -I length`);
+  `update-alternatives --display nc`: `status is auto`, `netcat` and `ncat` both priority 10.
+  Nmap's `ncat` is `/usr/bin/ncat`. `dnf.sh` does not pin the alternative (it is only recorded).
+* `locale -a` includes `de_DE.utf8 en_US.utf8 ru_RU.utf8` (the langpacks bring many more).
+* `LC_ALL=ru_RU.UTF-8 bash -c 'echo $EPOCHREALTIME'` -> `1792530342,254220` (a comma).
+* sshd: `sshd -T` shows `passwordauthentication no`, `kbdinteractiveauthentication no`;
+  `dnf-makecache.timer` disabled; `/etc/sudoers.d/kb` is `kb ALL=(ALL) NOPASSWD:ALL`;
+  login shell of `kb` is `/bin/bash`; root filesystem 20 GB btrfs, 793 MB used.
+
 ## kb-fedora -- manual install
 
-**Status (2026-10-20): the unattended install is impossible with VirtualBox
-7.1.12.** `create/fedora.sh` and `provision/dnf.sh` are written but were never run
-past this point (untested). With the Fedora Server 44 netinst ISO
+**Fallback only (2026-10-21).** `create/fedora.sh` now builds kb-fedora from the
+cloud image (section "kb-fedora" above); this ISO checklist is for a host where that
+fails. **The installer route is impossible with VirtualBox 7.1.12.** With the Fedora Server 44 netinst ISO
 (`Fedora-Server-netinst-x86_64-44-1.7.iso`) `VBoxManage unattended install`
 detects `RedHat_64`, version `44`, and `ConstructMedia()` fails deterministically
 (also with `--script-template` and `--post-install-template` given, with and
