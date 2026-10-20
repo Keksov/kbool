@@ -410,7 +410,9 @@ one submodule in `$SCRATCH` for this — never modify the real tree), and no
    later NOPASSWD): `kb ALL=(ALL) NOPASSWD:ALL` in `/etc/sudoers.d/kb` (0440,
    `visudo -cf`); `DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y <PKG>`;
    `systemctl disable --now unattended-upgrades apt-daily.timer apt-daily-upgrade.timer`;
-   sshd `PasswordAuthentication no`; `apt-get clean`.
+   sshd `PasswordAuthentication no`; `apt-get clean`; the login shell of `kb`
+   is bash (`chsh -s /usr/bin/bash kb` if `getent passwd kb` shows another) —
+   on EVERY lab VM, because `vmlab.sh run` quotes with `printf %q`.
    PKG (SV fills from PORTING.md at L0.6; default):
    `bash git gawk sed grep coreutils findutils diffutils procps netcat-openbsd tar gzip xz-utils ca-certificates curl`.
 7. Record versions into the README section: `lsb_release -d`, `bash --version | head -1`,
@@ -470,7 +472,8 @@ beyond bash+git) and `clean-gnu` (GNU tools added).
 4. Still in the root console session of step 3 (kb has no sudo yet), type:
    `env ASSUME_ALWAYS_YES=yes pkg bootstrap && pkg install -y sudo bash git` ·
    `echo 'kb ALL=(ALL) NOPASSWD: ALL' > /usr/local/etc/sudoers.d/kb && chmod 440 /usr/local/etc/sudoers.d/kb` ·
-   `exit`. Then over ssh run `provision/pkg.sh` with `sudo` (sshd
+   `pw usermod kb -s /usr/local/bin/bash` · `exit`. Then over ssh run
+   `provision/pkg.sh` with `sudo` (sshd
    `PasswordAuthentication no`, `pkg clean -y`); check `sudo -n true`;
    `vmlab.sh snapshot kb-freebsd clean`.
 5. `clean-gnu`: from `clean`, `sudo pkg install -y coreutils gsed gawk findutils gnugrep diffutils`
@@ -503,12 +506,15 @@ beyond bash+git) and `clean-gnu` (GNU tools added).
    remaining prompt only if its screenshot shows a yes/no about erasing
    `/dev/sda` (`y`); `poweroff`; detach the ISO; boot from disk.
 4. `provision/apk.sh` via ssh + `doas` (setup-alpine `-a` makes kb an admin
-   with doas): `apk add bash git`; `clean`. Then `apk add coreutils findutils gawk sed grep diffutils procps netcat-openbsd` → `clean-gnu`.
+   with doas): `apk add bash git`; kb's login shell → `/bin/bash`
+   (`doas sed -i 's#^\(kb:.*:\)[^:]*$#\1/bin/bash#' /etc/passwd`, checked with
+   `grep '^kb:' /etc/passwd`); `clean`. Then `apk add coreutils findutils gawk sed grep diffutils procps netcat-openbsd` → `clean-gnu`.
 **Stop if.** Either VM is not reachable by SSH after 90 min of attempts →
 delete only that VM, write its manual checklist section, report BLOCKED
 (the other VM may still be DONE).
 **Acceptance.** For each VM and each snapshot: `reset NAME SNAP`, `up`,
-`run -- 'bash --version | head -1; command -v gsed gawk gfind sed awk find'`, `down`.
+`run -- 'echo "$0 $BASH_VERSION"; bash --version | head -1; command -v gsed gawk gfind sed awk find'`
+(the first line must show a bash login shell), `down`.
 **Timebox.** 4 h.
 
 ---

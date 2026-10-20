@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L0.1-L0.4 DONE + committed; next L0.5 (Opus, PORTING.md)",
+  "status": "in progress — L0.1-L0.4 + L1.1 DONE; L0.5 (Opus) running",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -67,7 +67,10 @@
       "title": "tools/porting/scan.sh + inventory.tsv (P01-P32)",
       "dep": [],
       "card": "ready",
-      "status": "DONE 2026-10-20 (Sonnet)"
+      "status": "DONE 2026-10-20 (Sonnet)",
+      "commits": {
+        "kbool": "2817b2b"
+      }
     },
     "L0.3": {
       "executor": "S",
@@ -76,7 +79,10 @@
         "L0.2"
       ],
       "card": "ready",
-      "status": "DONE 2026-10-20 (Sonnet; PARTIAL once: hit rule missed calls through variables -> card amended: via column direct|indirect, if/elif/while/until/!/{ positions); limit: wrapper units pass the tool name as a constructor argument (TSed: parent.constructor sed) - unit name = tool for the wrapper family"
+      "status": "DONE 2026-10-20 (Sonnet; PARTIAL once: hit rule missed calls through variables -> card amended: via column direct|indirect, if/elif/while/until/!/{ positions); limit: wrapper units pass the tool name as a constructor argument (TSed: parent.constructor sed) - unit name = tool for the wrapper family",
+      "commits": {
+        "kbool": "2817b2b"
+      }
     },
     "L0.4": {
       "executor": "S",
@@ -85,7 +91,10 @@
         "L0.2"
       ],
       "card": "ready",
-      "status": "DONE 2026-10-20 (Sonnet); 5.1/5.2-only features in code = none unguarded; F27 funsub kklass.sh:1694 gated by BASH_VERSINFO>=5.3 (5.2 scratch-file path), F23 SRANDOM kklass.sh:940 has fallback to $( ); F01/F07/F11/F14 = the 4.x surface"
+      "status": "DONE 2026-10-20 (Sonnet); 5.1/5.2-only features in code = none unguarded; F27 funsub kklass.sh:1694 gated by BASH_VERSINFO>=5.3 (5.2 scratch-file path), F23 SRANDOM kklass.sh:940 has fallback to $( ); F01/F07/F11/F14 = the 4.x surface",
+      "commits": {
+        "kbool": "2817b2b"
+      }
     },
     "L0.5": {
       "executor": "O",
@@ -96,7 +105,7 @@
         "L0.4"
       ],
       "card": null,
-      "status": "planned"
+      "status": "dispatched 2026-10-20 (Opus)"
     },
     "L0.6": {
       "executor": "SV",
@@ -114,7 +123,7 @@
         "L0.1"
       ],
       "card": "ready",
-      "status": "planned"
+      "status": "DONE 2026-10-20 (Sonnet; remark: rc 14 when results are not fetched); tests PASS 124/124 both runtimes (SV re-run)"
     },
     "L1.2": {
       "executor": "S",
