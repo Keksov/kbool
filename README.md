@@ -389,6 +389,15 @@ bash kklass/tests/tests.sh --mode single     # sequential; the default is thread
 bash kkore/tests/tests.sh -n 15              # only test file 015 (-n 1,3-5 lists, ranges)
 ```
 
+To check a change on **both runtimes**, use the phase gate: each suite runs
+in a hermetic sandbox under each bash, one line per (bash, suite), one verdict
+and exit code; `--changed` picks the suites your uncommitted diff touches
+(name suites instead, or `all`) — [ktests/tools/README.md](ktests/tools/README.md#gatesh--the-phase-gate):
+
+```bash
+bash ktests/tools/gate.sh --bash C:/bin/Git/usr/bin/bash.exe --bash C:/bin/msys64/usr/bin/bash.exe --changed
+```
+
 * Run suites **one at a time** (they share `tests/.ckk` and temp names), and
   read results by grepping **all** `[FAIL]` lines, not the tail.
 * A second bash: the runner starts every test file with the `bash` found on
