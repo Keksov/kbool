@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # kbool.sh — the kbool startup file (kklass/USES_PLAN.md U1, U2, U4, P1, P3).
 #
 #     source /path/to/kbool/kbool.sh        # or `source kbool.sh` through $PATH (U3)

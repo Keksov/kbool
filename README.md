@@ -103,7 +103,7 @@ nothing), and keep a copy if code needs the folder later.
 <!-- doctest -->
 ```bash
 cat > greet.sh <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 [[ ${__KK_UNITS[@]@a} == A* ]] || source "${KBOOL_HOME-}/kbool.sh" || return 2
 kk.unit greet || return $__kk_unit_rc
 
@@ -128,7 +128,7 @@ A unit finds its own data files through `KK_UNIT_DIR`, wherever the caller is:
 mkdir -p lib/colors
 printf 'red\ngreen\n' > lib/colors/names.txt
 cat > lib/colors/colors.sh <<'EOF2'
-#!/bin/bash
+#!/usr/bin/env bash
 [[ ${__KK_UNITS[@]@a} == A* ]] || source "${KBOOL_HOME-}/kbool.sh" || return 2
 kk.unit colors || return $__kk_unit_rc
 
@@ -179,7 +179,7 @@ echo "${COLORS[*]}"                  # => red green
 <!-- doctest -->
 ```bash
 cat > needy.sh <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 [[ ${__KK_UNITS[@]@a} == A* ]] || source "${KBOOL_HOME-}/kbool.sh" || return 2
 kk.unit needy || return $__kk_unit_rc
 
@@ -210,7 +210,7 @@ define of the configuration (rc 0 / 1), in an ordinary `if`.
 <!-- doctest -->
 ```bash
 cat > strutil.sh <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 [[ ${__KK_UNITS[@]@a} == A* ]] || source "${KBOOL_HOME-}/kbool.sh" || return 2
 kk.unit strutil || return $__kk_unit_rc
 
@@ -299,7 +299,7 @@ no-op, another file rc 2.
 ```bash
 mkdir -p app/lib
 cat > app/lib/greet.sh <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 [[ ${__KK_UNITS[@]@a} == A* ]] || source "${KBOOL_HOME-}/kbool.sh" || return 2
 kk.unit greet || return $__kk_unit_rc
 
@@ -357,7 +357,7 @@ instances).
 <!-- doctest -->
 ```bash
 cat > counter.sh <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 [[ ${__KK_UNITS[@]@a} == A* ]] || source "${KBOOL_HOME-}/kbool.sh" || return 2
 kk.unit counter || return $__kk_unit_rc
 echo "counter: loaded"

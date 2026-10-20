@@ -1,4 +1,4 @@
-F01 4.0 associative arrays  core=81 wrapper=0 harness=29 test=54 bench=1 docs=4
+F01 4.0 associative arrays  core=82 wrapper=0 harness=29 test=54 bench=1 docs=4
 F02 4.0 case modification  core=47 wrapper=0 harness=1 test=17 bench=0 docs=0
 F03 4.0 coproc  core=2 wrapper=0 harness=0 test=1 bench=0 docs=6
 F04 4.0 ;& / ;;&  core=2 wrapper=0 harness=0 test=6 bench=0 docs=0

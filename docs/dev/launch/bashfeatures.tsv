@@ -168,6 +168,7 @@ F01	4.0	ktests/tools/strays.sh	595	ktests	harness	local -A __kts_tgt=()
 F01	4.0	ktests/tools/suitejob.sh	96	ktests	harness	declare -gA KT_SUITEJOB_STRAY_LABELS=()
 F01	4.0	ktests/tools/timing_check.sh	237	ktests	harness	local -A want=()
 F01	4.0	ktests/tools/timing_check.sh	356	ktests	harness	declare -A TC_PASS=() TC_TOTAL=() TC_NT=() TC_NF=() TC_NE=()
+F01	4.0	tools/vmlab/vmlab.sh	26	kbool	core	declare -A C_PORT=() C_BASH=() C_USER=()
 F02	4.0	kcl/dateutils/dateutils.sh	2033	kcl/dateutils	core	upc=${pc^^}
 F02	4.0	kcl/tcustomapplication/tcustomapplication.sh	92	kcl/tcustomapplication	core	__tca_so="${__tca_so^^}"
 F02	4.0	kcl/tcustomapplication/tcustomapplication.sh	118	kcl/tcustomapplication	core	__tca_o="${__tca_o^^}"
@@ -2184,42 +2185,42 @@ F18	5.0	kcl/tstopwatch/tests/006_G3_BooleansAndLocale.sh	187	kcl/tstopwatch	test
 F18	5.0	kcl/tstopwatch/tstopwatch.sh	106	kcl/tstopwatch	core	local __tsw_er=$EPOCHREALTIME
 F18	5.0	kcl/tstopwatch/tstopwatch.sh	115	kcl/tstopwatch	core	local __tsw_er=$EPOCHREALTIME
 F18	5.0	kcl/tstopwatch/tstopwatch.sh	127	kcl/tstopwatch	core	local __tsw_er=$EPOCHREALTIME
-F18	5.0	kcl/tstringhelper/tests/061_TSH17_ReturnContract.sh	173	kcl/tstringhelper	test	t0=${EPOCHREALTIME/./}
-F18	5.0	kcl/tstringhelper/tests/061_TSH17_ReturnContract.sh	175	kcl/tstringhelper	test	t1=${EPOCHREALTIME/./}
-F18	5.0	kcl/tstringhelper/tests/061_TSH17_ReturnContract.sh	177	kcl/tstringhelper	test	t2=${EPOCHREALTIME/./}
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	50	kcl/tstringhelper	test	t0=${EPOCHREALTIME/./}; t0=$(( t0 / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	56	kcl/tstringhelper	test	t1=${EPOCHREALTIME/./}; t1=$(( t1 / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	66	kcl/tstringhelper	test	a=${EPOCHREALTIME/./}; a=$(( a / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	69	kcl/tstringhelper	test	b=${EPOCHREALTIME/./}; b=$(( b / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	128	kcl/tstringhelper	test	t0=${EPOCHREALTIME/./}; t0=$(( t0 / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	130	kcl/tstringhelper	test	t1=${EPOCHREALTIME/./}; t1=$(( t1 / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	137	kcl/tstringhelper	test	t0=${EPOCHREALTIME/./}; t0=$(( t0 / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	139	kcl/tstringhelper	test	t1=${EPOCHREALTIME/./}; t1=$(( t1 / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	148	kcl/tstringhelper	test	t0=${EPOCHREALTIME/./}; t0=$(( t0 / 1000 ))
-F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	150	kcl/tstringhelper	test	t1=${EPOCHREALTIME/./}; t1=$(( t1 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/061_TSH17_ReturnContract.sh	173	kcl/tstringhelper	test	t0=${EPOCHREALTIME/[.,]/}
+F18	5.0	kcl/tstringhelper/tests/061_TSH17_ReturnContract.sh	175	kcl/tstringhelper	test	t1=${EPOCHREALTIME/[.,]/}
+F18	5.0	kcl/tstringhelper/tests/061_TSH17_ReturnContract.sh	177	kcl/tstringhelper	test	t2=${EPOCHREALTIME/[.,]/}
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	50	kcl/tstringhelper	test	t0=${EPOCHREALTIME/[.,]/}; t0=$(( t0 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	56	kcl/tstringhelper	test	t1=${EPOCHREALTIME/[.,]/}; t1=$(( t1 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	66	kcl/tstringhelper	test	a=${EPOCHREALTIME/[.,]/}; a=$(( a / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	69	kcl/tstringhelper	test	b=${EPOCHREALTIME/[.,]/}; b=$(( b / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	128	kcl/tstringhelper	test	t0=${EPOCHREALTIME/[.,]/}; t0=$(( t0 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	130	kcl/tstringhelper	test	t1=${EPOCHREALTIME/[.,]/}; t1=$(( t1 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	137	kcl/tstringhelper	test	t0=${EPOCHREALTIME/[.,]/}; t0=$(( t0 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	139	kcl/tstringhelper	test	t1=${EPOCHREALTIME/[.,]/}; t1=$(( t1 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	148	kcl/tstringhelper	test	t0=${EPOCHREALTIME/[.,]/}; t0=$(( t0 / 1000 ))
+F18	5.0	kcl/tstringhelper/tests/066_TSH09_Performance.sh	150	kcl/tstringhelper	test	t1=${EPOCHREALTIME/[.,]/}; t1=$(( t1 / 1000 ))
 F18	5.0	kcl/tstringlist/tests/013_AssignOptimization.sh	237	kcl/tstringlist	test	now_us() { local t="${EPOCHREALTIME}"; US="${t/[.,]/}"; }
 F18	5.0	kcl/tstringlist/tests/018_ReviewP2.sh	34	kcl/tstringlist	test	now_ms() { local t="${EPOCHREALTIME}"; t="${t/[.,]/}"; MS=$(( t / 1000 )); }
-F18	5.0	kklass/bench/kklass_bench.sh	15	kklass	bench	now_us() { local t="${EPOCHREALTIME/./}"; NOW_US="${t#0}"; }
+F18	5.0	kklass/bench/kklass_bench.sh	15	kklass	bench	now_us() { local t="${EPOCHREALTIME/[.,]/}"; NOW_US="${t#0}"; }
 F18	5.0	kklass/kklass_decl.sh	260	kklass	core	_|BASH|BASHOPTS|BASHPID|COMPREPLY|COPROC|DIRSTACK|EPOCHREALTIME|EPOCHSECONDS|EUID|FUNCNAME|GROUPS|HISTCMD|\
-F18	5.0	kklass/tests/120_DeleteForkFree.sh	17	kklass	test	now_us() { local t="${EPOCHREALTIME/./}"; printf -v NOW_US '%d' "${t#0}"; }
+F18	5.0	kklass/tests/120_DeleteForkFree.sh	17	kklass	test	now_us() { local t="${EPOCHREALTIME/[.,]/}"; printf -v NOW_US '%d' "${t#0}"; }
 F18	5.0	kklass/tests/140_TakenNames.sh	142	kklass	test	now() { REPLY=${EPOCHREALTIME//[!0-9]/}; }
 F18	5.0	kklass/tests/147_Round6.sh	244	kklass	test	refused="_ BASH BASHOPTS BASHPID COMPREPLY COPROC DIRSTACK EPOCHREALTIME EPOCHSECONDS EUID FUNCNAME GROUPS HISTCMD
 F18	5.0	kkore/tests/002_VariableManagement.sh	882	kkore	test	t="${EPOCHREALTIME}"; start_time="${t/[.,]/}"
 F18	5.0	kkore/tests/002_VariableManagement.sh	887	kkore	test	t="${EPOCHREALTIME}"; end_time="${t/[.,]/}"
-F18	5.0	kkore/tests/006_NumericGuards.sh	209	kkore	test	start="${EPOCHREALTIME/./}"
-F18	5.0	kkore/tests/006_NumericGuards.sh	211	kkore	test	end="${EPOCHREALTIME/./}"
-F18	5.0	kkore/tests/007_DebugAndOutName.sh	496	kkore	test	start="${EPOCHREALTIME/./}"
-F18	5.0	kkore/tests/007_DebugAndOutName.sh	498	kkore	test	end="${EPOCHREALTIME/./}"
-F18	5.0	ktests/ktest_runner.sh	625	ktests	core	__kt_t0="${EPOCHREALTIME/./}"
-F18	5.0	ktests/ktest_runner.sh	627	ktests	core	__kt_st=$(( ${EPOCHREALTIME/./} - __kt_t0 ))
-F18	5.0	ktests/ktest_runner.sh	635	ktests	core	__kt_end=$(( ${EPOCHREALTIME/./} + g * 100000 ))
-F18	5.0	ktests/ktest_runner.sh	638	ktests	core	__kt_t0="${EPOCHREALTIME/./}"
-F18	5.0	ktests/ktest_runner.sh	640	ktests	core	__kt_st=$(( __kt_st + ${EPOCHREALTIME/./} - __kt_t0 ))
-F18	5.0	ktests/ktest_runner.sh	663	ktests	core	__kt_t="${EPOCHREALTIME/./}"
-F18	5.0	ktests/ktest_runner.sh	671	ktests	core	__kt_t="${EPOCHREALTIME/./}"
+F18	5.0	kkore/tests/006_NumericGuards.sh	209	kkore	test	start="${EPOCHREALTIME/[.,]/}"
+F18	5.0	kkore/tests/006_NumericGuards.sh	211	kkore	test	end="${EPOCHREALTIME/[.,]/}"
+F18	5.0	kkore/tests/007_DebugAndOutName.sh	496	kkore	test	start="${EPOCHREALTIME/[.,]/}"
+F18	5.0	kkore/tests/007_DebugAndOutName.sh	498	kkore	test	end="${EPOCHREALTIME/[.,]/}"
+F18	5.0	ktests/ktest_runner.sh	625	ktests	core	__kt_t0="${EPOCHREALTIME/[.,]/}"
+F18	5.0	ktests/ktest_runner.sh	627	ktests	core	__kt_st=$(( ${EPOCHREALTIME/[.,]/} - __kt_t0 ))
+F18	5.0	ktests/ktest_runner.sh	635	ktests	core	__kt_end=$(( ${EPOCHREALTIME/[.,]/} + g * 100000 ))
+F18	5.0	ktests/ktest_runner.sh	638	ktests	core	__kt_t0="${EPOCHREALTIME/[.,]/}"
+F18	5.0	ktests/ktest_runner.sh	640	ktests	core	__kt_st=$(( __kt_st + ${EPOCHREALTIME/[.,]/} - __kt_t0 ))
+F18	5.0	ktests/ktest_runner.sh	663	ktests	core	__kt_t="${EPOCHREALTIME/[.,]/}"
+F18	5.0	ktests/ktest_runner.sh	671	ktests	core	__kt_t="${EPOCHREALTIME/[.,]/}"
 F18	5.0	ktests/ktest_runner.sh	975	ktests	core	__kt_nonce="${BASHPID}x${RANDOM}${RANDOM}x${EPOCHREALTIME//[!0-9]/}"
-F18	5.0	ktests/tests/044_GroupStopWatchdog.sh	154	ktests	test	t0=${EPOCHREALTIME/./}
-F18	5.0	ktests/tests/044_GroupStopWatchdog.sh	156	ktests	test	dt=$(( (${EPOCHREALTIME/./} - t0) / 100000 ))
+F18	5.0	ktests/tests/044_GroupStopWatchdog.sh	154	ktests	test	t0=${EPOCHREALTIME/[.,]/}
+F18	5.0	ktests/tests/044_GroupStopWatchdog.sh	156	ktests	test	dt=$(( (${EPOCHREALTIME/[.,]/} - t0) / 100000 ))
 F18	5.0	ktests/tests/045_StrayGuard.sh	212	ktests	test	T1="$EPOCHREALTIME"
 F18	5.0	ktests/tests/045_StrayGuard.sh	289	ktests	test	'        _kt_strays_ms "$EPOCHREALTIME"; [[ -n "$FIRST" ]] || FIRST=$REPLY' \
 F18	5.0	ktests/tests/045_StrayGuard.sh	294	ktests	test	'_kt_strays_ms "$EPOCHREALTIME"; t0=$REPLY' \

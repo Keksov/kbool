@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Master test runner - finds and executes all tests.sh in kbool subdirectories
 # Usage: ./tests.sh [OPTIONS]
 #

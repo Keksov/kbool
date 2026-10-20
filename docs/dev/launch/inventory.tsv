@@ -1,826 +1,4 @@
 pattern	file	line	unit	class	text
-P01	kbool.sh	1	kbool	core	#!/bin/bash
-P01	kcl/dateutils/bench.sh	1	kcl/dateutils	bench	#!/bin/bash
-P01	kcl/dateutils/dateutils.sh	1	kcl/dateutils	core	#!/bin/bash
-P01	kcl/dateutils/tests/001_Core.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/002_FpcParity.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/003_EncodeDecode.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/004_Validity.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/005_Extraction.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/006_OfTheFamilies.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/007_StartEnd.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/008_Predicates.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/009_Increment.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/010_BetweenSpan.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/011_CompareRange.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/012_Recode.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/013_WeekDayEncodings.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/014_UnixJulian.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/015_ISO8601.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/016_ScanDateTime.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/017_Contract.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/018_G3_NumericBoundary.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/019_G3_IsoForms.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/020_G3_JulianAndRanges.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/021_G3_ScanDateTime.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/022_G3_LocalOffset.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/023_D3_ReturnContract.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/024_IsoWeekSweep.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/dateutils/tests/tests.sh	1	kcl/dateutils	test	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g6/probe_bs.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g6/probe_tdir.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g6/probe_tfile.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g6/probe_tpath.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g6/probe_tpath2.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g7/tca_repro.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g7/tsh_repro.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/contract.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/errprobe.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/hygiene.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/hygiene2.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/inj.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/jsonprobe.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/jsonprobe2.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/jsonprobe3.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/docs/review-2026-09-06/repro/g8/sweep.sh	1	kcl/docs	docs	#!/bin/bash
-P01	kcl/math/bench.sh	1	kcl/math	bench	#!/bin/bash
-P01	kcl/math/math.sh	1	kcl/math	core	#!/bin/bash
-P01	kcl/math/tests/001_Core.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/002_FpcParity.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/003_MinMaxSign.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/004_RangeCompare.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/005_Rounding.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/006_Angles.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/007_Trig.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/008_Hyperbolic.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/009_LogExp.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/010_Stats.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/011_Financial.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/012_RngIeee.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/013_Contract.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/014_M1_EngineDomain.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/015_M3_EngineProtocol.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/016_D3_ReturnContract.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/017_M8_OverflowAndRng.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/018_DE1_ProgfileSweep.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/_mathtest.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/math/tests/tests.sh	1	kcl/math	test	#!/bin/bash
-P01	kcl/tarray/bench.sh	1	kcl/tarray	bench	#!/bin/bash
-P01	kcl/tarray/tarray.sh	1	kcl/tarray	core	#!/bin/bash
-P01	kcl/tarray/tests/001_Skeleton.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/002_Sort.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/003_SortStabilityTorture.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/004_BinarySearch.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/005_ScanFamily.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/006_FpcParity.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/007_CopyReverseConcat.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/008_Contract.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/009_ReviewP2.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tarray/tests/tests.sh	1	kcl/tarray	test	#!/bin/bash
-P01	kcl/tawk/bench.sh	1	kcl/tawk	bench	#!/bin/bash
-P01	kcl/tawk/tawk.sh	1	kcl/tawk	wrapper	#!/bin/bash
-P01	kcl/tawk/tests/004_Argv.sh	1	kcl/tawk	test	#!/bin/bash
-P01	kcl/tawk/tests/005_Run.sh	1	kcl/tawk	test	#!/bin/bash
-P01	kcl/tawk/tests/006_Contract.sh	1	kcl/tawk	test	#!/bin/bash
-P01	kcl/tawk/tests/007_Bench.sh	1	kcl/tawk	test	#!/bin/bash
-P01	kcl/tawk/tests/tests.sh	1	kcl/tawk	test	#!/bin/bash
-P01	kcl/tcustomapplication/tcustomapplication.sh	1	kcl/tcustomapplication	core	#!/bin/bash
-P01	kcl/tcustomapplication/tests/001_BasicCreationAndInitialization.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/002_TerminateOperations.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/003_ExceptionHandling.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/004_RunOperations.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/005_CommandLineOptions.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/006_GetNonOptions.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/007_EnvironmentAndLogging.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/008_PropertiesAndIntegration.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/009_OnExceptionProperty.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/010_EventLogFilter.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/011_ParamsIndices.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/012_GetNonOptionsProcedure.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/013_CheckOptionsTStrings.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/014_LogFiltering.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/015_TerminateExitCode.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/016_ExceptionIntegration.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/017_CommandLineOptionsExternal.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/018_SecurityTests.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/019_CommandLineArgsRealParameters.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/020_ConstructorSetArgsInvocation.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/021_CommandLineOptionsExternalScript.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/021_CommandLineOptionsExternalScript.sh	51	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/022_CaseSensitiveOptions.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/023_OptionCharTests.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/024_GetOptionValuesEdgeCases.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/025_LongOptionsEqualSign.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/026_MixedShortOptions.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/027_OptionsAtEnd.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/028_SetArgsEdgeCases.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/029_ConstructorWithArgs.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/030_KklassResultCompatibility.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/031_Contract.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/helper_external_app.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tcustomapplication/tests/tests.sh	1	kcl/tcustomapplication	test	#!/bin/bash
-P01	kcl/tdictionary/bench.sh	1	kcl/tdictionary	bench	#!/bin/bash
-P01	kcl/tdictionary/tdictionary.sh	1	kcl/tdictionary	core	#!/bin/bash
-P01	kcl/tdictionary/tests/001_CreationAndDestruction.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/002_StorageIdioms.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/003_AddFamily.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/004_ItemsAndLookup.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/005_RemoveAndClear.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/006_ExtractPair.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/007_ValueQueries.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/008_AssignAndBulk.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/009_KeysValues.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/010_ForEach.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/011_Notifications.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/012_NotificationParity.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/013_ObjectDictionary.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/014_Contract.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdictionary/tests/tests.sh	1	kcl/tdictionary	test	#!/bin/bash
-P01	kcl/tdirectory/tdirectory.sh	1	kcl/tdirectory	core	#!/bin/bash
-P01	kcl/tdirectory/tests/001_CreateDirectory.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/002_Delete.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/003_Exists.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/004_Copy.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/005_Move.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/006_IsEmpty.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/007_IsRelativePath.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/008_GetDirectoryRoot.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/009_GetParent.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/010_GetCurrentDirectory.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/011_SetCurrentDirectory.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/012_GetLogicalDrives.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/013_GetDirectories.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/014_GetFiles.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/015_GetFileSystemEntries.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/016_GetAttributes.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/017_SetAttributes.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/018_GetCreationTime.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/019_SetCreationTime.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/020_GetCreationTimeUtc.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/021_SetCreationTimeUtc.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/022_GetLastAccessTime.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/023_SetLastAccessTime.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/024_GetLastAccessTimeUtc.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/025_SetLastAccessTimeUtc.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/026_GetLastWriteTime.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/027_SetLastWriteTime.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/028_GetLastWriteTimeUtc.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/029_SetLastWriteTimeUtc.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/030_KklassStaticCompatibility.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/031_TimeAndAttributeStatus.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/032_Contract.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/033_G6_Listings.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/034_G6_Lifecycle.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/035_G6_Times.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/036_G6_ReturnContract.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/symlink_helper.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tdirectory/tests/tests.sh	1	kcl/tdirectory	test	#!/bin/bash
-P01	kcl/tests/001_UnitFiles.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/101_tstopwatch.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/102_tpath.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/103_tarray.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/104_tregex.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/105_tqueuestack.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/106_thashset.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/107_tdictionary.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/201_dateutils.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/202_math.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/203_tinifile.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/204_tstringhelper.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/301_tfile.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/302_tdirectory.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/303_tlist.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/304_tobjectlist.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/305_tstringlist.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/401_tpipe.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/402_tutil.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/403_tgrep.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/404_thead.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/405_ttail.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/406_tfind.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/407_tsed.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/408_tawk.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/501_tcustomapplication.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/502_thttpmessage.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/503_thttprouter.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/504_thttpserver.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/505_thttpapplication.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/kcl_units.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tests/tests.sh	1	kcl/tests	test	#!/bin/bash
-P01	kcl/tfile/tests/001_AppendAllText.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/002_AppendText.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/003_Copy.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/004_Create.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/005_CreateSymLink.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/006_CreateText.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/007_Decrypt.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/008_Delete.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/009_Encrypt.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/010_Exists.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/011_FileAttributesToInteger.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/012_GetAttributes.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/013_GetCreationTime.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/014_GetCreationTimeUtc.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/015_GetLastAccessTime.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/016_GetLastAccessTimeUtc.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/017_GetLastWriteTime.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/018_GetLastWriteTimeUtc.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/019_GetSymLinkTarget.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/020_IntegerToFileAttributes.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/021_Move.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/022_Open.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/023_OpenRead.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/024_OpenText.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/025_OpenWrite.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/026_ReadAllBytes.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/027_ReadAllLines.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/028_ReadAllText.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/029_Replace.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/030_SetAttributes.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/031_SetCreationTime.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/032_SetCreationTimeUtc.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/033_SetLastAccessTime.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/034_SetLastAccessTimeUtc.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/035_SetLastWriteTime.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/036_SetLastWriteTimeUtc.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/037_WriteAllBytes.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/038_KklassStaticCompatibility.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/039_Contract.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/040_G6_SymLink.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/041_G6_Setters.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/042_G6_IO.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/043_G6_ReturnContract.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/symlink_helper.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tests/tests.sh	1	kcl/tfile	test	#!/bin/bash
-P01	kcl/tfile/tfile.sh	1	kcl/tfile	core	#!/bin/bash
-P01	kcl/tfind/bench.sh	1	kcl/tfind	bench	#!/bin/bash
-P01	kcl/tfind/tests/004_Argv.sh	1	kcl/tfind	test	#!/bin/bash
-P01	kcl/tfind/tests/005_Run.sh	1	kcl/tfind	test	#!/bin/bash
-P01	kcl/tfind/tests/006_Contract.sh	1	kcl/tfind	test	#!/bin/bash
-P01	kcl/tfind/tests/007_Bench.sh	1	kcl/tfind	test	#!/bin/bash
-P01	kcl/tfind/tests/tests.sh	1	kcl/tfind	test	#!/bin/bash
-P01	kcl/tfind/tfind.sh	1	kcl/tfind	wrapper	#!/bin/bash
-P01	kcl/tgrep/bench.sh	1	kcl/tgrep	bench	#!/bin/bash
-P01	kcl/tgrep/tests/004_Argv.sh	1	kcl/tgrep	test	#!/bin/bash
-P01	kcl/tgrep/tests/005_Search.sh	1	kcl/tgrep	test	#!/bin/bash
-P01	kcl/tgrep/tests/006_Contract.sh	1	kcl/tgrep	test	#!/bin/bash
-P01	kcl/tgrep/tests/007_Bench.sh	1	kcl/tgrep	test	#!/bin/bash
-P01	kcl/tgrep/tests/tests.sh	1	kcl/tgrep	test	#!/bin/bash
-P01	kcl/tgrep/tgrep.sh	1	kcl/tgrep	wrapper	#!/bin/bash
-P01	kcl/thashset/bench.sh	1	kcl/thashset	bench	#!/bin/bash
-P01	kcl/thashset/tests/001_Skeleton.sh	1	kcl/thashset	test	#!/bin/bash
-P01	kcl/thashset/tests/002_MembershipCore.sh	1	kcl/thashset	test	#!/bin/bash
-P01	kcl/thashset/tests/003_Contract.sh	1	kcl/thashset	test	#!/bin/bash
-P01	kcl/thashset/tests/004_ReviewP2.sh	1	kcl/thashset	test	#!/bin/bash
-P01	kcl/thashset/tests/005_SetAlgebra.sh	1	kcl/thashset	test	#!/bin/bash
-P01	kcl/thashset/tests/006_Events.sh	1	kcl/thashset	test	#!/bin/bash
-P01	kcl/thashset/tests/tests.sh	1	kcl/thashset	test	#!/bin/bash
-P01	kcl/thashset/thashset.sh	1	kcl/thashset	core	#!/bin/bash
-P01	kcl/thead/bench.sh	1	kcl/thead	bench	#!/bin/bash
-P01	kcl/thead/tests/004_Argv.sh	1	kcl/thead	test	#!/bin/bash
-P01	kcl/thead/tests/005_Run.sh	1	kcl/thead	test	#!/bin/bash
-P01	kcl/thead/tests/006_Contract.sh	1	kcl/thead	test	#!/bin/bash
-P01	kcl/thead/tests/007_Bench.sh	1	kcl/thead	test	#!/bin/bash
-P01	kcl/thead/tests/tests.sh	1	kcl/thead	test	#!/bin/bash
-P01	kcl/thead/thead.sh	1	kcl/thead	wrapper	#!/bin/bash
-P01	kcl/thttpserver/bench.sh	1	kcl/thttpserver	bench	#!/bin/bash
-P01	kcl/thttpserver/examples/demo.sh	1	kcl/thttpserver	docs	#!/bin/bash
-P01	kcl/thttpserver/examples/demo_oop.sh	1	kcl/thttpserver	docs	#!/bin/bash
-P01	kcl/thttpserver/tests/001_Request.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/002_Response.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/003_Router.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/004_Server.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/005_Lifecycle.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/006_Application.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/007_Hostile.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/008_Contract.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/009_Demo.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/010_Bench.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/_ths_socket.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/tests/tests.sh	1	kcl/thttpserver	test	#!/bin/bash
-P01	kcl/thttpserver/thttpapplication.sh	1	kcl/thttpserver	core	#!/bin/bash
-P01	kcl/thttpserver/thttpmessage.sh	1	kcl/thttpserver	core	#!/bin/bash
-P01	kcl/thttpserver/thttprouter.sh	1	kcl/thttpserver	core	#!/bin/bash
-P01	kcl/thttpserver/thttpserver.sh	1	kcl/thttpserver	core	#!/bin/bash
-P01	kcl/tinifile/bench.sh	1	kcl/tinifile	bench	#!/bin/bash
-P01	kcl/tinifile/tests/001_Skeleton.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/002_LoadAndRead.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/003_WriteAndPersist.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/004_TypedAccessors.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/005_FpcBoolParity.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/006_Contract.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/007_T1_Persistence.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/008_T2_RoundTrip.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/009_T9_ValuesAndInts.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/010_T13_OutArrays.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/011_T6_Performance.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/012_D6_Locale.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tests/tests.sh	1	kcl/tinifile	test	#!/bin/bash
-P01	kcl/tinifile/tinifile.sh	1	kcl/tinifile	core	#!/bin/bash
-P01	kcl/tlist/tests/001_BasicCreationAndDestruction.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/002_AddAndBasicOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/003_InsertOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/004_DeleteOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/005_ClearOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/006_CapacityOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/007_CountOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/008_IndexOfOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/009_RemoveOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/010_ExchangeOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/011_MoveOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/012_PackOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/014_EdgeCases.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/015_PerformanceTest.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/016_AdaptiveGrowth.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/017_BatchOperations.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/018_CustomSort.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/019_GetPut.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/020_Contract.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/021_ReviewP2.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tests/tests.sh	1	kcl/tlist	test	#!/bin/bash
-P01	kcl/tlist/tlist.sh	1	kcl/tlist	core	#!/bin/bash
-P01	kcl/tobjectlist/tests/001_OwnershipCore.sh	1	kcl/tobjectlist	test	#!/bin/bash
-P01	kcl/tobjectlist/tests/002_FpcParity.sh	1	kcl/tobjectlist	test	#!/bin/bash
-P01	kcl/tobjectlist/tests/003_OwnershipTorture.sh	1	kcl/tobjectlist	test	#!/bin/bash
-P01	kcl/tobjectlist/tests/004_Contract.sh	1	kcl/tobjectlist	test	#!/bin/bash
-P01	kcl/tobjectlist/tests/005_ReviewP2.sh	1	kcl/tobjectlist	test	#!/bin/bash
-P01	kcl/tobjectlist/tests/tests.sh	1	kcl/tobjectlist	test	#!/bin/bash
-P01	kcl/tobjectlist/tobjectlist.sh	1	kcl/tobjectlist	core	#!/bin/bash
-P01	kcl/tpath/tests/001_CombinePaths.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/002_ChangeExtension.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/003_GetDirectoryName.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/004_GetExtension.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/005_GetFilename.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/006_PathAnalysis.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/007_GetPathRoot.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/008_SystemPaths.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/009_GetFullPath.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/010_properties.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/011_DriveExists.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/012_GetAttributes.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/013_ValidChars.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/014_MatchesPattern.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/015_KklassStaticCompatibility.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/016_Contract.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/017_G6_Separators.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/018_G6_PathParsing.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/019_G6_Platform.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/020_G6_ReturnContract.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tests/tests.sh	1	kcl/tpath	test	#!/bin/bash
-P01	kcl/tpath/tpath.sh	1	kcl/tpath	core	#!/bin/bash
-P01	kcl/tpipe/bench.sh	1	kcl/tpipe	bench	#!/bin/bash
-P01	kcl/tpipe/tests/001_Each.sh	1	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/001_Each.sh	301	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/002_Stop.sh	1	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/002_Stop.sh	90	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/003_Sinks.sh	1	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/003_Sinks.sh	524	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/004_Contract.sh	1	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/004_Contract.sh	207	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/004_Contract.sh	243	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/005_Bench.sh	1	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/005_Bench.sh	177	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tests/tests.sh	1	kcl/tpipe	test	#!/bin/bash
-P01	kcl/tpipe/tpipe.sh	1	kcl/tpipe	wrapper	#!/bin/bash
-P01	kcl/tqueuestack/bench.sh	1	kcl/tqueuestack	bench	#!/bin/bash
-P01	kcl/tqueuestack/tests/001_Skeleton.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/002_QueueCore.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/003_FpcQueueParity.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/004_StackCore.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/005_FpcStackParity.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/006_Events.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/007_ObjectOwnership.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/008_Contract.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/009_ReviewP2.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tests/tests.sh	1	kcl/tqueuestack	test	#!/bin/bash
-P01	kcl/tqueuestack/tqueuestack.sh	1	kcl/tqueuestack	core	#!/bin/bash
-P01	kcl/tregex/bench.sh	1	kcl/tregex	bench	#!/bin/bash
-P01	kcl/tregex/tests/001_Skeleton.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/002_IsMatch.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/003_Match.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/004_Escape.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/005_FlagsAndForkFree.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/006_Matches.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/007_Split.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/008_FpcParity.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/009_Replace.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/010_Contract.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/011_T3_T4_LocaleAndAnchors.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/012_T5_T8_FlagsAndNamerefs.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/013_T6_T7_Scaling.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/014_T9_T10_Replacement.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tests/tests.sh	1	kcl/tregex	test	#!/bin/bash
-P01	kcl/tregex/tregex.sh	1	kcl/tregex	core	#!/bin/bash
-P01	kcl/tsed/bench.sh	1	kcl/tsed	bench	#!/bin/bash
-P01	kcl/tsed/tests/004_Argv.sh	1	kcl/tsed	test	#!/bin/bash
-P01	kcl/tsed/tests/005_Run.sh	1	kcl/tsed	test	#!/bin/bash
-P01	kcl/tsed/tests/006_Contract.sh	1	kcl/tsed	test	#!/bin/bash
-P01	kcl/tsed/tests/007_Bench.sh	1	kcl/tsed	test	#!/bin/bash
-P01	kcl/tsed/tests/tests.sh	1	kcl/tsed	test	#!/bin/bash
-P01	kcl/tsed/tsed.sh	1	kcl/tsed	wrapper	#!/bin/bash
-P01	kcl/tstopwatch/bench.sh	1	kcl/tstopwatch	bench	#!/bin/bash
-P01	kcl/tstopwatch/tests/001_CreationAndDestruction.sh	1	kcl/tstopwatch	test	#!/bin/bash
-P01	kcl/tstopwatch/tests/002_StateMachine.sh	1	kcl/tstopwatch	test	#!/bin/bash
-P01	kcl/tstopwatch/tests/003_TimingAndAccumulation.sh	1	kcl/tstopwatch	test	#!/bin/bash
-P01	kcl/tstopwatch/tests/004_ZeroFork.sh	1	kcl/tstopwatch	test	#!/bin/bash
-P01	kcl/tstopwatch/tests/005_Contract.sh	1	kcl/tstopwatch	test	#!/bin/bash
-P01	kcl/tstopwatch/tests/006_G3_BooleansAndLocale.sh	1	kcl/tstopwatch	test	#!/bin/bash
-P01	kcl/tstopwatch/tests/tests.sh	1	kcl/tstopwatch	test	#!/bin/bash
-P01	kcl/tstopwatch/tstopwatch.sh	1	kcl/tstopwatch	core	#!/bin/bash
-P01	kcl/tstringhelper/tests/001_Chars.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/002_Compare.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/003_CompareOrdinal.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/004_CompareText.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/005_CompareTo.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/006_Contains.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/007_Copy.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/008_CopyTo.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/009_CountChar.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/010_Create.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/011_DeQuotedString.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/012_EndsText.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/013_EndsWith.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/014_Equals.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/015_Format.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/016_GetHashCode.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/017_IndexOf.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/018_IndexOfAny.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/019_IndexOfAnyUnquoted.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/020_Insert.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/021_IsDelimiter.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/022_IsEmpty.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/023_IsNullOrEmpty.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/024_IsNullOrWhiteSpace.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/025_Join.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/026_LastDelimiter.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/027_LastIndexOf.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/028_LastIndexOfAny.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/029_Length.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/030_LowerCase.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/031_PadLeft.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/032_PadRight.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/033_Parse.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/034_QuotedString.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/035_Remove.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/036_Replace.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/037_Split.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/038_StartsText.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/039_StartsWith.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/040_Substring.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/041_ToBoolean.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/042_ToCharArray.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/043_ToDouble.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/044_ToExtended.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/045_ToInt64.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/046_ToInteger.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/047_ToLower.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/048_ToLowerInvariant.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/049_ToSingle.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/050_ToUpper.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/051_ToUpperInvariant.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/052_Trim.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/053_TrimEnd.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/054_TrimLeft.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/055_TrimRight.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/056_TrimStart.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/057_UpperCase.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/058_KklassStaticCompatibility.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/059_SecurityTests.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/060_Contract.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/061_TSH17_ReturnContract.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/063_TSH04_Locale.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/066_TSH09_Performance.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/067_P5F1_CompareTo.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tests/tests.sh	1	kcl/tstringhelper	test	#!/bin/bash
-P01	kcl/tstringhelper/tstringhelper.sh	1	kcl/tstringhelper	core	#!/bin/bash
-P01	kcl/tstringlist/tests/001_BasicCreationAndInitialization.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/002_AddAndRetrievalOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/003_PutAndModificationOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/004_IndexOfAndSearchOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/005_RemoveAndDeleteOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/006_SortOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/007_SortedListOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/008_ClearAndCopyOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/009_CompareStringsOperations.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/010_ErrorHandlingAndEdgeCases.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/011_PropertyManipulation.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/012_IntegrationAndComplexScenarios.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/013_AssignOptimization.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/014_AddStringsOptimization.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/015_KklassResultCompatibility.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/016_SortDelegation.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/017_Contract.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/018_ReviewP2.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tests/tests.sh	1	kcl/tstringlist	test	#!/bin/bash
-P01	kcl/tstringlist/tstringlist.sh	1	kcl/tstringlist	core	#!/bin/bash
-P01	kcl/ttail/bench.sh	1	kcl/ttail	bench	#!/bin/bash
-P01	kcl/ttail/tests/004_Argv.sh	1	kcl/ttail	test	#!/bin/bash
-P01	kcl/ttail/tests/005_Run.sh	1	kcl/ttail	test	#!/bin/bash
-P01	kcl/ttail/tests/006_Contract.sh	1	kcl/ttail	test	#!/bin/bash
-P01	kcl/ttail/tests/007_Bench.sh	1	kcl/ttail	test	#!/bin/bash
-P01	kcl/ttail/tests/tests.sh	1	kcl/ttail	test	#!/bin/bash
-P01	kcl/ttail/ttail.sh	1	kcl/ttail	wrapper	#!/bin/bash
-P01	kcl/tutil/bench.sh	1	kcl/tutil	bench	#!/bin/bash
-P01	kcl/tutil/tests/001_Core.sh	1	kcl/tutil	test	#!/bin/bash
-P01	kcl/tutil/tests/002_Sinks.sh	1	kcl/tutil	test	#!/bin/bash
-P01	kcl/tutil/tests/002_Sinks.sh	1081	kcl/tutil	test	#!/bin/bash
-P01	kcl/tutil/tests/003_Contract.sh	1	kcl/tutil	test	#!/bin/bash
-P01	kcl/tutil/tests/004_Bench.sh	1	kcl/tutil	test	#!/bin/bash
-P01	kcl/tutil/tests/tests.sh	1	kcl/tutil	test	#!/bin/bash
-P01	kcl/tutil/tutil.sh	1	kcl/tutil	wrapper	#!/bin/bash
-P01	kklass/bench/kklass_bench.sh	1	kklass	bench	#!/bin/bash
-P01	kklass/examples/01_basic_class_creation.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/02_instance_creation.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/03_property_assignment_access.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/04_method_calls.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/05_single_inheritance.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/06_method_overriding.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/07_parent_method_calls.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/08_multiple_inheritance_levels.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/09_resource_cleanup.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/10_method_parameters.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/11_property_inheritance.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/12_property_computation.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/13_multiple_instances.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/14_property_values_with_spaces.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/15_nested_method_calls.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/16_constructor_functionality.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/17_property_inherited_method.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/18_parent_method_with_properties.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/19_this_method_context.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/20_multiple_parameters_property_access.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/21_property_method_access.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/22_autocompilation_first_load.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/23_cached_compiled_version.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/24_auto_recompilation.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/25_force_recompilation.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/26_runtime_mode.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/27_functional_test_compiled.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/28_inheritance_compiled.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/29_error_handling.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/30_complex_property_names.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/31_deep_inheritance_chain.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/32_static_methods_properties.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/33_introspection_capabilities.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/34_composition_patterns.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/35_factory_pattern.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/36_singleton_pattern.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/37_computed_and_lazy_properties.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/38_observer_pattern.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/39_strategy_pattern.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/40_builder_pattern.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/41_string_serialization.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/42_json_serialization.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/43_nested_serialization.sh	2	kklass	docs	#!/bin/bash
-P01	kklass/examples/44_pascal_declare_implement.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/45_pascal_unit_kkp.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/46_visibility_modifiers.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/47_pascal_dsl.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/48_deep_inheritance_scopes.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/examples/demo.sh	1	kklass	docs	#!/bin/bash
-P01	kklass/kklass.sh	1	kklass	core	#!/bin/bash
-P01	kklass/kklass_autoload.sh	1	kklass	core	#!/bin/bash
-P01	kklass/kklass_compiler.sh	1	kklass	core	#!/bin/bash
-P01	kklass/kklass_compiler.sh	260	kklass	core	#!/bin/bash
-P01	kklass/kklass_decl.sh	1	kklass	core	#!/bin/bash
-P01	kklass/kklass_kkp.sh	1	kklass	core	#!/bin/bash
-P01	kklass/kklass_pascal.sh	1	kklass	core	#!/bin/bash
-P01	kklass/kklass_serializable.sh	1	kklass	core	#!/bin/bash
-P01	kklass/tests/001_BasicClassCreation.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/002_InstanceCreation.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/003_PropertyAssignmentAccess.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/004_MethodCalls.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/005_SingleInheritance.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/006_MethodOverriding.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/007_ParentMethodCalls.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/008_MultipleInheritanceLevels.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/009_ResourceCleanup.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/010_MethodWithParameters.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/011_PropertyInheritance.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/012_PropertyComputation.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/013_MultipleInstances.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/014_PropertyValuesWithSpaces.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/015_NestedMethodCalls.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/016_ConstructorFunctionality.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/017_PropertyInheritedMethod.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/018_ParentMethodWithProperties.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/019_ThisMethodContext.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/020_MultipleParametersPropertyAccess.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/021_PropertyAccessViaMethod.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/022_MethodModifyingProperties.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/023_MethodOverridingMultipleClasses.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/024_StaticPropertiesMethods.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/025_FactoryPattern.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/026_SingletonPattern.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/027_AutocompilationFirstLoad.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/028_UsingCachedCompiledVersion.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/029_AutorecompilationOnSourceChange.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/030_ForceRecompilation.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/031_RuntimeMode.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/032_FunctionalTestCompiled.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/033_InheritanceCompiled.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/034_ErrorHandling.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/035_ComplexPropertyNames.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/036_DeepInheritanceChain.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/036_ProceduresAndFunctions.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/037_CompositionPatterns.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/038_ComputedProperties.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/039_UnifiedPropertySyntax.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/040_LazyProperties.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/040_ObserverPattern.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/041_BuilderPattern.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/042_StrategyPattern.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/043_StringSerialization.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/044_JsonSerialization.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/045_NestedSerialization.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/046_MixedSerialization.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/047_FunctionTypeWithKkResult.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/048_KKEchoResult.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/049_FrameContextSafety.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/050_InheritanceAndPolymorphism.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/060_DeclareImplement.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/061_VirtualOverrideAbstract.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/062_VisibilityWarning.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/063_KkpUnitParser.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/064_ClassVarPascal.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/065_KkpMultilineSignatures.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/066_ComplexNestedObjectGraph.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/101_KKWrite.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/102_KKWriteln.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/106_AutodetectSubshell.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/107_BashSubshell.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/108_Debug.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/109_Diagnostic.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/110_StaticRegistrationHelper.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/111_DefaultExportEnvironment.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/112_SilentCallHelper.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/113_SecurityHardening.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/114_StaticThinDispatch.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/115_PascalBuildStatus.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/116_PascalDslBasics.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/117_PascalDslInheritance.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/118_PascalDslContext.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/119_DuplicateClassGuard.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/120_DeleteForkFree.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/121_GuardKeepsMetadata.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/122_DefineMethodOverride.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/123_CompiledParity.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/124_StaticMethodStatus.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/125_ReservedNames.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/126_ComputedPropertyOutput.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/127_ReturnValueFidelity.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/128_SetUContract.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/129_BuilderNamespace.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/130_ComputedPropertyStatus.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/131_JsonEscaping.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/132_ThisDispatch.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/133_IsAbstract.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/134_SerializationContract.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/135_DeclarationHygiene.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/136_StaticInstanceClash.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/137_CompilerDump.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/137_CompilerDump.sh	91	kklass	test	#!/bin/bash
-P01	kklass/tests/138_IdentifierLocale.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/139_ClassDeclarationSites.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/140_TakenNames.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/141_UnitHeaders.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/142_DocExamples.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/143_CompilerTempCleanup.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/144_Round5Hygiene.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/145_ForkFreeBuild.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/146_ScopeIsolation.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/147_Round6.sh	1	kklass	test	#!/bin/bash
-P01	kklass/tests/tests.sh	1	kklass	test	#!/bin/bash
-P01	kkore/kcfg.sh	1	kkore	core	#!/bin/bash
-P01	kkore/kerr.sh	1	kkore	core	#!/bin/bash
-P01	kkore/klib.sh	1	kkore	core	#!/bin/bash
-P01	kkore/kuse.sh	1	kkore	core	#!/bin/bash
-P01	kkore/kvar.sh	1	kkore	core	#!/bin/bash
-P01	kkore/tests/001_KKLibTests.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/001_KKLibTests.sh	85	kkore	test	#!/bin/bash
-P01	kkore/tests/001_KKLibTests.sh	258	kkore	test	#!/bin/bash
-P01	kkore/tests/002_VariableManagement.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/003_ConfigManagement.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/004_FrameUseErrorTrap.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/005_HardeningRegression.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/006_NumericGuards.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/007_DebugAndOutName.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/008_IdentifierLocale.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/009_UnitsAndUses.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/010_KboolLoader.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/011_ConfigProject.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/012_DeclaredNamespaces.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/013_SystemUnitHeaders.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/014_FailedDepsAndLookup.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/015_DocExamples.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/016_UnitExtdebug.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/doc_examples.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/tests.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/unit_fixture.sh	1	kkore	test	#!/bin/bash
-P01	kkore/tests/unit_lint.sh	1	kkore	test	#!/bin/bash
-P01	ktests/ktest.sh	1	ktests	core	#!/bin/bash
-P01	ktests/ktest_assertions.sh	1	ktests	core	#!/bin/bash
-P01	ktests/ktest_core.sh	1	ktests	core	#!/bin/bash
-P01	ktests/ktest_env_signatures.sh	1	ktests	core	#!/bin/bash
-P01	ktests/ktest_fixtures.sh	1	ktests	core	#!/bin/bash
-P01	ktests/ktest_runner.sh	1	ktests	core	#!/bin/bash
-P01	ktests/ktest_source.sh	1	ktests	core	#!/bin/bash
-P01	ktests/ktests.sh	1	ktests	core	#!/bin/bash
-P01	ktests/templates/common.sh.template	1	ktests	core	#!/bin/bash
-P01	ktests/templates/test-example.sh	1	ktests	core	#!/bin/bash
-P01	ktests/tests/001_CoreFrameworkInit.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/001_TestPass.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/002_AssertionsValueChecks.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/003_AssertionsStringMatching.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/004_AssertionsNumericChecks.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/005_AssertionsFileSystemChecks.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/006_AssertionsCommandExecution.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/007_AssertionsArrayChecks.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/008_FixturesManagement.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/009_CoreLoggingFunctions.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/010_TestRunnerParsing.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/011_TestRunnerExecution.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/011_TestRunnerExecution.sh	16	ktests	test	#!/bin/bash
-P01	ktests/tests/012_ErrorHandlingExceptions.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/013_IntegrationFullWorkflow.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/013_IntegrationFullWorkflow.sh	17	ktests	test	#!/bin/bash
-P01	ktests/tests/014_IntegrationParallelExecution.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/014_IntegrationParallelExecution.sh	18	ktests	test	#!/bin/bash
-P01	ktests/tests/015_IntegrationReportGeneration.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/016_IntegrationRegressionScenarios.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/017_AdvancedFileSystemAssertions.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/018_CommandFailureTesting.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/019_OutputContentTesting.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/020_AdvancedArrayOperations.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/021_AdvancedFixtureManagement.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/022_DirectRunnerExecution.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/022_DirectRunnerExecution.sh	19	ktests	test	#!/bin/bash
-P01	ktests/tests/022_DirectRunnerExecution.sh	31	ktests	test	#!/bin/bash
-P01	ktests/tests/022_DirectRunnerExecution.sh	43	ktests	test	#!/bin/bash
-P01	ktests/tests/022_DirectRunnerExecution.sh	112	ktests	test	#!/bin/bash
-P01	ktests/tests/022_DirectRunnerExecution.sh	120	ktests	test	#!/bin/bash
-P01	ktests/tests/023_FrameworkInformation.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/024_CounterManagement.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/025_TestSelectionEdgeCases.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/026_PerformanceStressTests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/027_CrossPlatformCompatibility.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/028_AdvancedIntegrationScenarios.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/029_FixtureAutoRestoreRegression.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/030_LocaleContract.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/031_RunnerArgZero.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/031_RunnerArgZero.sh	20	ktests	test	#!/bin/bash
-P01	ktests/tests/032_FixtureDirPerFile.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/032_FixtureDirPerFile.sh	21	ktests	test	#!/bin/bash
-P01	ktests/tests/033_ForkStormHarness.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/034_SourceAbortDetection.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/035_RetryRuleAndSignatures.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/036_FileScopeReturn.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/037_ThreadedRunnerIsolation.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/038_OwnExitTrapCleanup.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/039_ParseArgsNoExport.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/040_ConfigIsolation.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/040_ConfigIsolation.sh	39	ktests	test	#!/bin/bash
-P01	ktests/tests/040_ConfigIsolation.sh	65	ktests	test	#!/bin/bash
-P01	ktests/tests/041_FixtureBaseAbsolute.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/042_KilledRunCleanup.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/043_PrivateTmpDirSweep.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/044_GroupStopWatchdog.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/045_StrayGuard.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/046_ConcurrentFixtureRuns.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/047_StandaloneExitCode.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/048_SummaryFile.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/049_SuiteJob.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/050_GateCli.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/051_GateVerdicts.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/052_GateSignals.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/053_GateReports.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/054_GateSelection.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/055_TimingCheckReexec.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/ckk/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/crash/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/empty/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/env/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/envcrash/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/envx/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/fail/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/failsig/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/flaky/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/hang/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/leak/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/mix/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/mkroot.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/pass/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/probe/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/sigs/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/tcenv/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/gate_fixtures/warn/suite/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tests/tests.sh	1	ktests	test	#!/bin/bash
-P01	ktests/tools/forkstorm.sh	1	ktests	harness	#!/bin/bash
-P01	ktests/tools/gate.sh	1	ktests	harness	#!/bin/bash
-P01	ktests/tools/strays.sh	1	ktests	harness	#!/bin/bash
-P01	ktests/tools/suitejob.sh	1	ktests	harness	#!/bin/bash
-P01	ktests/tools/timing_check.sh	1	ktests	harness	#!/bin/bash
-P01	tests/tests.sh	1	kbool	core	#!/bin/bash
 P02	kcl/tsed/tests/004_Argv.sh	357	kcl/tsed	test	one "S1: \`inPlace = 1\` -> the derived -b, then -i" inPlace  1   sed --sandbox -b -i -e 's/a/A/' -- f.txt
 P02	kcl/tsed/tests/004_Argv.sh	365	kcl/tsed	test	sed --sandbox -b -i.bak -e 's/a/A/' -- f.txt
 P02	kcl/tsed/tests/004_Argv.sh	482	kcl/tsed	test	sed --sandbox -E -n -s -z -b -i.bak --posix -u -l 40 -e E0 -e X1 -e X2 \
@@ -837,6 +15,9 @@ P02	kklass/tests/141_UnitHeaders.sh	317	kklass	test	sed -i '4d' "$B2/kklass/kkla
 P02	kkore/tests/013_SystemUnitHeaders.sh	127	kkore	test	sed -i 's/^kk\.unit kcfg || return \$__kk_unit_rc$/kk.unit kcfgx || return $__kk_unit_rc/' "$H/kkore/kcfg.sh"
 P02	ktests/tests/044_GroupStopWatchdog.sh	191	ktests	test	sed -i '/__kt_l/s/{ IFS= read/{ sleep 2; IFS= read/' "$TMP/lib/ktest_runner.sh"
 P02	ktests/tools/gate.sh	2520	ktests	harness	sed -i "s|^verdict=.*|verdict=STRAY|; s|^reason=.*|reason=stray process(es) found by the segment's final check, stopped|" "$f"
+P02	tools/vmlab/provision/apk.sh	36	kbool	core	pin_off() { sed -i '/ dl-cdn\.alpinelinux\.org$/d' /etc/hosts; }
+P02	tools/vmlab/provision/apk.sh	61	kbool	core	sed -i "s#^\($LABUSER:.*:\)[^:]*\$#\1/bin/bash#" /etc/passwd
+P02	tools/vmlab/provision/apt.sh	43	kbool	core	sed -i "s/^# *\($l UTF-8\)\$/\1/" /etc/locale.gen
 P03	kcl/tsed/bench.sh	140	kcl/tsed	bench	SED_BANNER="$(sed --version 2>/dev/null | sed -n 1p || true)"
 P03	kcl/tsed/bench.sh	254	kcl/tsed	bench	echo "(c) TSed.edit 's/a/A/' FILE vs a bare \`sed --sandbox -e 's/a/A/' -- FILE\` (INTERLEAVED, medians):"
 P03	kcl/tsed/bench.sh	265	kcl/tsed	bench	sed --sandbox -e 's/a/A/' -- "$__file" >/dev/null 2>&1 || :
@@ -1045,6 +226,7 @@ P06	kcl/tpath/tpath.sh	686	kcl/tpath	core	if command -v realpath >/dev/null 2>&1
 P06	kcl/tpath/tpath.sh	687	kcl/tpath	core	full="$(realpath -m -- "$path" 2>/dev/null)" || full=""
 P06	kkore/klib.sh	343	kkore	core	realpath "$caller_file" 2>/dev/null || kl.write "$caller_file"
 P06	kkore/tests/001_KKLibTests.sh	91	kkore	test	expected=$(realpath "$temp_file" 2>/dev/null || echo "$temp_file")
+P06	tools/porting/tools.sh	50	kbool	core	readlink realpath basename dirname chmod chown ls du df env timeout sleep nc ncat
 P07	kcl/math/math.sh	717	kcl/math	core	done < <(command find "$__m_d/" -maxdepth 1 -type f -name '.math_fe_*.awk' -mmin +5 2>/dev/null)
 P07	kcl/tfind/tests/004_Argv.sh	404	kcl/tfind	test	find tree -maxdepth 3 -name '*.c'
 P07	kcl/tfind/tests/004_Argv.sh	412	kcl/tfind	test	find tree -maxdepth 4 -mindepth 1 -iname 'A*' -type f
@@ -1059,10 +241,17 @@ P07	kklass/kklass_compiler.sh	136	kklass	core	done < <(command find "$__kk_t/" -
 P07	ktests/ktest_fixtures.sh	168	ktests	core	[[ -n "$(command find "$d" -maxdepth 0 -mmin +1440 2>/dev/null)" ]]
 P07	ktests/ktest_runner.sh	536	ktests	core	done < <(command find "$tmp/" -maxdepth 1 -name 'kt_iso.*' -mmin +1440 2>/dev/null)
 P07	ktests/tools/gate.sh	899	ktests	harness	[[ -n "$(find "$d" -maxdepth 1 -name hb -mmin -2 2>/dev/null)" ]] && continue
+P07	tools/vmlab/tests/run.sh	253	kbool	test	t_eq "dry state dirs removed" 0 "$(find "$T" -maxdepth 1 -name 'vmlab-dry.*' | wc -l | tr -d ' ')"
 P08	kcl/docs/review-2026-09-06/repro/g8/hygiene.sh	25	kcl/docs	docs	echo "## lowercase/odd new globals"; comm -13 $G8/before.vars $G8/after.vars | grep -E '^[a-z]' | head -40
 P08	kcl/docs/review-2026-09-06/repro/g8/hygiene2.sh	19	kcl/docs	docs	compgen -v | sort | comm -13 $G8/b.vars - | grep -vE '^(T[A-Za-z]+|kk|KK|__kk|_KK)' | grep -vE '^__(u|rc)$' | tr '\n' ' '; echo
 P08	kcl/tgrep/tests/005_Search.sh	830	kcl/tgrep	test	grep -o -e 'need[a-z]*' -- "$FX/plain.txt"
 P09	kcl/tfind/tests/005_Run.sh	180	kcl/tfind	test	mapfile -d '' -t __zt < <( printf '%s\0' "${__zs[@]}" | sort -z )
+P09	tools/vmlab/create/alpine.sh	96	kbool	core	| sed 's/href="alpine-virt-//; s/-x86_64\.iso"//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+P09	tools/vmlab/create/debian.sh	69	kbool	core	ISO=$(ls "$LAB"/iso/debian-13.*-amd64-netinst.iso 2>/dev/null | sort -V | tail -1)
+P09	tools/vmlab/create/fedora.sh	70	kbool	core	[[ -n $IMG ]] || IMG=$(ls "$LAB"/img/Fedora-Cloud-Base-Generic-*.x86_64.qcow2 2>/dev/null | sort -V | tail -1)
+P09	tools/vmlab/create/fedora.sh	72	kbool	core	SUM=$(ls "$(dirname "$IMG")"/Fedora-Cloud-*-CHECKSUM 2>/dev/null | sort -V | tail -1)
+P09	tools/vmlab/create/freebsd.sh	81	kbool	core	| sed 's/href="//; s/-RELEASE\/"//' | sort -V | tail -1)
+P09	tools/vmlab/create/ubuntu.sh	69	kbool	core	ISO=$(ls "$LAB"/iso/ubuntu-24.04.*-live-server-amd64.iso 2>/dev/null | sort -V | tail -1)
 P10	kcl/docs/review-2026-09-06/repro/g5/p1.sh	2	kcl/docs	docs	D=$(mktemp -d); trap 'rm -rf "$D"' EXIT
 P10	kcl/docs/review-2026-09-06/repro/g5/p2.sh	2	kcl/docs	docs	D=$(mktemp -d); trap 'rm -rf "$D"' EXIT
 P10	kcl/docs/review-2026-09-06/repro/g5/p3.sh	2	kcl/docs	docs	D=$(mktemp -d); trap 'rm -rf "$D"' EXIT
@@ -1109,6 +298,16 @@ P10	ktests/tests/029_FixtureAutoRestoreRegression.sh	52	ktests	test	a="$(mktemp 
 P10	ktests/tests/029_FixtureAutoRestoreRegression.sh	53	ktests	test	b="$(mktemp "$_kt029_outer/b.XXXXXX")"; printf 'B_ORIG' > "$b"
 P10	ktests/tests/042_KilledRunCleanup.sh	128	ktests	test	mktemp() { command mktemp "$@"; local r=$?; ls -A "$TMPDIR" >&2; return $r; }
 P10	ktests/tools/timing_check.sh	267	ktests	harness	TC_RX_DIR="$(mktemp -d "$base/timing_check.XXXXXXXXXX" 2>/dev/null)" \
+P10	tools/porting/bashfeat.sh	35	kbool	core	work=$(mktemp -d "${TMPDIR:-/tmp}/bashfeat.XXXXXX") || exit 2
+P10	tools/porting/scan.sh	33	kbool	core	work=$(mktemp -d "${TMPDIR:-/tmp}/scan.XXXXXX") || exit 2
+P10	tools/porting/tools.sh	40	kbool	core	work=$(mktemp -d "${TMPDIR:-/tmp}/tools.XXXXXX") || exit 2
+P10	tools/porting/tools.sh	49	kbool	core	paste join comm fold column split stat date touch mktemp mkdir rmdir rm mv cp ln
+P10	tools/vmlab/create/debian.sh	78	kbool	core	PW=$(mktemp "$SCR/kbpw.XXXXXX") || exit 2
+P10	tools/vmlab/create/fedora.sh	101	kbool	core	SEED=$(mktemp -d "$SCR/kbseed.XXXXXX") || exit 2
+P10	tools/vmlab/create/ubuntu.sh	78	kbool	core	PW=$(mktemp "$SCR/kbpw.XXXXXX") || exit 2
+P10	tools/vmlab/create/ubuntu.sh	87	kbool	core	PIT=$(mktemp "$SCR/kbpit.XXXXXX") || exit 2
+P10	tools/vmlab/tests/run.sh	10	kbool	test	T=$(mktemp -d "${TMPDIR:-/tmp}/vmlab-test.XXXXXX") || exit 1
+P10	tools/vmlab/vmlab.sh	492	kbool	core	if (( DRY )); then DRYDIR=$(mktemp -d "${TMPDIR:-/tmp}/vmlab-dry.XXXXXX") || exit 2; fi
 P11	kcl/docs/review-2026-09-06/repro/g4/m3.sh	6	kcl/docs	docs	timeout 5 bash -c 'source /c/projects/kkbot/kbool/kcl/math/math.sh; math.frexp +inf; echo done-inf'; echo "rc=$?"
 P11	kcl/docs/review-2026-09-06/repro/g4/m3.sh	7	kcl/docs	docs	timeout 5 bash -c 'source /c/projects/kkbot/kbool/kcl/math/math.sh; math.frexp nan; echo done-nan'; echo "rc=$?"
 P11	kcl/docs/review-2026-09-06/repro/g4/m3.sh	8	kcl/docs	docs	timeout 5 bash -c 'source /c/projects/kkbot/kbool/kcl/math/math.sh; math.frexp 1e308; echo done-big'; echo "rc=$?"
@@ -1299,6 +498,20 @@ P11	ktests/tools/gate.sh	2598	ktests	harness	[[ "$why" == timeout\ * && "$cur" !
 P11	ktests/tools/strays.sh	168	ktests	harness	[[ "$c" == "timeout "* || "$c" == *"/timeout "* || "$c" == "timeout.exe "* || "$c" == *"/timeout.exe "* ]] || return 1
 P11	ktests/tools/timing_check.sh	138	ktests	harness	--timeout) TC_TIMEOUT="${2:?--timeout needs seconds}"; shift 2 ;;
 P11	ktests/tools/timing_check.sh	371	ktests	harness	( cd "$TC_SUITE" && exec timeout "$TC_TIMEOUT" "${cmd[@]}" ) < /dev/null > "$TC_TMP/run.out" 2>&1 &
+P11	tools/porting/tools.sh	50	kbool	core	readlink realpath basename dirname chmod chown ls du df env timeout sleep nc ncat
+P11	tools/vmlab/create/alpine.sh	102	kbool	core	timeout -k 30 1500 curl -sS --fail -o "$LAB/iso/$ISOF" "$BASEURL/$ISOF" || { err "download failed"; exit 2; }
+P11	tools/vmlab/create/fedora.sh	114	kbool	core	timeout -k 5 1800 "$PY" -u -m http.server "$HTTP_PORT" --bind 127.0.0.1 --directory "$(wp "$SEED")" >"$SLOG" 2>&1 &
+P11	tools/vmlab/create/freebsd.sh	88	kbool	core	timeout -k 30 3000 curl -sS --fail -o "$LAB/img/$IMGX" "$BASEURL/$REL-RELEASE/amd64/Latest/$IMGX" || { err "download failed"; exit 2; }
+P11	tools/vmlab/tests/run.sh	123	kbool	test	t_eq "up boot timeout rc" 11 "$RC"
+P11	tools/vmlab/tests/run.sh	124	kbool	test	t_eq "up boot timeout: trap powers the VM off" "start probe acpi" "$(seq_of "$OUT" "${PATS[@]}" | sq)"
+P11	tools/vmlab/tests/run.sh	189	kbool	test	t_has "gate default GATE_ARGS" "$OUT" 'KT_GATE_BASHES=/usr/bin/bash timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out --rerun-failed 1 all'
+P11	tools/vmlab/tests/run.sh	203	kbool	test	t_has "gate GATE_ARGS after --" "$OUT" 'KT_GATE_BASHES=/usr/local/bin/bash timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out --changed a\ b'
+P11	tools/vmlab/tests/run.sh	208	kbool	test	t_eq "gate boot timeout rc" 11 "$RC"
+P11	tools/vmlab/tests/run.sh	209	kbool	test	t_eq "gate boot timeout: ends with power-off" "acpi" "$(seq_of "$OUT" "${PATS[@]}" | sed 's/.* //')"
+P11	tools/vmlab/tests/run.sh	210	kbool	test	t_no "gate boot timeout: never reached sync" "$OUT" "kbool.new"
+P11	tools/vmlab/vmlab.sh	56	kbool	core	else  the remote command's rc (run, gate; 124 = timeout, 255 = ssh failed)
+P11	tools/vmlab/vmlab.sh	191	kbool	core	MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' timeout -k 30 "$secs" "${SSHA[@]}" "$rcmd"
+P11	tools/vmlab/vmlab.sh	440	kbool	core	gcmd="rm -rf ~/gate-out; cd ~/kbool && KT_GATE_BASHES=$(printf '%q' "$bashp") timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out $(printf '%q ' "${g
 P12	kcl/docs/review-2026-09-06/repro/g7/tsh_repro.sh	29	kcl/docs	docs	echo "split 'a,b<NL>c,d' ','  -> [$(string.split $'a,b\nc,d' ',')]  (expect c,d preserved)"
 P12	kcl/docs/review-2026-09-06/repro/g7/tsh_repro.sh	108	kcl/docs	docs	show $'a,b\nc,d' ','
 P12	kcl/tawk/tests/004_Argv.sh	566	kcl/tawk	test	enc_case "A1 enc: backslash + newline -> \`\\\\\\n\`"              "b${BS}"$'\n'"c"    "b${BS}${BS}${BS}nc"
@@ -1387,6 +600,8 @@ P12	ktests/tests/053_GateReports.sh	362	ktests	test	_kt_gate_hsuite $'a\tb\nc\x1
 P12	ktests/tools/strays.sh	260	ktests	harness	local c="${_KTS_CMD[$1]:-}" m nc=0 old oldold rc=1 d
 P12	ktests/tools/strays.sh	264	ktests	harness	shopt -q nocasematch && nc=1
 P12	ktests/tools/strays.sh	284	ktests	harness	(( nc )) || shopt -u nocasematch
+P12	tools/porting/tools.sh	50	kbool	core	readlink realpath basename dirname chmod chown ls du df env timeout sleep nc ncat
+P12	tools/vmlab/provision/apt.sh	36	kbool	core	if [ -x /bin/nc.openbsd ]; then update-alternatives --set nc /bin/nc.openbsd; fi
 P13	kcl/docs/review-2026-09-06/repro/g1/p3_tsl.sh	14	kcl/docs	docs	before=$(grep -c . /proc/self/status 2>/dev/null)  # not reliable; use bash trick instead
 P13	kcl/docs/review-2026-09-06/repro/g8/hygiene.sh	21	kcl/docs	docs	echo "## coproc fds"; ls -la /proc/$$/fd 2>/dev/null | grep -c pipe
 P13	kcl/docs/review-2026-09-06/repro/g8/hygiene2.sh	17	kcl/docs	docs	echo "## fds"; ls -la /proc/$$/fd 2>/dev/null | awk '{print $NF}' | grep -v '^/dev' | head
@@ -1605,6 +820,20 @@ P14	ktests/tools/timing_check.sh	170	ktests	harness	mapfile -t out < <(cygpath -
 P14	ktests/tools/timing_check.sh	260	ktests	harness	command -v cygpath >/dev/null 2>&1 && f28="$(cygpath -m -F 28 2>/dev/null)"
 P14	ktests/tools/timing_check.sh	263	ktests	harness	if [[ "$v" == [A-Za-z]:* ]] && command -v cygpath >/dev/null 2>&1; then v="$(cygpath -u "$v" 2>/dev/null)"; fi
 P14	ktests/tools/timing_check.sh	307	ktests	harness	if command -v cygpath >/dev/null 2>&1; then tc_b="$(cygpath -u "$tc_b")"; fi
+P14	tools/vmlab/create/alpine.sh	51	kbool	core	vbm() { MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' "$VBOXMANAGE" "$@"; }
+P14	tools/vmlab/create/alpine.sh	52	kbool	core	wp() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
+P14	tools/vmlab/create/debian.sh	42	kbool	core	vbm() { MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' "$VBOXMANAGE" "$@"; }
+P14	tools/vmlab/create/debian.sh	43	kbool	core	wp() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
+P14	tools/vmlab/create/fedora.sh	41	kbool	core	vbm() { MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' "$VBOXMANAGE" "$@"; }
+P14	tools/vmlab/create/fedora.sh	42	kbool	core	wp() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
+P14	tools/vmlab/create/freebsd.sh	39	kbool	core	vbm() { MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' "$VBOXMANAGE" "$@"; }
+P14	tools/vmlab/create/freebsd.sh	40	kbool	core	wp() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
+P14	tools/vmlab/create/ubuntu.sh	41	kbool	core	vbm() { MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' "$VBOXMANAGE" "$@"; }
+P14	tools/vmlab/create/ubuntu.sh	42	kbool	core	wp() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
+P14	tools/vmlab/vmlab.sh	163	kbool	core	winpath() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
+P14	tools/vmlab/vmlab.sh	191	kbool	core	MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' timeout -k 30 "$secs" "${SSHA[@]}" "$rcmd"
+P14	tools/vmlab/vmlab.sh	404	kbool	core	if [[ -n ${LOCALAPPDATA:-} ]] && command -v cygpath >/dev/null 2>&1; then
+P14	tools/vmlab/vmlab.sh	405	kbool	core	base=$(cygpath -u "$LOCALAPPDATA")/Temp
 P15	kcl/docs/review-2026-09-06/repro/g1/p1_tlist.sh	1	kcl/docs	docs	source /c/projects/kkbot/kbool/kcl/tlist/tlist.sh
 P15	kcl/docs/review-2026-09-06/repro/g1/p2_tol.sh	1	kcl/docs	docs	source /c/projects/kkbot/kbool/kcl/tobjectlist/tobjectlist.sh
 P15	kcl/docs/review-2026-09-06/repro/g1/p3_tsl.sh	1	kcl/docs	docs	source /c/projects/kkbot/kbool/kcl/tstringlist/tstringlist.sh
@@ -1883,6 +1112,17 @@ P15	ktests/tests/gate_fixtures/env/suite/001_env.sh	12	ktests	test	echo "      0
 P15	ktests/tests/gate_fixtures/envcrash/suite/tests.sh	8	ktests	test	echo "      0 [main] bash 4242 dofork: child -1 - CreateProcessW failed for 'C:\bin\bash.exe', errno 11" >&2
 P15	ktests/tests/gate_fixtures/envx/suite/001_envx.sh	5	ktests	test	echo "      0 [main] bash 4242 dofork: child -1 - CreateProcessW failed for 'C:\bin\bash.exe', errno 11" >&2
 P15	ktests/tests/gate_fixtures/mix/suite/001_noise.sh	6	ktests	test	echo "      0 [main] bash 4242 dofork: child -1 - CreateProcessW failed for 'C:\bin\bash.exe', errno 11" >&2
+P15	tools/vmlab/create/alpine.sh	39	kbool	core	VBOXMANAGE=${VBOXMANAGE:-/c/Program Files/Oracle/VirtualBox/VBoxManage.exe}
+P15	tools/vmlab/create/alpine.sh	41	kbool	core	LAB=${KB_LAB_DIR:-/c/var/vbox/kb-lab}
+P15	tools/vmlab/create/debian.sh	33	kbool	core	VBOXMANAGE=${VBOXMANAGE:-/c/Program Files/Oracle/VirtualBox/VBoxManage.exe}
+P15	tools/vmlab/create/debian.sh	35	kbool	core	LAB=${KB_LAB_DIR:-/c/var/vbox/kb-lab}
+P15	tools/vmlab/create/fedora.sh	30	kbool	core	VBOXMANAGE=${VBOXMANAGE:-/c/Program Files/Oracle/VirtualBox/VBoxManage.exe}
+P15	tools/vmlab/create/fedora.sh	32	kbool	core	LAB=${KB_LAB_DIR:-/c/var/vbox/kb-lab}
+P15	tools/vmlab/create/freebsd.sh	29	kbool	core	VBOXMANAGE=${VBOXMANAGE:-/c/Program Files/Oracle/VirtualBox/VBoxManage.exe}
+P15	tools/vmlab/create/freebsd.sh	31	kbool	core	LAB=${KB_LAB_DIR:-/c/var/vbox/kb-lab}
+P15	tools/vmlab/create/ubuntu.sh	33	kbool	core	VBOXMANAGE=${VBOXMANAGE:-/c/Program Files/Oracle/VirtualBox/VBoxManage.exe}
+P15	tools/vmlab/create/ubuntu.sh	35	kbool	core	LAB=${KB_LAB_DIR:-/c/var/vbox/kb-lab}
+P15	tools/vmlab/vmlab.sh	15	kbool	core	VBOXMANAGE=${VBOXMANAGE:-/c/Program Files/Oracle/VirtualBox/VBoxManage.exe}
 P16	kcl/dateutils/tests/024_IsoWeekSweep.sh	43	kcl/dateutils	test	print $d, " ", strftime("%G %V %u %j", @t), "\n";
 P16	kcl/dateutils/tests/024_IsoWeekSweep.sh	118	kcl/dateutils	test	print $y, " ", strftime("%V", @t), "\n";
 P16	kcl/docs/review-2026-09-06/repro/g3/r3_isoweek.sh	9	kcl/docs	docs	perl -MPOSIX -e 'for($d=0;$d<41*366;$d++){ @t=gmtime(($d+9131)*86400); $iso=strftime("%G %V %u %Y %j",@t); print(($d+9131)," $iso\n"); }' > "$1/perl_week.txt"
@@ -2101,6 +1341,13 @@ P16	kcl/tawk/tests/007_Bench.sh	344	kcl/tawk	test	gawk --sandbox -e "$PROG" -- "
 P16	kcl/tawk/tests/007_Bench.sh	409	kcl/tawk	test	if tcase "the ONLY fork per call is gawk: every property, every builder member, \`run\` and \`apply\` fork nothing"; then
 P16	kcl/tawk/tests/007_Bench.sh	438	kcl/tawk	test	&& "${FW[*]}" == "gawk --sandbox -e $PROG -- $ONE" ]]; then
 P16	kcl/tawk/tests/007_Bench.sh	466	kcl/tawk	test	kt_test_pass "five refusals, all rc 2, BASHPID $p0 unchanged, lastRc still -1 (gawk never ran)"
+P16	tools/porting/tools.sh	48	kbool	core	cmds='awk gawk sed grep egrep find xargs head tail cat tac sort uniq cut tr wc
+P16	tools/vmlab/provision/apk.sh	21	kbool	core	GNU="coreutils sed grep findutils diffutils gawk procps-ng util-linux perl curl openssl netcat-openbsd tzdata"
+P16	tools/vmlab/provision/apt.sh	13	kbool	core	CORE="bash git coreutils sed grep findutils diffutils gawk procps util-linux perl curl openssl netcat-openbsd tzdata locales"
+P16	tools/vmlab/provision/dnf.sh	13	kbool	core	CORE="bash git-core coreutils sed grep findutils diffutils gawk procps-ng util-linux perl-interpreter perl-POSIX curl openssl nmap-ncat netcat tzdata glibc-lang
+P16	tools/vmlab/provision/pkg.sh	17	kbool	core	GNU="coreutils gsed gawk findutils gnugrep diffutils netcat curl perl5 socat"
+P17	tools/porting/bashfeat.sh	95	kbool	core	( cd "$root" && xargs -0 grep -anHE -e "$regex" -- < "$list" 2>/dev/null ) |
+P17	tools/porting/scan.sh	61	kbool	core	( cd "$root" && xargs -0 grep -anHE -e "$regex" -- < "$list" 2>/dev/null ) |
 P18	kcl/thead/bench.sh	131	kcl/thead	bench	HEAD_BANNER="$(head --version 2>/dev/null | sed -n 1p || true)"
 P18	kcl/thead/tests/004_Argv.sh	342	kcl/thead	test	head -v -n -2 -- 'dir one' 'dir two'
 P18	kcl/thead/tests/004_Argv.sh	349	kcl/thead	test	head -q -z -n 7 --extra -- f
@@ -2129,6 +1376,12 @@ P20	ktests/tests/051_GateVerdicts.sh	299	ktests	test	kt_test_start "INT and QUIT
 P20	ktests/tools/gate.sh	1166	ktests	harness	cmd=( "$_KT_GATE_PERL" -MPOSIX -e 'POSIX::setsid(); exec @ARGV or exit 127' "${cmd[@]}" )
 P20	ktests/tools/gate.sh	1833	ktests	harness	_KT_GATE_SETSID="$(type -P setsid 2>/dev/null)"; _KT_GATE_PERL=""
 P20	ktests/tools/gate.sh	1900	ktests	harness	[[ "${_KT_GATE_B_RT[k]}" == "$_KT_GATE_RT" ]] && { _kt_gate_say "[WARN] no setsid/perl: a same-runtime segment shares the caller's session (its stray checks see
+P20	tools/porting/tools.sh	48	kbool	core	cmds='awk gawk sed grep egrep find xargs head tail cat tac sort uniq cut tr wc
+P20	tools/porting/tools.sh	51	kbool	core	ps pgrep pkill kill od xxd hexdump base64 md5sum sha1sum sha256sum cksum openssl
+P20	tools/porting/tools.sh	53	kbool	core	tput stty uname hostname whoami id getconf flock setsid nohup stdbuf seq shuf
+P20	tools/vmlab/create/alpine.sh	104	kbool	core	out=$(cd "$LAB/iso" && sha256sum -c "$ISOF.sha256" 2>/dev/null)
+P20	tools/vmlab/create/fedora.sh	74	kbool	core	out=$(cd "$(dirname "$IMG")" && sha256sum -c --ignore-missing "$SUM" 2>/dev/null)
+P20	tools/vmlab/create/freebsd.sh	92	kbool	core	got=$(sha256sum "$LAB/img/$IMGX" | cut -d' ' -f1)
 P22	kcl/docs/review-2026-09-06/repro/g4/m3.sh	15	kcl/docs	docs	bash -c 'source /c/projects/kkbot/kbool/kcl/math/math.sh; x=$(math.sin 1); echo "x=$x active_in_parent=$(math.feActive) up=[$__MATH_FE_UP]"; y=$(math.cos 0); ec
 P22	kcl/docs/review-2026-09-06/repro/g4/m3.sh	17	kcl/docs	docs	bash -c 'source /c/projects/kkbot/kbool/kcl/math/math.sh; math.feStart; x=$(math.sin 1); echo "x=$x"; y=$(math.cos 0); echo "y=$y"; pgrep -c awk'
 P22	kcl/tests/102_tpath.sh	18	kcl/tests	test	MINGW*|CYGWIN*|MSYS*) WANT_OS='w=1 ps=; alt=\ vol=:' ;;
@@ -2139,6 +1392,13 @@ P22	kcl/tqueuestack/tests/001_Skeleton.sh	65	kcl/tqueuestack	test	[[ "${!pq}" ==
 P22	kcl/tqueuestack/tests/001_Skeleton.sh	67	kcl/tqueuestack	test	|| kt_test_fail "q=${!pq} s=${!ps}"
 P22	kcl/ttail/tests/005_Run.sh	1035	kcl/ttail	test	mine="$(ps 2>/dev/null | awk -v me="$$" 'NR > 1 && $2 == me && $NF ~ /tail/ { print $1 }' | tr '\n' ' ')"
 P22	ktests/tests/027_CrossPlatformCompatibility.sh	160	ktests	test	if kt_assert_success "ps" "Process listing"; then
+P22	tools/porting/tools.sh	51	kbool	core	ps pgrep pkill kill od xxd hexdump base64 md5sum sha1sum sha256sum cksum openssl
+P22	tools/vmlab/vmlab.sh	366	kbool	core	local n=$1 gh=0 ref= c ps
+P22	tools/vmlab/vmlab.sh	386	kbool	core	ps=("${PIPESTATUS[@]}")
+P22	tools/vmlab/vmlab.sh	387	kbool	core	pipe_rc "${ps[@]}"
+P22	tools/vmlab/vmlab.sh	391	kbool	core	local n=$1 remote=${2-} host=${3-} ps
+P22	tools/vmlab/vmlab.sh	395	kbool	core	ps=("${PIPESTATUS[@]}")
+P22	tools/vmlab/vmlab.sh	396	kbool	core	pipe_rc "${ps[@]}"
 P23	kcl/dateutils/tests/024_IsoWeekSweep.sh	45	kcl/dateutils	test	lines=$(wc -l < "$REF")
 P23	kcl/docs/review-2026-09-06/repro/g2/p5_misc.sh	7	kcl/docs	docs	exec 3>$S/direct.out; D.GetItem a >&3; exec 3>&-; echo "direct stdout bytes=$(wc -c < $S/direct.out) RESULT=$RESULT"
 P23	kcl/docs/review-2026-09-06/repro/g3/r5_tsw.sh	6	kcl/docs	docs	RESULT=xx; sw.elapsedMilliseconds > "$1/direct.out"; echo "direct stdout bytes=$(wc -c < "$1/direct.out") RESULT=[$RESULT]"
@@ -2179,6 +1439,8 @@ P23	ktests/tests/050_GateCli.sh	58	ktests	test	kt_test_pass "rc 0, $(wc -l < "$T
 P23	ktests/tests/053_GateReports.sh	301	ktests	test	nl="$(wc -l < "$OD/cells.tsv")"
 P23	ktests/tests/053_GateReports.sh	366	ktests	test	kt_test_pass "$hs | help: $(wc -l <<< "$hl") lines"
 P23	ktests/tests/054_GateSelection.sh	325	ktests	test	n1="$(wc -l < "$TMP/outW1/seg-1.ckk/cells.log" 2>/dev/null)"
+P23	tools/vmlab/create/debian.sh	81	kbool	core	[[ $(wc -c <"$PW") -eq 20 ]] || { err "password generation failed"; exit 2; }
+P23	tools/vmlab/create/ubuntu.sh	81	kbool	core	[[ $(wc -c <"$PW") -eq 20 ]] || { err "password generation failed"; exit 2; }
 P24	kcl/docs/review-2026-09-06/repro/g6/probe_tfile.sh	25	kcl/docs	docs	echo x > st.txt; touch -d '2000-01-01 00:00:00' st.txt; before=$(stat -c %Y st.txt)
 P24	kcl/math/tests/018_DE1_ProgfileSweep.sh	41	kcl/math	test	touch -d '10 minutes ago' "$P/.math_fe_${dead}.awk" "$P/.math_fe_${live}.awk" \
 P24	kcl/math/tests/018_DE1_ProgfileSweep.sh	101	kcl/math	test	[[ $leaked == yes ]] && touch -d '10 minutes ago' "$P/.math_fe_${kpid}.awk"
@@ -2198,6 +1460,7 @@ P24	ktests/tests/040_ConfigIsolation.sh	138	ktests	test	touch -d '2 days ago' "$
 P24	ktests/tests/042_KilledRunCleanup.sh	206	ktests	test	touch -d '2 days ago' "$S/kt_iso.${d[2]}" "$S/kt_iso.${d[4]}.results.abc"
 P24	ktests/tests/050_GateCli.sh	275	ktests	test	touch -d '10 minutes ago' "$D/othdead/hb"
 P25	ktests/tests/018_CommandFailureTesting.sh	101	ktests	test	if kt_assert_failure "ls --invalid-option" "Invalid option"; then
+P25	tools/vmlab/vmlab.sh	310	kbool	core	done < <(git -C "$1" ls-files -co --exclude-standard -z)
 P26	kcl/dateutils/tests/024_IsoWeekSweep.sh	38	kcl/dateutils	test	kt_test_start "the perl reference for the sweep is produced"
 P26	kcl/dateutils/tests/024_IsoWeekSweep.sh	39	kcl/dateutils	test	if perl -MPOSIX -e '
 P26	kcl/dateutils/tests/024_IsoWeekSweep.sh	44	kcl/dateutils	test	}' -- "$FIRST_DAY" "$LAST_DAY" "$STEP" > "$REF" 2>"$TMP/perl.err"; then
@@ -2238,6 +1501,14 @@ P26	ktests/tests/053_GateReports.sh	356	ktests	test	kt_test_fail "node=[$js] tsv
 P26	ktests/tests/054_GateSelection.sh	139	ktests	test	NODE="$(type -P node 2>/dev/null)"
 P26	ktests/tools/gate.sh	1834	ktests	harness	[[ -z "$_KT_GATE_SETSID" ]] && _KT_GATE_PERL="$(type -P perl 2>/dev/null)"
 P26	ktests/tools/gate.sh	1900	ktests	harness	[[ "${_KT_GATE_B_RT[k]}" == "$_KT_GATE_RT" ]] && { _kt_gate_say "[WARN] no setsid/perl: a same-runtime segment shares the caller's session (its stray checks see
+P26	tools/porting/tools.sh	52	kbool	core	iconv diff cmp patch tar gzip xz curl wget git python python3 perl node ruby
+P26	tools/vmlab/create/fedora.sh	36	kbool	core	PY=${KB_PYTHON:-python}
+P26	tools/vmlab/create/fedora.sh	66	kbool	core	command -v "$PY" >/dev/null 2>&1 || { err "no python ($PY) for the seed http server"; exit 2; }
+P26	tools/vmlab/provision/apk.sh	21	kbool	core	GNU="coreutils sed grep findutils diffutils gawk procps-ng util-linux perl curl openssl netcat-openbsd tzdata"
+P26	tools/vmlab/provision/apt.sh	13	kbool	core	CORE="bash git coreutils sed grep findutils diffutils gawk procps util-linux perl curl openssl netcat-openbsd tzdata locales"
+P26	tools/vmlab/provision/apt.sh	14	kbool	core	OPTIONAL="socat ncat netcat-traditional nodejs python3 uuid-runtime"
+P26	tools/vmlab/provision/dnf.sh	13	kbool	core	CORE="bash git-core coreutils sed grep findutils diffutils gawk procps-ng util-linux perl-interpreter perl-POSIX curl openssl nmap-ncat netcat tzdata glibc-lang
+P26	tools/vmlab/provision/dnf.sh	14	kbool	core	OPTIONAL="socat nodejs python3"
 P27	kcl/math/tests/018_DE1_ProgfileSweep.sh	28	kcl/math	test	SHIM='awk() { case "$2" in /dev/fd/*|/proc/*) return 1 ;; esac; command awk "$@"; }'
 P27	kcl/tawk/tests/005_Run.sh	768	kcl/tawk	test	sbox "A8: \`print > \\\"/dev/stderr\\\"\` is refused too" "$MK/m_none1" "{print > \"/dev/stderr\"}"
 P27	kcl/tawk/tests/005_Run.sh	769	kcl/tawk	test	sbox "A8: \`print > \\\"/dev/stdout\\\"\` is refused too" "$MK/m_none2" "{print > \"/dev/stdout\"}"
@@ -2394,6 +1665,44 @@ P28	ktests/tools/gate.sh	2121	ktests	harness	mkdir -p -- "$cd/home" "$cd/tmp" "$
 P28	ktests/tools/gate.sh	2128	ktests	harness	export HOME="$cd/home" TMPDIR="$cd/tmp" TMP="$cd/tmp" TEMP="$cd/tmp"
 P28	ktests/tools/gate.sh	2412	ktests	harness	rm -rf -- "$cd/home" "$cd/tmp" "$cd/etc" "$cd/cwd" "$cd/ckk" 2>/dev/null
 P28	ktests/tools/timing_check.sh	258	ktests	harness	base=/tmp
+P28	tools/porting/bashfeat.sh	35	kbool	core	work=$(mktemp -d "${TMPDIR:-/tmp}/bashfeat.XXXXXX") || exit 2
+P28	tools/porting/scan.sh	33	kbool	core	work=$(mktemp -d "${TMPDIR:-/tmp}/scan.XXXXXX") || exit 2
+P28	tools/porting/tools.sh	40	kbool	core	work=$(mktemp -d "${TMPDIR:-/tmp}/tools.XXXXXX") || exit 2
+P28	tools/vmlab/create/alpine.sh	44	kbool	core	SCR=${KB_SCRATCH:-${SCRATCH:-${TMPDIR:-/tmp}}}
+P28	tools/vmlab/create/alpine.sh	134	kbool	core	ctype "cat > /tmp/a <<'EOF'"
+P28	tools/vmlab/create/alpine.sh	155	kbool	core	ctype "$pin printf '%s\n' https://dl-cdn.alpinelinux.org/alpine/v$MAJMIN/main https://dl-cdn.alpinelinux.org/alpine/v$MAJMIN/community >> /etc/apk/repositories;
+P28	tools/vmlab/create/alpine.sh	175	kbool	core	bash "$VMLAB" run "$NAME" -- sh -c 'cat > /tmp/apk.sh' <"$APK_SH" || exit 1
+P28	tools/vmlab/create/alpine.sh	176	kbool	core	bash "$VMLAB" run "$NAME" -- 'doas -n sh /tmp/apk.sh' || { err "provision/apk.sh failed"; exit 1; }
+P28	tools/vmlab/create/alpine.sh	178	kbool	core	bash "$VMLAB" run "$NAME" -- 'doas rm -f /tmp/apk.sh'
+P28	tools/vmlab/create/alpine.sh	183	kbool	core	bash "$VMLAB" run "$NAME" -- sh -c 'cat > /tmp/apk.sh' <"$APK_SH" || exit 1
+P28	tools/vmlab/create/alpine.sh	184	kbool	core	bash "$VMLAB" run "$NAME" -- 'doas -n sh /tmp/apk.sh --gnu' || { err "provision/apk.sh --gnu failed"; exit 1; }
+P28	tools/vmlab/create/alpine.sh	185	kbool	core	bash "$VMLAB" run "$NAME" -- 'doas rm -f /tmp/apk.sh'
+P28	tools/vmlab/create/debian.sh	39	kbool	core	SCR=${KB_SCRATCH:-${SCRATCH:-${TMPDIR:-/tmp}}}
+P28	tools/vmlab/create/debian.sh	146	kbool	core	bash "$VMLAB" run "$NAME" -- sh -c 'cat > /tmp/apt.sh' <"$APT_SH" || exit 1
+P28	tools/vmlab/create/debian.sh	147	kbool	core	gc root "bash /tmp/apt.sh" || { err "provision/apt.sh failed"; exit 1; }
+P28	tools/vmlab/create/debian.sh	148	kbool	core	bash "$VMLAB" run "$NAME" -- rm -f /tmp/apt.sh
+P28	tools/vmlab/create/fedora.sh	37	kbool	core	SCR=${KB_SCRATCH:-${SCRATCH:-${TMPDIR:-/tmp}}}
+P28	tools/vmlab/create/fedora.sh	135	kbool	core	bash "$VMLAB" run "$NAME" -- sh -c 'cat > /tmp/dnf.sh' <"$DNF_SH" || exit 1
+P28	tools/vmlab/create/fedora.sh	136	kbool	core	bash "$VMLAB" run "$NAME" -- 'sudo -n bash /tmp/dnf.sh' || { err "provision/dnf.sh failed"; exit 1; }
+P28	tools/vmlab/create/fedora.sh	137	kbool	core	bash "$VMLAB" run "$NAME" -- rm -f /tmp/dnf.sh
+P28	tools/vmlab/create/freebsd.sh	34	kbool	core	SCR=${KB_SCRATCH:-${SCRATCH:-${TMPDIR:-/tmp}}}
+P28	tools/vmlab/create/freebsd.sh	136	kbool	core	ctype "echo 'FreeBSD-base: { enabled: no }' > /usr/local/etc/pkg/repos/FreeBSD.conf; for i in 1 2 3 4; do env ASSUME_ALWAYS_YES=yes pkg bootstrap && pkg install
+P28	tools/vmlab/create/freebsd.sh	138	kbool	core	wait_run 'test -f /tmp/kb-console.done' 900 || { err "console package step did not finish in 15 min"; exit 11; }
+P28	tools/vmlab/create/freebsd.sh	143	kbool	core	bash "$VMLAB" run "$NAME" -- sh -c 'cat > /tmp/pkg.sh' <"$PKG_SH" || exit 1
+P28	tools/vmlab/create/freebsd.sh	144	kbool	core	bash "$VMLAB" run "$NAME" -- 'sudo -n sh /tmp/pkg.sh' || { err "provision/pkg.sh failed"; exit 1; }
+P28	tools/vmlab/create/freebsd.sh	146	kbool	core	bash "$VMLAB" run "$NAME" -- 'sudo rm -f /tmp/pkg.sh /tmp/kb-console.done'
+P28	tools/vmlab/create/freebsd.sh	153	kbool	core	bash "$VMLAB" run "$NAME" -- sh -c 'cat > /tmp/pkg.sh' <"$PKG_SH" || exit 1
+P28	tools/vmlab/create/freebsd.sh	154	kbool	core	bash "$VMLAB" run "$NAME" -- 'sudo -n sh /tmp/pkg.sh --gnu' || { err "provision/pkg.sh --gnu failed"; exit 1; }
+P28	tools/vmlab/create/freebsd.sh	155	kbool	core	bash "$VMLAB" run "$NAME" -- 'sudo rm -f /tmp/pkg.sh'
+P28	tools/vmlab/create/ubuntu.sh	38	kbool	core	SCR=${KB_SCRATCH:-${SCRATCH:-${TMPDIR:-/tmp}}}
+P28	tools/vmlab/create/ubuntu.sh	143	kbool	core	local g; g=/tmp/$(basename "$PW")
+P28	tools/vmlab/create/ubuntu.sh	145	kbool	core	--target-directory /tmp/ "$(wp "$PW")" >/dev/null 2>&1 || return 1
+P28	tools/vmlab/create/ubuntu.sh	163	kbool	core	bash "$VMLAB" run "$NAME" -- sh -c 'cat > /tmp/apt.sh' <"$APT_SH" || exit 1
+P28	tools/vmlab/create/ubuntu.sh	164	kbool	core	bash "$VMLAB" run "$NAME" -- sudo -S -p '' bash /tmp/apt.sh <"$PW" || { err "provision/apt.sh failed"; exit 1; }
+P28	tools/vmlab/create/ubuntu.sh	165	kbool	core	bash "$VMLAB" run "$NAME" -- rm -f /tmp/apt.sh
+P28	tools/vmlab/tests/run.sh	10	kbool	test	T=$(mktemp -d "${TMPDIR:-/tmp}/vmlab-test.XXXXXX") || exit 1
+P28	tools/vmlab/vmlab.sh	407	kbool	core	base=/tmp
+P28	tools/vmlab/vmlab.sh	492	kbool	core	if (( DRY )); then DRYDIR=$(mktemp -d "${TMPDIR:-/tmp}/vmlab-dry.XXXXXX") || exit 2; fi
 P29	kcl/docs/review-2026-09-06/repro/g4/m4.sh	10	kcl/docs	docs	kill "$__MATH_FE_PID"; sleep 0.2
 P29	kcl/math/tests/018_DE1_ProgfileSweep.sh	84	kcl/math	test	for (( i = 0; i < 1200; i++ )); do [[ -s "$TMP/killed.pid" ]] && break; sleep 0.1; done
 P29	kcl/math/tests/018_DE1_ProgfileSweep.sh	92	kcl/math	test	sleep 0.05
@@ -2497,6 +1806,8 @@ P29	ktests/tests/gate_fixtures/tcenv/suite/tests.sh	28	ktests	test	for (( __gfx_
 P29	ktests/tools/forkstorm.sh	180	ktests	harness	sleep 0.1
 P29	ktests/tools/forkstorm.sh	193	ktests	harness	sleep 0.1
 P29	ktests/tools/timing_check.sh	445	ktests	harness	sleep 0.1
+P29	tools/vmlab/tests/run.sh	244	kbool	test	sleep 0.2
+P30	tools/porting/tools.sh	53	kbool	core	tput stty uname hostname whoami id getconf flock setsid nohup stdbuf seq shuf
 P31	kcl/docs/review-2026-09-06/repro/g6/probe_tpath.sh	92	kcl/docs	docs	echo "## P11 fork counts (uname/realpath per call)"
 P31	kcl/docs/review-2026-09-06/repro/g6/probe_tpath.sh	93	kcl/docs	docs	declare -f tpath.driveExists tpath.getDocumentsPath tpath.getDownloadsPath | grep -c 'uname -s'
 P31	kcl/tcustomapplication/tests/018_SecurityTests.sh	22	kcl/tcustomapplication	test	security_test1.SetArgs -v '$(whoami)' '`id`' '; rm -rf /tmp/malicious' '|| malicious'
@@ -2537,6 +1848,16 @@ P31	kklass/tests/147_Round6.sh	363	kklass	test	defineClass Acct "" property USER
 P31	kklass/tests/147_Round6.sh	368	kklass	test	check "B8" "body USER=propuser child=[TERM=globalterm USER=globaluser ] whoami-style=globaluser|a.USER=propuser top USER=globaluser|rc=0 err=" "${OUT//$'\n'/|}|
 P31	kkore/tests/002_VariableManagement.sh	1147	kkore	test	special_shell_value='$HOME $(echo test) `whoami` ${PATH}'
 P31	ktests/tests/027_CrossPlatformCompatibility.sh	248	ktests	test	platform_info="Platform: $(uname -s 2>/dev/null || echo 'Unknown'), Bash: ${BASH_VERSION:-'N/A'}, Shell: ${SHELL:-'N/A'}"
+P31	tools/porting/tools.sh	53	kbool	core	tput stty uname hostname whoami id getconf flock setsid nohup stdbuf seq shuf
+P31	tools/vmlab/create/debian.sh	96	kbool	core	--full-user-name=kb --hostname=kb-debian.lab --time-zone=UTC --locale=en_US \
+P31	tools/vmlab/create/fedora.sh	102	kbool	core	printf 'instance-id: kb-fedora-1\nlocal-hostname: kb-fedora\n' >"$SEED/meta-data"
+P31	tools/vmlab/create/ubuntu.sh	104	kbool	core	--full-user-name=kb --hostname=kb-ubuntu.lab --time-zone=UTC --locale=en_US \
+P31	tools/vmlab/provision/apk.sh	16	kbool	core	[ "$(id -u)" = 0 ] || { echo "apk.sh: must run as root" >&2; exit 2; }
+P31	tools/vmlab/provision/apt.sh	7	kbool	core	[ "$(id -u)" = 0 ] || { echo "apt.sh: must run as root" >&2; exit 2; }
+P31	tools/vmlab/provision/dnf.sh	7	kbool	core	[ "$(id -u)" = 0 ] || { echo "dnf.sh: must run as root" >&2; exit 2; }
+P31	tools/vmlab/provision/pkg.sh	12	kbool	core	[ "$(id -u)" = 0 ] || { echo "pkg.sh: must run as root" >&2; exit 2; }
+P31	tools/vmlab/tests/run.sh	192	kbool	test	t_has "gate vm.txt uname" "$OUT" '{ uname -a; if [ -r /etc/os-release ]; then cat /etc/os-release; else freebsd-version; fi; /usr/bin/bash --version | head -n 1
+P31	tools/vmlab/vmlab.sh	436	kbool	core	vmtxt='{ uname -a; if [ -r /etc/os-release ]; then cat /etc/os-release; else freebsd-version; fi; '
 P32	kcl/docs/review-2026-09-06/repro/g6/probe_tfile.sh	18	kcl/docs	docs	printf 'crlf\r\nx' > c.txt; r=$(tfile.readAllText c.txt); printf 'crlf len=%s (expect 7)\n' "${#r}"
 P32	kcl/fpjson/bench/lexer_probe.sh	85	kcl/fpjson	bench	' '|$'\t'|$'\n'|$'\r') i=$(( i + 1 )) ;;
 P32	kcl/fpjson/bench/lexer_probe.sh	129	kcl/fpjson	bench	' '|$'\t'|$'\n'|$'\r') q=$(( q + 1 )) ;;
@@ -2752,3 +2073,11 @@ P32	ktests/tools/gate.sh	1395	ktests	harness	s="${s//$'\n'/\\n}"; s="${s//$'\r'/
 P32	ktests/tools/gate.sh	1492	ktests	harness	line="${L[0]%$'\r'}"
 P32	ktests/tools/gate.sh	1499	ktests	harness	line="${L[n]%$'\r'}"
 P32	ktests/tools/gate.sh	2059	ktests	harness	line="${line//$'\r'/}"
+P32	tools/porting/bashfeat.sh	81	kbool	core	sub(/\r$/, "", text)
+P32	tools/porting/scan.sh	47	kbool	core	sub(/\r$/, "", text)
+P32	tools/porting/tools.sh	85	kbool	core	sub(/\r$/, "", line)
+P32	tools/vmlab/create/debian.sh	107	kbool	core	lvl=$(vbm showvminfo "$NAME" --machinereadable 2>/dev/null | tr -d '\r' \
+P32	tools/vmlab/create/ubuntu.sh	115	kbool	core	lvl=$(vbm showvminfo "$NAME" --machinereadable 2>/dev/null | tr -d '\r' \
+P32	tools/vmlab/vmlab.sh	72	kbool	core	user=${user%$'\r'}
+P32	tools/vmlab/vmlab.sh	150	kbool	core	s=$(vbm showvminfo "$1" --machinereadable 2>/dev/null | tr -d '\r' | sed -n 's/^VMState="\(.*\)"$/\1/p')
+P32	tools/vmlab/vmlab.sh	155	kbool	core	vbm snapshot "$1" list --machinereadable 2>/dev/null | tr -d '\r' \

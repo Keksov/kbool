@@ -673,9 +673,11 @@ numbers as of kbool 2817b2b — locate by content). Any OTHER test that fails
 after the change because it expects `#!/bin/bash` → BLOCKED with the list.
 **Steps.**
 1. Per repo R (`.`, `kcl`, `kklass`, `kkore`, `ktests`):
-   `git -C R ls-files -z` → files whose first line is exactly `#!/bin/bash`
-   → `sed -i '1s|^#!/bin/bash$|#!/usr/bin/env bash|' FILE`.
-   Files whose first line is `#!/bin/bash <args>`: do not change, list them.
+   `git -C R ls-files -z` → files with a line that is exactly `#!/bin/bash`
+   (line 1 **or any other line** — *amended 2026-10-21*: 25 such lines sit in
+   heredocs that tests write out and execute directly) →
+   `sed -i 's|^#!/bin/bash$|#!/usr/bin/env bash|' FILE`.
+   Lines `#!/bin/bash <args>`: do not change, list them.
 2. Per repo: every tracked file whose first two bytes are `#!` →
    `git -C R update-index --chmod=+x FILE` (already +x: skip).
 **Do not.** Change any other line or file; touch submodule pointers.
