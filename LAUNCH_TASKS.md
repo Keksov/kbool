@@ -55,7 +55,9 @@ paths (`cygpath -w`). Every VM you start is powered off before you finish.
 **Process hygiene.** No `&` job outliving its tool call. Every `timeout` gets
 a kill fallback (`timeout -k 30 N …`). A script you write that starts
 children traps EXIT/TERM/INT and stops them. Stop only processes you started
-(by recorded pid) — never by a name pattern. At the end list strays in both
+(by recorded pid) — **never by a name pattern or regex over the process list**
+(L1.2 attempt 2 killed its own tool shells that way; a pattern can just as
+well hit another session's work). Record every pid you start at start time. At the end list strays in both
 runtimes and the running VMs:
 
 ```bash
