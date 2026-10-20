@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — kb-ubuntu, kb-debian, kb-fedora DONE; next L1.4 (freebsd, alpine)",
+  "status": "in progress — L1.2-L1.4 DONE: five lab VMs; next L1.6 acceptance (SV), then L2.1 (Opus harness on Linux/FreeBSD), L2.2/L2.3 (Sonnet)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -179,7 +179,7 @@
         "L1.2"
       ],
       "card": "ready after L1.2",
-      "status": "planned"
+      "status": "DONE 2026-10-21 (Sonnet): kb-freebsd FreeBSD 15.1 (official ufs vmdk, console scripting; pkgbase repo FreeBSD-base disabled - unreachable; git pulls perl5+python312 into clean), bash 5.3.20, fdescfs, sudo; kb-alpine Alpine 3.24.2 virt ISO + setup-alpine answer file (card verbatim) with dl-cdn pinned during install (NAT DNS flaky), doas nopass, tiny-power-button for ACPI, bash 5.3.9, musl has no ru_RU (comma locale not exercised there). Both snapshots clean + clean-gnu; SV verified live. Open: vmlab down could poweroff over ssh before the 60 s ACPI fallback"
     },
     "L1.5": {
       "executor": "OW",

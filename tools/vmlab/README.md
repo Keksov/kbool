@@ -549,3 +549,200 @@ Where things are: ISO `C:\var\vbox\kb-lab\iso\Fedora-Server-netinst-x86_64-44-1.
 8. Check: `bash tools/vmlab/vmlab.sh status` shows `kb-fedora poweroff ... clean`; `reset` +
    `up` + `run kb-fedora -- 'bash --version | head -1; sudo -n true && echo sudo-ok'` + `down` works;
    `sync kb-fedora` then `run kb-fedora -- 'ls ~/kbool'`.
+
+## kb-freebsd
+
+FreeBSD 15.1-RELEASE lab VM (name `kb-freebsd`, ssh port 2225, user `kb`, bash
+`/usr/local/bin/bash`, snapshots `clean` and `clean-gnu`). Created 2026-10-21 by
+`create/freebsd.sh` (+ `provision/pkg.sh`) from the official VM image, not from an
+installer. VM, image and checksum live in `C:\var\vbox\kb-lab\`
+(`img\FreeBSD-15.1-RELEASE-amd64-ufs.vmdk.xz`, its `.vmdk`, and
+`img\FreeBSD-15.1-RELEASE-CHECKSUM.SHA256`, all from
+`https://download.freebsd.org/releases/VM-IMAGES/15.1-RELEASE/amd64/Latest/`; `15.1` was the
+newest `15.x-RELEASE` listed). The VM is not part of the repository.
+
+```
+bash tools/vmlab/create/freebsd.sh      # whole recipe, ~12 min; downloads the image if absent;
+                                        # takes both snapshots; the VM is left powered OFF
+```
+
+The script (refuses with rc 13 if `kb-freebsd` exists):
+
+1. picks the newest `15.x-RELEASE` (or `KB_FB_REL`), downloads image + `CHECKSUM.SHA256` into
+   `img\` when absent, compares the `SHA256 (...)` line with `sha256sum`, `xz -dk`;
+2. `clonemedium` VMDK -> `kb-freebsd.vdi` (VirtualBox reads the VMDK itself),
+   `closemedium` of the VMDK (clonemedium registered it; the file stays), `modifymedium
+   --resize 20480`, `createvm --ostype FreeBSD_64`, 4096 MB, 4 CPUs, BIOS, NAT with
+   `ssh,tcp,127.0.0.1,2225,,22` and `--nat-localhostreachable1 on`, audio/USB off, VDI on SATA;
+3. boots headless, waits 120 s (the login prompt is there after ~60 s), then types on the VGA
+   console, one line per `controlvm keyboardputstring` + Enter (`keyboardputscancode 1c 9c`),
+   5 s apart: `root` (the image has no root password), `sysrc sshd_enable=YES`,
+   `pw useradd kb -m -G wheel -s /bin/sh`, `mkdir -p /home/kb/.ssh`,
+   `echo '<the .pub line>' > /home/kb/.ssh/authorized_keys`, the `chown`/`chmod` line,
+   `service sshd start`; `vmlab run kb-freebsd -- true` must answer within 90 s;
+4. still in the root console, one long line: disable the `FreeBSD-base` repository (below),
+   `pkg bootstrap` + `pkg install -y sudo bash git` (up to 4 tries), `kb ALL=(ALL) NOPASSWD: ALL`
+   into `/usr/local/etc/sudoers.d/kb`, `pw usermod kb -s /usr/local/bin/bash`, `touch
+   /tmp/kb-console.done`; the script polls for that file over ssh (up to 15 min), types `exit`;
+5. `provision/pkg.sh` through `sudo -n sh`: sudoers, packages, shell, **`fdesc /dev/fd fdescfs rw 0 0`
+   in `/etc/fstab` + `mount /dev/fd`** (process substitution, H14; `bash -c 'cat <(echo ok)'`
+   prints `ok` and the script checks it), sshd key-only (`PasswordAuthentication no` and
+   `KbdInteractiveAuthentication no` put at the TOP of `/etc/ssh/sshd_config`: first value wins,
+   `sshd -T` confirms), `pkg clean -y`; `vmlab snapshot kb-freebsd clean`;
+6. `provision/pkg.sh --gnu`: `coreutils gsed gawk findutils gnugrep diffutils netcat curl perl5
+   socat`, one `pkg install` each (a missing one prints `pkg.sh: MISSING <pkg>`; none was
+   missing); `vmlab snapshot kb-freebsd clean-gnu`.
+
+The console has no serial log (the image has no serial console; a UART log stayed empty). For
+debugging: `VBoxManage controlvm kb-freebsd screenshotpng X.png`; on failure the script saves one
+as `$KB_SCRATCH/freebsd-fail.png`.
+
+Things found on VirtualBox 7.1.12 + FreeBSD 15.1:
+
+* **The image is a pkgbase install** (531 `FreeBSD-*` packages) and ships
+  `/usr/local/etc/pkg/repos/FreeBSD.conf` = `FreeBSD-base: { enabled: yes }`. Every `pkg
+  install` then dies with `Unable to update repository FreeBSD-base` (`SSL connect error`
+  fetching `.../base_release_1/meta.conf`; `fetch` says `Authentication error`; the same URL
+  answers 302 to the host's curl). The card's `pkg install -y ...` therefore failed with rc 3
+  until that repository was disabled: `create/freebsd.sh` and `pkg.sh` write
+  `FreeBSD-base: { enabled: no }` into that file. Only the ports repositories are used.
+* **The pkg mirrors are flaky from this host**: with the SRV mirror selection, `pkg update` /
+  `install` fails at random with `SSL connect error` (the very same command worked a minute
+  later). The console line and `pkg.sh` retry 4 times, 5 s apart.
+* `git` pulls in `perl5` and `python312` (pkg dependencies), so they are in `clean` as well;
+  there is no unversioned `python3` (`/usr/local/bin/python3.12` only).
+* `$0` of an ssh command is `bash` (login shell `/usr/local/bin/bash`); `kb`'s password field is
+  `*` (key login only).
+* The image's `growfs` makes the root 18 GB UFS (20 GB disk).
+* ACPI power button works: `down` takes a few seconds.
+
+Execution engine, from `C:\var\vbox\kb-lab\kb-freebsd\Logs\VBox.log`:
+
+```
+HM: HMR3Init: AMD-V w/ nested paging
+```
+
+### Versions recorded at creation (2026-10-21)
+
+`freebsd-version`: `15.1-RELEASE`; `uname -srm`: `FreeBSD 15.1-RELEASE amd64`.
+`bash --version | head -1`: `GNU bash, version 5.3.20(0)-release (amd64-portbld-freebsd15.1)`.
+`pkg info` (clean): `bash-5.3.20 git-2.56.0 sudo-1.9.17p2_2 curl-8.22.0 perl5-5.42.3
+python312-3.12.15`; added by `clean-gnu`:
+
+```
+coreutils-9.9   gsed-4.10   gawk-5.4.1_1   findutils-4.11.0   gnugrep-3.12
+diffutils-3.12  netcat-1.10_4   socat-1.8.1.3   (curl and perl5 were already there)
+```
+
+Binary names in `clean-gnu` (`command -v`):
+
+* coreutils: `g`-prefixed in `/usr/local/bin` (`ghead gtail gdate gsort gseq ...`);
+  **GNU stat is `gnustat`**, `gstat` is FreeBSD's GEOM tool `/usr/sbin/gstat`;
+* `gsed`, `gawk`, `gfind` (+ `gxargs`, `glocate`), `ggrep` (+ `gegrep gfgrep`), `gdiff gdiff3 gcmp`;
+* `sed`, `awk`, `find`, `grep` stay the BSD ones in `/usr/bin`;
+* netcat: base `nc` = `/usr/bin/nc` (OpenBSD-derived: `usage: nc [-46DdEFhklNnrStUuvz] ...`);
+  the `netcat` package is Hobbit's netcat 1.10 as `/usr/local/bin/netcat`
+  (`nc -l -p port` syntax); `socat` is `/usr/local/bin/socat`;
+* `curl`, `perl` in `/usr/local/bin`; `openssl` is the base one (`/usr/bin/openssl`).
+
+`LC_ALL=ru_RU.UTF-8 bash -c 'echo $EPOCHREALTIME'` -> `1792543653,485799` (a comma).
+`/etc/fstab` has `fdesc /dev/fd fdescfs rw 0 0`; `mount | grep fdescfs` -> `fdescfs on /dev/fd (fdescfs)`.
+
+## kb-alpine
+
+Alpine Linux 3.24.2 lab VM (name `kb-alpine`, ssh port 2224, user `kb`, bash `/bin/bash`,
+snapshots `clean` and `clean-gnu`, 2048 MB, 12 GB). Created 2026-10-21 by `create/alpine.sh`
+(+ `provision/apk.sh`) from the official **virt** ISO with `setup-alpine -f`. VM and ISO live in
+`C:\var\vbox\kb-lab\` (`iso\alpine-virt-3.24.2-x86_64.iso` and its `.sha256` from
+`https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/`; the newest `x.y.z`,
+release candidates excluded). The VM is not part of the repository.
+
+```
+bash tools/vmlab/create/alpine.sh       # whole recipe, ~12 min; downloads the ISO if absent;
+                                        # takes both snapshots; the VM is left powered OFF
+```
+
+The script (refuses with rc 13 if `kb-alpine` exists):
+
+1. newest ISO (or `KB_ALPINE_VER`), downloaded when absent, `sha256sum -c` on the `.sha256`;
+2. `createvm --ostype Linux_64`, 2048 MB, 4 CPUs, BIOS, NAT `ssh,tcp,127.0.0.1,2224,,22` +
+   `--nat-localhostreachable1 on`, boot order dvd, disk; a 12 GB VDI and the ISO on SATA;
+3. boots headless, waits 60 s, types on the VGA console (2 s per line): `root` (no password),
+   the answer file (a here-document into `/tmp/a`, the card's content: `KEYMAPOPTS="us us"`,
+   `HOSTNAMEOPTS="-n kb-alpine"`, `INTERFACESOPTS` lo + eth0 dhcp, `DNSOPTS="-d lab 10.0.2.3"`,
+   `TIMEZONEOPTS="-z UTC"`, `PROXYOPTS="none"`, `APKREPOSOPTS="-1"`, `USEROPTS="-a -u kb"`,
+   `USERSSHKEY="<the .pub line>"`, `SSHDOPTS="-c openssh"`, `NTPOPTS="-c busybox"`,
+   `DISKOPTS="-m sys /dev/sda"`), then
+   `ERASE_DISKS=/dev/sda setup-alpine -e -f /tmp/a; poweroff` (no prompt came up: the
+   erase confirmation is answered by `ERASE_DISKS`). The script waits for `poweroff`, detaches
+   the ISO (`storageattach ... --medium emptydrive`), boots from disk and waits up to 150 s for
+   ssh; if there is none the whole step is repeated (up to `KB_AL_TRIES` = 4; both full runs
+   needed one attempt);
+4. root console of the installed system (empty root password, console only): `permit nopass
+   :wheel` into `/etc/doas.d/20-wheel.conf`, `exit`; `vmlab run kb-alpine -- 'doas -n true'`;
+5. `provision/apk.sh` through `doas -n sh`: `apk add bash git`, kb's login shell
+   (`sed -i 's#^\(kb:.*:\)[^:]*$#\1/bin/bash#' /etc/passwd`, checked with `grep '^kb:'` ->
+   `kb:x:1000:1000::/home/kb:/bin/bash`), sshd key-only (`sshd_config.d/00-kbool-lab.conf`), the
+   ACPI power-button fix below; `vmlab snapshot kb-alpine clean`;
+6. `provision/apk.sh --gnu`: `coreutils sed grep findutils diffutils gawk procps-ng util-linux
+   perl curl openssl netcat-openbsd tzdata` (a name missing from the index prints `apk.sh:
+   MISSING <pkg>`; `procps-ng` would fall back to `procps`, reported; neither happened);
+   `vmlab snapshot kb-alpine clean-gnu`.
+
+Things found on VirtualBox 7.1.12 + Alpine 3.24.2:
+
+* **DNS**: the NAT's resolver (10.0.2.3) loses a few percent of the lookups; musl and apk report
+  `DNS: transient error (try again later)`. `setup-alpine` cannot retry: in 5 of 5 manual attempts without the pin
+  it ended after `Creating file systems...` with `ERROR: <pkg>: DNS: transient error` and no
+  system (or with `unable to select packages: syslinux`). `apk update` in the live system failed
+  on about half of its runs; with `nameserver 1.1.1.1` 10 of 10 worked, but DHCP rewrites
+  `resolv.conf` during `setup-alpine` (and with `/etc/udhcpc/udhcpc.conf` `RESOLV_CONF="no"` and
+  1.1.1.1 a package download still lost a lookup), and `--natdnshostresolver1 on` did not help
+  either, so none of these is used. What is used (the card's answer file is unchanged): before
+  `setup-alpine` the live system gets the four A records of `dl-cdn.alpinelinux.org`
+  (`151.101.2.132 151.101.66.132 151.101.130.132 151.101.194.132`, Fastly) in `/etc/hosts` and
+  `https://dl-cdn.alpinelinux.org/alpine/v3.24/{main,community}` in `/etc/apk/repositories`;
+  `provision/apk.sh` pins the same lines while it runs (removed again at exit, the installed
+  `/etc/hosts` is clean) and retries `apk` up to 8 times. `APKREPOSOPTS="-1"` needs
+  `mirrors.alpinelinux.org`, which answered `wget: bad address` about half of the time
+  (the step then only warns `No mirror found`); when it works it appends
+  `http://dl-cdn.alpinelinux.org/alpine/v3.24/main`, so the installed
+  `/etc/apk/repositories` has that extra `http` line (harmless).
+* `setup-alpine -a` writes `permit persist :wheel` for doas, which asks `kb` for a password it
+  does not have (`doas: Authentication required`); hence step 4.
+* **ACPI power button**: with VirtualBox's fixed power button the `linux-virt` kernel's `button`
+  driver registers no input device (`LNXPWRBN:00` has no driver), so `acpid` never hears the
+  press and `vmlab down` fell back to the hard poweroff after 60 s. `apk.sh` loads the
+  `tiny-power-button` module instead with `power_signal=12` (SIGUSR2 = busybox `poweroff`; the
+  default SIGINT would be "ctrlaltdel" = reboot): `/etc/modprobe.d/kbool-lab.conf`
+  (`blacklist button`, `options tiny-power-button power_signal=12`) and `tiny-power-button`
+  in `/etc/modules`. `down` now takes about 7 s.
+* `nc`: `/usr/bin/nc` is `netcat-openbsd`. Root can log in on the console with an empty
+  password (`setup-alpine -e`); sshd does not allow it.
+* musl has no `ru_RU` locale: `LC_ALL=ru_RU.UTF-8 bash -c 'echo $EPOCHREALTIME'` prints a dot
+  (`1792537375.060807`), unlike the glibc VMs and FreeBSD.
+
+Execution engine, from `C:\var\vbox\kb-lab\kb-alpine\Logs\VBox.log`:
+
+```
+HM: HMR3Init: AMD-V w/ nested paging
+```
+
+### Versions recorded at creation (2026-10-21)
+
+`cat /etc/alpine-release`: `3.24.2`; kernel `6.18.57-0-virt`. `bash --version | head -1`:
+`GNU bash, version 5.3.9(1)-release (x86_64-alpine-linux-musl)`. `clean` has `bash-5.3.9-r1
+git-2.54.0-r0` on top of the base system (73 packages, busybox `sed grep awk find`, no
+python, no perl); `clean-gnu` adds (129 packages in all):
+
+```
+coreutils-9.11-r0   sed-4.9-r2          grep-3.12-r0       findutils-4.10.0-r1
+diffutils-3.12-r0   gawk-5.3.2-r2       procps-ng-4.0.6-r0 util-linux-2.42.3-r1
+perl-5.42.2-r1      curl-8.22.0-r0      openssl-3.5.9-r0   netcat-openbsd-1.234.1-r0
+tzdata-2026e-r0
+```
+
+Binary names in `clean-gnu`: GNU tools take the plain names, **there is no `g` prefix**:
+`command -v gsed gawk gfind sed awk find` -> `/usr/bin/gawk /bin/sed /usr/bin/awk /usr/bin/find`
+(`awk -> gawk`; `/bin/sed` and `/bin/grep` are the GNU ones, the packages replace the busybox
+links; `date --version` says `GNU coreutils 9.11`). In `clean` they are busybox.
