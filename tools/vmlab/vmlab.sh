@@ -38,7 +38,7 @@ usage: vmlab.sh CMD [NAME] [args]      NAME = a VM row of vms.conf (kb-*)
   down NAME                               acpi power button, then poweroff
   reset NAME [SNAP]                       down + restore snapshot (default clean)
   snapshot NAME SNAP [--replace]          down + take snapshot
-  run NAME -- CMD...                      run CMD in the VM (rc = CMD's rc)
+  run NAME -- CMD...                      run CMD in the VM (one arg = command line verbatim; rc = CMD's rc)
   shell NAME                              interactive ssh (for the owner)
   sync NAME [--from-github [--ref R]]     working tree (tar) or a fresh clone -> ~/kbool
   fetch NAME REMOTE_DIR HOST_DIR          copy a remote directory to the host
@@ -283,8 +283,10 @@ cmd_run() {
   local n=$1; shift
   [[ ${1-} == -- ]] && shift
   (( $# )) || usage_err "run NAME -- CMD..."
-  local c; c=$(printf '%q ' "$@")
-  rssh "$n" "$RUN_TIMEOUT" "${c% }"
+  local c
+  if (( $# == 1 )); then c=$1                     # one string: a remote command line, verbatim
+  else c=$(printf '%q ' "$@"); c=${c% }; fi       # several words: each quoted
+  rssh "$n" "$RUN_TIMEOUT" "$c"
 }
 
 cmd_shell() {

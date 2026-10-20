@@ -39,7 +39,7 @@ therefore not be touched through this script.
 | `down NAME` | ACPI power button, wait up to `VMLAB_DOWN_WAIT` (60) s for `poweroff`, else hard `controlvm poweroff`. A stopped VM is left alone |
 | `reset NAME [SNAP]` | `down`, then restore snapshot (default `clean`) |
 | `snapshot NAME SNAP [--replace]` | `down`, then take `SNAP`; an existing `SNAP` is rc 13 unless `--replace` (deletes it first) |
-| `run NAME -- CMD...` | run CMD in the VM via ssh (words quoted with `printf %q`); timeout `VMLAB_TIMEOUT` (600) s; rc = CMD's rc |
+| `run NAME -- CMD...` | run CMD in the VM via ssh: ONE argument is sent verbatim as the remote command line, TWO OR MORE are each quoted with `printf %q`; timeout `VMLAB_TIMEOUT` (600) s; rc = CMD's rc |
 | `shell NAME` | interactive ssh (for the owner) |
 | `sync NAME [--from-github [--ref R]]` | put the code in `~/kbool` of the VM: the host working tree (tar), or a fresh `git clone --recurse-submodules` of GitHub |
 | `fetch NAME REMOTE_DIR HOST_DIR` | copy a remote directory to the host (`tar` over ssh) |
@@ -134,3 +134,72 @@ bash tools/vmlab/tests/run.sh     # PASS n/n, rc 0/1; runs under either bash
 
 The tests never touch the real tree or a VM: they build a tiny repo with one
 submodule in a temp directory.
+
+## kb-ubuntu -- manual install
+
+Status (2026-10-20): `create/ubuntu.sh` (VirtualBox *unattended* install) does
+not finish reliably on this host. VirtualBox 7.1.12 runs on the Hyper-V
+platform backend here (`HM: ... AMD-V is not available` -> NEM; Core Isolation
+is on). In 5 attempts the guest hung 2 times (one vCPU at 100 %, guest clock
+stalled, black or frozen console: once 15 s after boot, once ~8 min into the
+subiquity "downloading and installing security updates" step), one attempt was
+stopped too early by the script, and the others were interrupted by hand.
+Hence this checklist for the owner. `create/ubuntu.sh` and `provision/apt.sh`
+are kept (the script is the same recipe, automated).
+
+Where things are: ISO `C:\var\vbox\kb-lab\iso\ubuntu-24.04.5-live-server-amd64.iso`
+(sha256 checked against `SHA256SUMS` in the same folder); VM folder
+`C:\var\vbox\kb-lab\` (the VM folder `kb-ubuntu\` is created by VirtualBox);
+ssh key `~/.ssh/kbool_vmlab` (+ `.pub`, created, no passphrase).
+
+1. VirtualBox: new VM `kb-ubuntu`, folder `C:\var\vbox\kb-lab`, type Linux /
+   Ubuntu (64-bit), 4096 MB RAM, 4 CPUs, a new 20 GB dynamic VDI on a SATA
+   controller, ISO above in the optical drive. Settings: Network adapter 1 =
+   NAT with port forward `ssh`, TCP, host `127.0.0.1`:2221 -> guest 22;
+   Audio off; USB off. (CLI equivalent: the `createvm`/`modifyvm`/`storagectl`
+   lines of `create/ubuntu.sh`, without the `unattended` call.)
+2. Start it and install Ubuntu Server 24.04 with these choices: English,
+   keyboard US, "Ubuntu Server" (not minimized), network: DHCP default,
+   no proxy, default mirror, entire disk (no LVM needed, default is fine),
+   server name `kb-ubuntu`, your name `kb`, user name `kb`, a password (keep it:
+   it is needed once, below), **Install OpenSSH server: yes**, no featured
+   snaps, no Ubuntu Pro. If the installer hangs: power the VM off and retry
+   (it is intermittent) - at the "downloading and installing security
+   updates" step you may also choose to continue without updates.
+3. Reboot into the installed system, log in as `kb`, then in the VM:
+   `sudo timedatectl set-timezone UTC`.
+4. Guest additions (optional, not needed by vmlab): skip.
+5. Put the lab key in (from the host, Git-bash; the password is asked once):
+   `ssh-copy-id -i ~/.ssh/kbool_vmlab.pub -p 2221 kb@127.0.0.1`
+   then `bash tools/vmlab/vmlab.sh up kb-ubuntu && bash tools/vmlab/vmlab.sh run kb-ubuntu -- true`
+   must succeed (vmlab refuses until `kb-ubuntu` answers on 2221).
+6. Provision (first run asks for the password via `sudo -S`, later NOPASSWD):
+   ```
+   bash tools/vmlab/vmlab.sh run kb-ubuntu -- sh -c 'cat > /tmp/apt.sh' < tools/vmlab/provision/apt.sh
+   ssh -i ~/.ssh/kbool_vmlab -p 2221 kb@127.0.0.1 'sudo bash /tmp/apt.sh'     # asks the password once
+   bash tools/vmlab/vmlab.sh run kb-ubuntu -- rm -f /tmp/apt.sh
+   ```
+   `apt.sh` installs the package list of the L1.2 card (bash git coreutils sed
+   grep findutils diffutils gawk procps util-linux perl curl openssl
+   netcat-openbsd tzdata locales; then one by one socat ncat netcat-traditional
+   nodejs python3 uuid-runtime), keeps mawk as `awk` and OpenBSD `nc`, runs
+   `locale-gen en_US.UTF-8 de_DE.UTF-8 ru_RU.UTF-8`, sets `kb ALL=(ALL)
+   NOPASSWD:ALL`, disables unattended-upgrades and the apt timers, sets sshd to
+   key-only, and makes bash the login shell of `kb`.
+7. Record the versions into this README (a section "kb-ubuntu -- versions"):
+   ```
+   bash tools/vmlab/vmlab.sh run kb-ubuntu -- bash -c 'lsb_release -d; bash --version | head -1; dpkg-query -W gawk sed grep coreutils findutils netcat-openbsd'
+   bash tools/vmlab/vmlab.sh run kb-ubuntu -- bash -c 'readlink -f "$(command -v nc)"; update-alternatives --display nc; locale -a; LC_ALL=ru_RU.UTF-8 bash -c "echo \$EPOCHREALTIME"'
+   ```
+8. Snapshot: `bash tools/vmlab/vmlab.sh snapshot kb-ubuntu clean`
+   (a later re-provision: `... snapshot kb-ubuntu clean --replace`).
+9. Check: `bash tools/vmlab/vmlab.sh status` shows `kb-ubuntu poweroff ... clean`;
+   `reset` + `up` + `run kb-ubuntu -- bash -c 'bash --version | head -1; sudo -n true && echo sudo-ok'` + `down` works;
+   `sync kb-ubuntu` then `run kb-ubuntu -- ls ~/kbool`.
+
+Note: `vmlab.sh run NAME -- ...` has two forms. With exactly ONE argument
+after `--` the string is the remote command line, sent verbatim (pipes, `;`,
+`$VAR` are interpreted by the remote shell):
+`run kb-ubuntu -- 'uname -a | head -1; echo $0'`. With TWO OR MORE arguments
+each word is quoted with `printf %q` and nothing is interpreted:
+`run kb-ubuntu -- echo 'a b;c'` prints `a b;c`.

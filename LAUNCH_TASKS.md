@@ -418,6 +418,26 @@ one submodule in `$SCRATCH` for this — never modify the real tree), and no
 - `VMLAB_DRY=1 bash tools/vmlab/vmlab.sh gate kb-ubuntu` output shown in full.
 **Timebox.** 2 h.
 
+### L1.1b — vmlab run: single-string commands  [S] ready
+
+**Goal.** `vmlab.sh run NAME -- 'cmd1 | cmd2; cmd3'` must run that string as a
+remote shell command line (today every word is `printf %q`-quoted, so one
+string becomes one command name — found in L1.2).
+**Read.** `tools/vmlab/vmlab.sh` (`cmd_run`), `tools/vmlab/README.md`, `tools/vmlab/tests/run.sh`.
+**Write scope.** those three files.
+**Rule.** After `--`: exactly ONE argument → sent verbatim as the remote
+command line (no quoting); TWO OR MORE arguments → as today (`printf %q`
+per word, joined by spaces). No other behaviour change; `gate`'s internal
+calls stay as they are.
+**Steps.** Implement in `cmd_run`; update the README table row and the
+"Note:" paragraph (≈ line 200) to state the rule with one example of each
+form; DRY tests: one-string form → the DRY ssh line ends with the string
+unchanged (e.g. `echo a | tr a b; true`); multi-word form with an argument
+containing a space and a `;` → quoted as before.
+**Acceptance.** `bash tools/vmlab/tests/run.sh` → `PASS n/n` (n > 124) on
+both runtimes; the two new test names; `VMLAB_DRY=1 bash tools/vmlab/vmlab.sh run kb-ubuntu -- 'uname -a; echo $0'` output shown.
+**Timebox.** 30 min.
+
 ### L1.2 — kb-ubuntu: create + provision  [S] ready after L0.6 (package list)
 
 **Goal.** A clean Ubuntu 24.04 lab VM with SSH key access and snapshot `clean`.

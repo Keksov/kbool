@@ -163,6 +163,11 @@ run_v run kb-alpine -- echo 'a b' '$x'
 t_eq "run rc" 0 "$RC"
 t_has "run line" "$OUT" '-p 2224 '
 t_has "run quoting" "$OUT" 'kb@127.0.0.1 echo a\ b \$x'
+run_v run kb-alpine -- 'echo a | tr a b; true'
+t_eq "run one-string rc" 0 "$RC"
+t_eq "run one-string verbatim" "echo a | tr a b; true" "${OUT##*kb@127.0.0.1 }"
+run_v run kb-alpine -- echo 'a b;c' '$x'
+t_eq "run multi-word: space and ; quoted" 'echo a\ b\;c \$x' "${OUT##*kb@127.0.0.1 }"
 run_v run $U
 t_eq "run without command rc" 2 "$RC"
 run_v fetch $U '~/gate-out' "$T/f"

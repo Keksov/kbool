@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L0 DONE (incl. L0.7), L1.1 DONE; DL10 applied, reboot pending; then L1.2 retry",
+  "status": "in progress — host hypervisor off (DL10 done); next L1.1b vmlab run quoting, then L1.2 retry",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -16,7 +16,7 @@
     "DL7": "default: MIT for kbool, kkore, ktests",
     "DL8": "default: lab tooling in kbool/tools/vmlab/, portability scanner in kbool/tools/porting/; host side plain bash (Git-bash) + VBoxManage.exe + OpenSSH",
     "DL9": "owner 2026-10-20: well-specified technical tasks -> Sonnet 5.5 effort high (Agent model sonnet, effort high), brief = LAUNCH_TASKS.md §0 + one card; design/core layers/triage/public prose -> Opus worker; SV reviews every task",
-    "DL10": "owner 2026-10-20: turn off Memory integrity + hypervisorlaunchtype off (reboot) so VirtualBox gets AMD-V instead of the NEM/Hyper-V backend; rollback after lab work — APPLIED 2026-10-20 by SV on owner order (UAC): HVCI Enabled 1->0, bcd {current} hypervisorlaunchtype (default auto)->off; reboot pending; rollback: HVCI Enabled=1 + bcdedit /set {current} hypervisorlaunchtype auto"
+    "DL10": "owner 2026-10-20: turn off Memory integrity + hypervisorlaunchtype off (reboot) so VirtualBox gets AMD-V instead of the NEM/Hyper-V backend; rollback after lab work — APPLIED 2026-10-20 by SV on owner order (UAC): HVCI Enabled 1->0, bcd {current} hypervisorlaunchtype (default auto)->off; reboot pending; rollback: HVCI Enabled=1 + bcdedit /set {current} hypervisorlaunchtype auto | after reboot 2026-10-20: HVCI off (services_running 0) but HypervisorPresent=True, VBS status 2: registry DeviceGuard EnableVirtualizationBasedSecurity=1 keeps the hypervisor up despite hypervisorlaunchtype Off (bcd also has isolatedcontext Yes). Next step EnableVirtualizationBasedSecurity 1->0 was DENIED by the auto-mode classifier (Security Weaken) - owner runs scratchpad launch/dl10_vbs.ps1 himself or allows it; then reboot | owner ran dl10_vbs.ps1 (EnableVirtualizationBasedSecurity 1->0) + rebooted: HypervisorPresent=False, VBS 0; dism: Hyper-V/VMP/HypervisorPlatform/WSL/Containers all Disabled. Rollback = HVCI Enabled=1 + EnableVirtualizationBasedSecurity=1 + hypervisorlaunchtype auto + reboot"
   },
   "pending_owner_decisions": {
     "OG1": "L3: GNU-tool policy (recommended: core tool-free; wrappers require GNU tool, resolved by name gsed/gawk/gfind/ggrep; missing tool -> clear error, tests SKIP)",
@@ -135,6 +135,15 @@
       "card": "ready",
       "status": "DONE 2026-10-20 (Sonnet; remark: rc 14 when results are not fetched); tests PASS 124/124 both runtimes (SV re-run)"
     },
+    "L1.1b": {
+      "executor": "S",
+      "title": "vmlab run: a single argument after -- is a raw remote shell string",
+      "dep": [
+        "L1.1"
+      ],
+      "card": "ready",
+      "status": "DONE 2026-10-20 (Sonnet): PASS 127/127 both runtimes (SV re-run)"
+    },
     "L1.2": {
       "executor": "S",
       "title": "kb-ubuntu create + provision, snapshot clean",
@@ -143,7 +152,7 @@
         "L0.6"
       ],
       "card": "ready after L0.6",
-      "status": "BLOCKED 2026-10-20 (Sonnet): unattended install hung 2/5 under VBox NEM backend (VBS on). Scripts create/ubuntu.sh + provision/apt.sh written, untested, uncommitted; ISO 24.04.5 verified in C:/var/vbox/kb-lab/iso; lab key created. Waiting for DL10 host change, then retry. Card bug found: vmlab run quotes a single string as one command -> use run NAME -- bash -c \"...\" or fix vmlab"
+      "status": "re-dispatched 2026-10-20 after DL10 (host hypervisor off)"
     },
     "L1.3": {
       "executor": "S",
