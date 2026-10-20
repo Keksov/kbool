@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L0 analysis done; L1.2 (kb-ubuntu) running; next L0.7 in a VM-free gap, L1.3/L1.4",
+  "status": "in progress — L0 DONE (incl. L0.7), L1.1 DONE; DL10 applied, reboot pending; then L1.2 retry",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -15,7 +15,8 @@
     "DL6": "default: dedicated lab VMs kb-<os>, NAT+SSH forward, snapshot clean; owner's existing VMs untouched (Ubuntu 24.02.2, OLHCV, <inaccessible>)",
     "DL7": "default: MIT for kbool, kkore, ktests",
     "DL8": "default: lab tooling in kbool/tools/vmlab/, portability scanner in kbool/tools/porting/; host side plain bash (Git-bash) + VBoxManage.exe + OpenSSH",
-    "DL9": "owner 2026-10-20: well-specified technical tasks -> Sonnet 5.5 effort high (Agent model sonnet, effort high), brief = LAUNCH_TASKS.md §0 + one card; design/core layers/triage/public prose -> Opus worker; SV reviews every task"
+    "DL9": "owner 2026-10-20: well-specified technical tasks -> Sonnet 5.5 effort high (Agent model sonnet, effort high), brief = LAUNCH_TASKS.md §0 + one card; design/core layers/triage/public prose -> Opus worker; SV reviews every task",
+    "DL10": "owner 2026-10-20: turn off Memory integrity + hypervisorlaunchtype off (reboot) so VirtualBox gets AMD-V instead of the NEM/Hyper-V backend; rollback after lab work — APPLIED 2026-10-20 by SV on owner order (UAC): HVCI Enabled 1->0, bcd {current} hypervisorlaunchtype (default auto)->off; reboot pending; rollback: HVCI Enabled=1 + bcdedit /set {current} hypervisorlaunchtype auto"
   },
   "pending_owner_decisions": {
     "OG1": "L3: GNU-tool policy (recommended: core tool-free; wrappers require GNU tool, resolved by name gsed/gawk/gfind/ggrep; missing tool -> clear error, tests SKIP)",
@@ -123,7 +124,7 @@
         "L0.6"
       ],
       "card": "ready (no lab VM running)",
-      "status": "planned"
+      "status": "DONE 2026-10-20 (Sonnet): R1 28 sites + R2 3 lines (repro p3.sh); red-first under ru_RU was already PASS (unsafe sites = runner group-stop hang path + test/bench timings; library already safe); gate all C PASS 18119/18119 = last full run; gate all ru_RU PASS 18119/18119. Open: regression test for group-stop deadline under comma locale -> L2.1; repro scripts under kcl/docs/review-2026-09-06 pass raw values to awk/perl (not gated, left)"
     },
     "L1.1": {
       "executor": "S",
@@ -142,7 +143,7 @@
         "L0.6"
       ],
       "card": "ready after L0.6",
-      "status": "dispatched 2026-10-20 (Sonnet), package list updated mid-task"
+      "status": "BLOCKED 2026-10-20 (Sonnet): unattended install hung 2/5 under VBox NEM backend (VBS on). Scripts create/ubuntu.sh + provision/apt.sh written, untested, uncommitted; ISO 24.04.5 verified in C:/var/vbox/kb-lab/iso; lab key created. Waiting for DL10 host change, then retry. Card bug found: vmlab run quotes a single string as one command -> use run NAME -- bash -c \"...\" or fix vmlab"
     },
     "L1.3": {
       "executor": "S",
@@ -182,7 +183,7 @@
     },
     "L2.1": {
       "executor": "O",
-      "title": "ktests harness on Linux (gate, suitejob, strays, runner)",
+      "title": "ktests harness on Linux (gate, suitejob, strays, runner) + regression test: group-stop KILL deadline under LC_ALL=ru_RU.UTF-8",
       "dep": [
         "L1.6"
       ],

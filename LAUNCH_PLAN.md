@@ -28,7 +28,7 @@ The code is ready; the first five minutes of a stranger are not:
 | `thttpserver` is built around GNU netcat 0.7.1 | GNU netcat is absent from Ubuntu, Debian, Fedora, Alpine (they ship OpenBSD nc / ncat / busybox nc); on them the suite fails instead of SKIPping |
 | *(L0.5, [PORTING.md](docs/dev/PORTING.md))* the ktests harness reads cygwin-only `/proc/PID/{ppid,pgid,sid,winpid}` (H1) | on Linux the stray check is blind (`strays: none` proves nothing); FreeBSD/macOS have no `/proc` |
 | *(L0.5)* `gate.sh` starts every segment with `env --default-signal` (H4, GNU coreutils ≥ 8.31) | no gate starts on Alpine-clean, FreeBSD, macOS |
-| *(L0.5, confirmed on this machine)* `EPOCHREALTIME` has a **comma** under `ru_RU`/`de_DE` locales; `${EPOCHREALTIME/./}` and friends (≈45 code sites: harness, tstopwatch, thttpserver, dateutils) then compute garbage (H7) | wrong timings / hangs for every user with a comma locale — **on Windows too**; English-locale CI never shows it |
+| *(L0.5, confirmed on this machine)* `EPOCHREALTIME` has a **comma** under `ru_RU`/`de_DE` locales; `${EPOCHREALTIME/./}` then computes garbage (H7). L0.7 measured: the library units already used comma-safe forms; the 28 unsafe sites were the runner's group-stop KILL deadline (`ktest_runner.sh`, a hang path no test exercises) plus test/bench timings | fixed in L0.7; a regression test for the group-stop deadline under a comma locale goes to L2.1 |
 | *(L0.5)* the 5.0 floor comes from the harness and a few kcl units; kkore and the kklass runtime need at most 4.4 statically | the library floor could sit below the harness floor (L4 measures) |
 | no CI (`.github` absent in all five repos) | no public proof that it works |
 | no LICENSE in kbool, kkore, ktests (kcl, kklass: MIT) | legally unusable |
@@ -51,6 +51,8 @@ The code is ready; the first five minutes of a stranger are not:
 | DL7 | **MIT** for kbool, kkore, ktests (same holder and text as kcl/kklass) | default |
 | DL8 | lab tooling lives in **`kbool/tools/vmlab/`**, the portability scanner in **`kbool/tools/porting/`**; host side is plain bash under Git-bash + `VBoxManage.exe` + Windows OpenSSH | default |
 | DL9 | **delegation**: well-specified technical tasks go to **Sonnet 5.5, effort high**; design, core-layer changes, triage judgment and public prose go to an Opus worker; every task is reviewed by the supervisor (§3) | owner 2026-10-20 |
+
+| DL10 | the host runs VBS / Memory integrity, so VirtualBox fell back to the Hyper-V (NEM) backend and the Ubuntu installer hung in 2 of 5 runs (L1.2, 2026-10-20) → the owner **turns off Memory integrity and the Windows hypervisor** (`bcdedit /set hypervisorlaunchtype off`, reboot) so VirtualBox gets AMD-V. Rollback after the lab work: Memory integrity on + `bcdedit /set hypervisorlaunchtype auto` | owner 2026-10-20 |
 
 Pending owner decisions (asked when the data is in): **OG1** GNU-tool policy
 (L3), **OG2** minimum bash (L4), **OG3** pushing a CI branch (L5), **OG4**
