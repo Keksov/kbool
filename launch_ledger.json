@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.5 DONE; executing L2.6-3 -> L2.6-2 -> L2.6-1 -> L2.7-K -> L2.7-C -> L2.7-P -> L2.7-M -> L2.7-N",
+  "status": "in progress — L2.6 batches DONE; L2.7-K running",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -294,7 +294,7 @@
         "L2.5"
       ],
       "card": "L2_triage.md §2 + §7",
-      "status": "dispatched 2026-10-21 (Sonnet)"
+      "status": "DONE 2026-10-21 (Sonnet): R2-R6 + R4b (ttail follower check on kt_proc_snapshot, red-first on ubuntu); wrappers PASS Windows x2 (1452/1452); Linux x3 (+de_DE): only the 7 C3 CR tcases remain -> L2.7-C. Leftovers: ttail/README.md:205-210,385 lastRc 143 wording, tgrep 005 section titles (docs, L6)"
     },
     "L2.7-K": {
       "executor": "O",
@@ -303,7 +303,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "planned"
+      "status": "dispatched 2026-10-21 (Opus)"
     },
     "L2.7-C": {
       "executor": "O",
