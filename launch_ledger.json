@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.6 batches DONE; L2.7-K running",
+  "status": "in progress — L2.7-K DONE; L2.7-C running; L1.7 (alpine timers) to precede L3",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -303,7 +303,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "dispatched 2026-10-21 (Opus)"
+      "status": "DONE 2026-10-22 (Opus, 1 review round): Windows 18159/18159 both runtimes; ktests PASS on 5 VMs; critic skipped (85-line diff, SV review)"
     },
     "L2.7-C": {
       "executor": "O",
@@ -312,7 +312,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "planned"
+      "status": "dispatched 2026-10-22 (Opus)"
     },
     "L2.7-P": {
       "executor": "O",
@@ -688,6 +688,9 @@
     "L2.1-o4": "ktest.sh pins LC_ALL=C.UTF-8, so H7 cannot fire inside harness runs; locale-dependent behaviour of units must be tested by tests that set the locale themselves",
     "L2.1-o5": "kcl/thttpserver/tests/004_Server.sh 8/8 handled=7 flake exists with the HEAD harness (2/5 on 5.3.9) - kcl issue",
     "L2.1-o6": "kcl/tpipe/tests/002_Stop.sh leaves an orphaned sleep 8 when its producer is TERMed (timing-dependent STRAY)",
-    "L2.1-o7": "TaskStop on a background Bash task kills only the tool shell; a gate under timeout survives and the parent watch does not catch it"
+    "L2.1-o7": "TaskStop on a background Bash task kills only the tool shell; a gate under timeout survives and the parent watch does not catch it",
+    "L2.7-K-o1": "linux backend recomputes boot epoch per snapshot (EPOCHREALTIME - uptime): a wall-clock step between window start and scan shifts starts (kb-alpine 049); correct fix = monotonic time base (kt_proc_stamp, --since-st, suitejob stores converted stamps) - design task, after L1.7",
+    "L2.7-K-o2": "ktests 052 wdterm fails 2/3 under full-suite load on kb-alpine (rescue watchdog not stopping b_hang); passes alone 6/6 - suspect Alpine timer stalls (L1.7)",
+    "L2.7-K-o3": "procps lstart on Linux up to ~1 s early (btime whole seconds) - only with forced ps backend; documented"
   }
 }
