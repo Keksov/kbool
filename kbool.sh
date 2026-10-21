@@ -29,7 +29,8 @@
 # The loader guard (C3): non-empty __KK_UNITS (an assoc with the sentinel [kbool]).
 # A source of ANOTHER copy of kbool.sh while one is loaded is a no-op with one
 # WARNING (the registry, KBOOL_HOME and the search paths stay the first copy's).
-if [[ ${__KK_UNITS[@]@a} == A* ]]; then
+# __KK_BASH_OK first: on a bash below the floor it is unset, so the 4.4 ${…@a} never expands.
+if [ "${__KK_BASH_OK-}" = 1 ] && [[ ${__KK_UNITS[@]@a} == A* ]]; then
     if [[ ${__KK_UNITS[kbool]-} != "${BASH_SOURCE[0]}" && ! ${__KK_UNITS[kbool]-} -ef ${BASH_SOURCE[0]} \
           && ${VERBOSE_KKLASS:-} != quiet ]]; then
         printf 'kbool: WARNING: %s is ignored: kbool is already loaded from %s\n' \
@@ -37,6 +38,30 @@ if [[ ${__KK_UNITS[@]@a} == A* ]]; then
     fi
     return 0
 fi
+
+# The bash guard: POSIX syntax only, so it runs (and refuses) under any sh
+# and any old bash before a line of newer syntax is reached. The floor is
+# __KK_BASH_MIN (major.minor); every later command may assume it. A passed
+# check sets __KK_BASH_OK; the loader guard above tests it first, so a re-source
+# of a loaded kbool never reaches (or parses) this block.
+if [ -z "${BASH_VERSION-}" ]; then
+    echo "kbool: bash is required (this shell is not bash)" >&2
+    return 2 2>/dev/null || exit 2
+fi
+case :${SHELLOPTS-}: in
+    *:posix:*)
+        echo "kbool: bash in POSIX mode (sh, --posix, POSIXLY_CORRECT) is not supported; run it as bash" >&2
+        return 2 2>/dev/null || exit 2 ;;
+esac
+__KK_BASH_MIN=5.2
+if [ "${BASH_VERSINFO[0]}" -lt "${__KK_BASH_MIN%.*}" ] || {
+       [ "${BASH_VERSINFO[0]}" -eq "${__KK_BASH_MIN%.*}" ] &&
+       [ "${BASH_VERSINFO[1]}" -lt "${__KK_BASH_MIN#*.}" ]; }; then
+    echo "kbool: bash >= $__KK_BASH_MIN is required, this is $BASH_VERSION ($BASH)" >&2
+    echo "kbool: on macOS install a current bash (brew install bash) and run scripts with it" >&2
+    return 2 2>/dev/null || exit 2
+fi
+__KK_BASH_OK=1
 
 # Executed instead of sourced? Exact: a function called from a SOURCED file's top
 # level sees FUNCNAME[1] == source (also for `bash -c 'source "$0"' kbool.sh`);

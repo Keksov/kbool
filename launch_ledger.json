@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.2 DONE; next L2.3 (version guard), then L2.1 (Opus)",
+  "status": "in progress — L2.2+L2.3 DONE; next L2.1 (Opus harness on Linux/FreeBSD)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -206,7 +206,7 @@
         "L1.6"
       ],
       "card": null,
-      "status": "planned"
+      "status": "dispatched 2026-10-21 (Opus)"
     },
     "L2.2": {
       "executor": "S",
@@ -224,7 +224,7 @@
         "L2.2"
       ],
       "card": "ready",
-      "status": "planned"
+      "status": "DONE 2026-10-21 (Sonnet, 3 rounds): guard refuses non-bash (dash verified), bash POSIX mode (sh/--posix/POSIXLY_CORRECT), bash < 5.2 - rc 2 + message; loaded fast-path first ([ __KK_BASH_OK = 1 ] && [[ @a ]]) so re-source cost = HEAD within noise (round 2 cost +40-80 us from parsing the guard); gate all PASS 18119/18119 both runtimes. Known: if __KK_BASH_OK is unset by hand while kbool is loaded, a second copy boots again (flag not exported, only manual unset)"
     },
     "L2.4": {
       "executor": "S",

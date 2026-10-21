@@ -690,7 +690,7 @@ after the change because it expects `#!/bin/bash` → BLOCKED with the list.
 - phase gate on both Windows runtimes: `bash $G --rerun-failed 1 --compare LAST all` → PASS, totals unchanged.
 **Timebox.** 1 h + gate.
 
-### L2.3 — bash version guard  [S] ready
+### L2.3 — bash version guard  [S] DONE — *amended twice in review (2026-10-21): POSIX-mode refusal added; the loaded fast-path moved before the guard (`[ "${__KK_BASH_OK-}" = 1 ] && [[ …@a… ]]`) because parsing the guard block cost +40–80 µs per re-source. The code below is the first draft; the final text is in kbool.sh.*
 
 **Goal.** A clear refusal on an unsupported shell, before any newer syntax runs.
 **Read.** `kbool.sh` lines 1–60.
