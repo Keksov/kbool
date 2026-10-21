@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L1.1c DONE; L2.4 running",
+  "status": "in progress — L2.4 DONE; L2.5 triage (Opus) running",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -255,7 +255,7 @@
         "L1.1c"
       ],
       "card": "ready",
-      "status": "dispatched 2026-10-21 (Sonnet)"
+      "status": "DONE 2026-10-21 (Sonnet): 4 VM gates (ubuntu 8845/9014, debian 8845/9014, fedora 8968/9063, debian de_DE 8845/9014); 111 rows in docs/dev/launch/L2_failures.tsv (105 repro yes, 2 no, 4 STRAY n/a). Clusters: kcl/math under mawk (17 files, H27), thttpserver x5 (nc flavour H26), tawk/tsed/tgrep/ttail/tregex/tfile on ALL3, thead 005 on debian+fedora, kkore 011 Windows paths, tpipe 002 stray, ktests 045 once under de_DE (passes alone)"
     },
     "L2.5": {
       "executor": "O",
@@ -264,7 +264,7 @@
         "L2.4"
       ],
       "card": null,
-      "status": "planned"
+      "status": "dispatched 2026-10-21 (Opus)"
     },
     "L2.6": {
       "executor": "S",
