@@ -17,7 +17,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-unset VMLAB_DRY_GATE_RC VMLAB_DRY_FETCH_FAIL VMLAB_DRY_STATE VMLAB_DRY_SNAPS VMLAB_DRY_SSH_FAIL VMLAB_DRY_LIST VMLAB_BOOT_WAIT \
+unset VMLAB_DRY_GATE_RC VMLAB_DRY_FETCH_FAIL VMLAB_DRY_STATE VMLAB_DRY_SNAPS VMLAB_DRY_SSH_FAIL VMLAB_DRY_SSH_POWEROFF VMLAB_DRY_LIST VMLAB_BOOT_WAIT \
       VMLAB_DOWN_WAIT VMLAB_TIMEOUT VMLAB_POLL VMLAB_ROOT VMLAB_CONF VBOXMANAGE
 export TMPDIR=$T VMLAB_DRY=1
 
@@ -58,7 +58,7 @@ seq_of() {
 U=kb-ubuntu
 PATS=("restore=snapshot $U restore" "start=startvm $U --type headless" "probe=127.0.0.1 true"
       "sync=tar -xf - -C ~/kbool.new" "vmtxt=> ~/vm.txt" "gate=gate.sh" "fetch=tar -cf - -C ~/gate-out"
-      "catvm=cat ~/vm.txt" "acpi=controlvm $U acpipowerbutton" "poweroff=controlvm $U poweroff"
+      "catvm=cat ~/vm.txt" "sshoff=sudo -n poweroff || doas" "acpi=controlvm $U acpipowerbutton" "poweroff=controlvm $U poweroff"
       "take=snapshot $U take" "delete=snapshot $U delete")
 
 # ---- a tiny repo with one submodule (the real tree is never touched)
@@ -127,9 +127,18 @@ t_eq "up boot timeout: trap powers the VM off" "start probe acpi" "$(seq_of "$OU
 run_v down $U
 t_eq "down on a stopped VM rc" 0 "$RC"
 t_no "down on a stopped VM: no controlvm" "$OUT" "controlvm"
-VMLAB_DRY_STATE=running VMLAB_DOWN_WAIT=2 run_v down $U
+VMLAB_DRY_STATE=running run_v down $U
+t_eq "down via ssh rc" 0 "$RC"
+t_eq "down via ssh order (no acpi once poweroff)" "probe sshoff" "$(seq_of "$OUT" "${PATS[@]}")"
+t_has "down via ssh command" "$OUT" 'kb@127.0.0.1 sudo -n poweroff || doas -n poweroff || sudo -n shutdown -p now'
+t_no "down via ssh: no controlvm" "$OUT" "controlvm"
+VMLAB_DRY_STATE=running VMLAB_DRY_SSH_POWEROFF=ignore VMLAB_DOWN_WAIT=2 run_v down $U
+t_eq "down ssh poweroff ignored rc" 0 "$RC"
+t_eq "down ssh poweroff ignored: acpi, then hard" "probe sshoff acpi poweroff" "$(seq_of "$OUT" "${PATS[@]}")"
+VMLAB_DRY_STATE=running VMLAB_DRY_SSH_FAIL=1 VMLAB_DOWN_WAIT=2 run_v down $U
 t_eq "down fallback rc" 0 "$RC"
-t_eq "down fallback order" "acpi poweroff" "$(seq_of "$OUT" "${PATS[@]}")"
+t_eq "down fallback order (ssh fails -> as before)" "probe acpi poweroff" "$(seq_of "$OUT" "${PATS[@]}")"
+t_no "down fallback: no ssh poweroff" "$OUT" "doas -n poweroff"
 
 # ---- reset
 run_v reset $U
@@ -137,7 +146,9 @@ t_eq "reset rc" 0 "$RC"
 t_eq "reset restores clean" "restore" "$(seq_of "$OUT" "${PATS[@]}")"
 t_has "reset restores clean (line)" "$OUT" "DRY: VBoxManage snapshot $U restore clean"
 VMLAB_DRY_STATE=running VMLAB_DOWN_WAIT=1 run_v reset $U
-t_eq "reset of a running VM: down first" "acpi poweroff restore" "$(seq_of "$OUT" "${PATS[@]}")"
+t_eq "reset of a running VM: down first" "probe sshoff restore" "$(seq_of "$OUT" "${PATS[@]}")"
+VMLAB_DRY_STATE=running VMLAB_DRY_SSH_FAIL=1 VMLAB_DOWN_WAIT=1 run_v reset $U
+t_eq "reset of a running VM, ssh down: acpi fallback" "probe acpi poweroff restore" "$(seq_of "$OUT" "${PATS[@]}")"
 run_v reset $U nosuch
 t_eq "reset absent snapshot rc" 12 "$RC"
 t_no "reset absent snapshot: no restore" "$OUT" "restore"
@@ -185,13 +196,28 @@ t_eq "gate rc" 0 "$RC"
 FIRST=$(printf "%s" "$OUT" | head -n 1)
 [[ $FIRST == "vmlab out=$T/kb-vmlab/"*"-kb-ubuntu-clean" ]]; t_eq "gate first line (default out)" 0 "$?"
 t_has "gate out name" "$OUT" "-$U-clean"
-t_eq "gate order" "restore start probe sync vmtxt gate fetch catvm acpi" "$(seq_of "$OUT" "${PATS[@]}")"
+t_eq "gate order" "restore start probe sync vmtxt gate fetch catvm probe sshoff" "$(seq_of "$OUT" "${PATS[@]}")"
 t_has "gate default GATE_ARGS" "$OUT" 'KT_GATE_BASHES=/usr/bin/bash timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out --rerun-failed 1 all'
 t_has "gate cd" "$OUT" 'cd ~/kbool && KT_GATE_BASHES='
 t_no "gate: clean power-off needs no hard poweroff" "$OUT" "controlvm $U poweroff"
 t_has "gate vm.txt uname" "$OUT" '{ uname -a; if [ -r /etc/os-release ]; then cat /etc/os-release; else freebsd-version; fi; /usr/bin/bash --version | head -n 1;'
 t_has "gate vm.txt shas" "$OUT" "printf '%s\\n' kbool=$ROOT_SHA-dirty kcl=$SUB_SHA-dirty ;"
 t_has "gate fetches into out" "$OUT" "DRY: tar -xf - -C $T/kb-vmlab/"
+VMLAB_ROOT=$R run_v gate kb-debian --out "$T/oe" --env LC_ALL=de_DE.UTF-8 -- kkore
+t_eq "gate --env rc" 0 "$RC"
+t_has "gate --env in the remote gate line" "$OUT" 'cd ~/kbool && LC_ALL=de_DE.UTF-8 KT_GATE_BASHES=/usr/bin/bash timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out kkore'
+t_has "gate --env in vm.txt (env line)" "$OUT" "env:\\ LC_ALL=de_DE.UTF-8; } > ~/vm.txt"
+VMLAB_ROOT=$R run_v gate kb-debian --out "$T/oe" --env 'A_1=a b$x' --env B= -- kkore
+t_eq "gate --env x2 rc" 0 "$RC"
+t_has "gate --env %q value + empty value + repeat" "$OUT" 'cd ~/kbool && A_1=a\ b\$x B='"''"' KT_GATE_BASHES='
+t_has "gate --env %q value in vm.txt" "$OUT" 'env:\ A_1=a\ b\$x env:\ B=;'
+for bad in 'a-b=1' '1A=x' '=x' 'NOEQUALS' ''; do
+  VMLAB_ROOT=$R run_v gate $U --env "$bad" -- kkore
+  t_eq "gate --env [$bad] rc" 2 "$RC"
+  t_no "gate --env [$bad]: nothing called" "$OUT" "DRY:"
+done
+VMLAB_ROOT=$R run_v gate $U --env
+t_eq "gate --env without argument rc" 2 "$RC"
 VMLAB_ROOT=$R run_v gate kb-freebsd --snapshot s2 --out "$T/o" --from-github -- --changed 'a b'
 t_eq "gate options rc" 12 "$RC"   # snapshot s2 does not exist in the default list
 t_has "gate --out first line" "$OUT" "vmlab out=$T/o"
@@ -213,13 +239,13 @@ t_no "gate boot timeout: never reached sync" "$OUT" "kbool.new"
 VMLAB_ROOT=$R VMLAB_DRY_FETCH_FAIL=out run_v gate $U --out "$T/o3"
 t_eq "gate: fetch of gate-out fails -> rc 14" 14 "$RC"
 t_has "gate fetch failure message" "$OUT" "vmlab: gate rc=0 but results not fetched: ~/gate-out"
-t_eq "gate fetch failure: VM still powered off" "gate fetch catvm acpi" "$(seq_of "$OUT" "${PATS[@]}" | sed 's/.* \(gate fetch catvm acpi\)$/\1/')"
+t_eq "gate fetch failure: VM still powered off" "gate fetch catvm probe sshoff" "$(seq_of "$OUT" "${PATS[@]}" | sed 's/.* \(gate fetch catvm probe sshoff\)$/\1/')"
 VMLAB_ROOT=$R VMLAB_DRY_FETCH_FAIL=vm run_v gate $U --out "$T/o3"
 t_eq "gate: fetch of vm.txt fails -> rc 14" 14 "$RC"
 VMLAB_ROOT=$R VMLAB_DRY_GATE_RC=1 VMLAB_DRY_FETCH_FAIL=1 run_v gate $U --out "$T/o3"
 t_eq "gate rc 1 + fetch fails -> rc 14" 14 "$RC"
 t_has "gate rc 1 + fetch fails: message carries the gate rc" "$OUT" "vmlab: gate rc=1 but results not fetched: ~/gate-out ~/vm.txt"
-t_eq "gate rc 1 + fetch fails: VM powered off" "acpi" "$(seq_of "$OUT" "${PATS[@]}" | sed 's/.* //')"
+t_eq "gate rc 1 + fetch fails: VM powered off" "sshoff" "$(seq_of "$OUT" "${PATS[@]}" | sed 's/.* //')"
 VMLAB_ROOT=$R VMLAB_DRY_GATE_RC=1 run_v gate $U --out "$T/o3"
 t_eq "gate rc 1, fetch ok -> rc 1" 1 "$RC"
 

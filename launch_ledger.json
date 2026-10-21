@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.1 DONE; next L2.4 (Sonnet: gate on 3 Linux VMs + de_DE run -> L2_failures.tsv), L1.7 (alpine timers)",
+  "status": "in progress — L1.1c DONE; L2.4 running",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -144,6 +144,15 @@
       "card": "ready",
       "status": "DONE 2026-10-20 (Sonnet): PASS 127/127 both runtimes (SV re-run)"
     },
+    "L1.1c": {
+      "executor": "S",
+      "title": "vmlab gate --env NAME=VALUE; down via ssh poweroff first",
+      "dep": [
+        "L1.1b"
+      ],
+      "card": "ready",
+      "status": "DONE 2026-10-21 (Sonnet): gate --env NAME=VALUE (validated, %q, recorded in vm.txt); do_down tries ssh poweroff (sudo/doas/shutdown -p) before ACPI - used by down/reset/snapshot/gate/trap; live down: alpine 9.4 s, freebsd 8.9 s; tests 152/152 both runtimes (SV re-run)"
+    },
     "L1.2": {
       "executor": "S",
       "title": "kb-ubuntu create + provision, snapshot clean",
@@ -242,10 +251,11 @@
         "L2.1",
         "L2.2",
         "L2.3",
-        "L0.7"
+        "L0.7",
+        "L1.1c"
       ],
-      "card": "draft",
-      "status": "planned"
+      "card": "ready",
+      "status": "dispatched 2026-10-21 (Sonnet)"
     },
     "L2.5": {
       "executor": "O",

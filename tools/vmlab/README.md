@@ -36,14 +36,14 @@ therefore not be touched through this script.
 |---|---|
 | `status` | one line per VM: `name state snapshots` (`absent` if VirtualBox does not know it; snapshots comma-joined, `-` for none) |
 | `up NAME` | start headless if not running; wait up to `VMLAB_BOOT_WAIT` (180) s until ssh answers. The VM is left running |
-| `down NAME` | ACPI power button, wait up to `VMLAB_DOWN_WAIT` (60) s for `poweroff`, else hard `controlvm poweroff`. A stopped VM is left alone |
+| `down NAME` | if the VM is running and ssh answers: `sudo -n poweroff \|\| doas -n poweroff \|\| sudo -n shutdown -p now` over ssh (the first that works; the dropped connection and its rc are ignored), wait up to `VMLAB_DOWN_WAIT` (60) s for `poweroff`; otherwise (ssh silent, or still not off) the ACPI power button, wait up to `VMLAB_DOWN_WAIT` s, else hard `controlvm poweroff`. A stopped VM is left alone. With ssh poweroff it takes a few seconds |
 | `reset NAME [SNAP]` | `down`, then restore snapshot (default `clean`) |
 | `snapshot NAME SNAP [--replace]` | `down`, then take `SNAP`; an existing `SNAP` is rc 13 unless `--replace` (deletes it first) |
 | `run NAME -- CMD...` | run CMD in the VM via ssh: ONE argument is sent verbatim as the remote command line, TWO OR MORE are each quoted with `printf %q`; timeout `VMLAB_TIMEOUT` (600) s; rc = CMD's rc |
 | `shell NAME` | interactive ssh (for the owner) |
 | `sync NAME [--from-github [--ref R]]` | put the code in `~/kbool` of the VM: the host working tree (tar), or a fresh `git clone --recurse-submodules` of GitHub |
 | `fetch NAME REMOTE_DIR HOST_DIR` | copy a remote directory to the host (`tar` over ssh) |
-| `gate NAME [--snapshot S] [--from-github] [--out DIR] [-- GATE_ARGS...]` | the whole cycle, below |
+| `gate NAME [--snapshot S] [--from-github] [--out DIR] [--env NAME=VALUE]... [-- GATE_ARGS...]` | the whole cycle, below |
 
 Snapshot names match `^[A-Za-z0-9][A-Za-z0-9._-]*$`.
 
@@ -75,6 +75,11 @@ is the gate's. OUT defaults to
 `${TMPDIR:-$LOCALAPPDATA/Temp}/kb-vmlab/<YYYYmmdd-HHMMSS>-<name>-<snap>` and
 is printed first: `vmlab out=OUT`.
 
+`--env NAME=VALUE` (repeatable, before `--`; NAME matches `^[A-Za-z_][A-Za-z0-9_]*$`, else rc 2)
+runs the gate under that environment, e.g. `--env LC_ALL=de_DE.UTF-8` for a comma-locale
+run: the pairs are put before `KT_GATE_BASHES=` as `NAME=<printf %q of VALUE>`, and each
+is recorded as a line `env: NAME=VALUE` in `OUT/vm.txt`.
+
 ### The cleanup trap
 
 On EXIT, INT and TERM the invocation powers off (`down`) every VM it started
@@ -101,7 +106,7 @@ interrupted, the VM is powered off. `shell` has no trap.
 |---|---|---|
 | `VBOXMANAGE` | `/c/Program Files/Oracle/VirtualBox/VBoxManage.exe` | |
 | `VMLAB_BOOT_WAIT` | 180 | seconds `up` waits for ssh |
-| `VMLAB_DOWN_WAIT` | 60 | seconds `down` waits for the ACPI shutdown |
+| `VMLAB_DOWN_WAIT` | 60 | seconds `down` waits for the ssh poweroff, then again for the ACPI shutdown |
 | `VMLAB_TIMEOUT` | 600 | seconds for one ssh call of `run`, `sync`, `fetch` |
 | `VMLAB_POLL` | 3 | seconds between ssh probes in `up` |
 | `VMLAB_ROOT` | the repository the script lives in | tree that `sync` and `gate` ship |
@@ -124,6 +129,8 @@ as one line `DRY: <argv>`, and the answers come from a simulation:
 * snapshots: `VMLAB_DRY_SNAPS` (space separated, default `clean`);
   `take`/`delete` update the list for the rest of the invocation;
 * ssh: `true` succeeds, unless `VMLAB_DRY_SSH_FAIL=1`;
+* the ssh poweroff of `down` (only tried when `true` answers) makes the state `poweroff`,
+  unless `VMLAB_DRY_SSH_POWEROFF=ignore` (then `down` goes on to the ACPI button);
 * `VMLAB_DRY_GATE_RC=N`: the remote gate call returns N;
 * `VMLAB_DRY_FETCH_FAIL=out|vm|1`: the fetch of `~/gate-out`, of `~/vm.txt`, or of both fails;
 * `VMLAB_DRY_LIST=1` prints each file `sync` would pack as `DRY: entry PATH`.

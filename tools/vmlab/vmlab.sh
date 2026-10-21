@@ -28,6 +28,7 @@ VM_NAMES=()
 STARTED=()      # VMs this invocation started: powered off again by the EXIT trap
 DRYDIR=
 SSHA=()
+POWEROFF_CMD='sudo -n poweroff || doas -n poweroff || sudo -n shutdown -p now'
 
 usage() {
   cat <<'EOF'
@@ -35,14 +36,14 @@ usage: vmlab.sh CMD [NAME] [args]      NAME = a VM row of vms.conf (kb-*)
 
   status                                  one line per VM: name state snapshots
   up NAME                                 start headless, wait until ssh answers
-  down NAME                               acpi power button, then poweroff
+  down NAME                               poweroff over ssh if the guest answers, else acpi power button, then hard poweroff
   reset NAME [SNAP]                       down + restore snapshot (default clean)
   snapshot NAME SNAP [--replace]          down + take snapshot
   run NAME -- CMD...                      run CMD in the VM (one arg = command line verbatim; rc = CMD's rc)
   shell NAME                              interactive ssh (for the owner)
   sync NAME [--from-github [--ref R]]     working tree (tar) or a fresh clone -> ~/kbool
   fetch NAME REMOTE_DIR HOST_DIR          copy a remote directory to the host
-  gate NAME [--snapshot S] [--from-github] [--out DIR] [-- GATE_ARGS...]
+  gate NAME [--snapshot S] [--from-github] [--out DIR] [--env NAME=VALUE]... [-- GATE_ARGS...]
                                           reset, up, sync, ktests gate, fetch, down
 
 exit codes:
@@ -178,7 +179,11 @@ rssh() {
   if (( DRY )); then
     [[ ${DRY_DRAIN-} == 1 ]] && cat >/dev/null
     dry_line "${SSHA[*]} $rcmd"
-    [[ $rcmd == true && ${VMLAB_DRY_SSH_FAIL:-0} == 1 ]] && return 255
+    [[ ( $rcmd == true || $rcmd == "$POWEROFF_CMD" ) && ${VMLAB_DRY_SSH_FAIL:-0} == 1 ]] && return 255
+    if [[ $rcmd == "$POWEROFF_CMD" ]]; then
+      [[ ${VMLAB_DRY_SSH_POWEROFF-} == ignore ]] || printf 'poweroff\n' >"$DRYDIR/$n.state"
+      return 255   # the connection drops
+    fi
     [[ $rcmd == *ktests/tools/gate.sh* && -n ${VMLAB_DRY_GATE_RC-} ]] && return "$VMLAB_DRY_GATE_RC"
     case ${VMLAB_DRY_FETCH_FAIL-} in
       1|out) [[ $rcmd == 'tar -cf - -C ~/gate-out .' ]] && return 255 ;;
@@ -202,7 +207,8 @@ rq() {
 
 # ---------------------------------------------------------------- VM control
 
-# do_down NAME: acpi power button, wait, else hard poweroff. rc 0 / 10.
+# do_down NAME: poweroff over ssh when the guest answers (wait), else acpi power
+# button (wait), else hard poweroff. rc 0 / 10.
 do_down() {
   local n=$1 st t0
   st=$(vm_state "$n")
@@ -210,6 +216,15 @@ do_down() {
     absent) err "VM $n does not exist in VirtualBox"; return 10 ;;
     poweroff|aborted|saved) return 0 ;;
   esac
+  if [[ $st == running ]] && rssh "$n" 30 true </dev/null >/dev/null 2>&1; then
+    rssh "$n" 30 "$POWEROFF_CMD" </dev/null >/dev/null 2>&1 || true   # the connection drops: rc ignored
+    t0=$SECONDS
+    while (( SECONDS - t0 < DOWN_WAIT )); do
+      [[ $(vm_state "$n") == poweroff ]] && return 0
+      sleep 1
+    done
+    err "$n did not power off within ${DOWN_WAIT}s after the ssh poweroff: acpi power button"
+  fi
   vbm controlvm "$n" acpipowerbutton >/dev/null 2>&1 || true
   t0=$SECONDS
   while (( SECONDS - t0 < DOWN_WAIT )); do
@@ -411,11 +426,15 @@ default_out_root() {
 }
 
 cmd_gate() {
-  local n=$1 snap=clean gh=0 out= gargs=() grc=0 rc
+  local n=$1 snap=clean gh=0 out= gargs=() grc=0 rc envs=() envq= envt= e
   shift
   while (( $# )); do
     case $1 in
       --snapshot) shift; snap=${1-}; need_snap_name "$snap" ;;
+      --env)
+        shift; e=${1-}
+        [[ $e == *=* && ${e%%=*} =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || usage_err "gate: --env needs NAME=VALUE (NAME = ^[A-Za-z_][A-Za-z0-9_]*\$), got '$e'"
+        envs+=("$e") ;;
       --from-github) gh=1 ;;
       --out) shift; out=${1-}; [[ -n $out ]] || usage_err "gate: --out needs a directory" ;;
       --) shift; gargs=("$@"); break ;;
@@ -434,10 +453,14 @@ cmd_gate() {
   local bashp=${C_BASH[$n]} shas=() l vmtxt gcmd
   while IFS= read -r l; do shas+=("$l"); done < <(host_shas "$ROOT")
   vmtxt='{ uname -a; if [ -r /etc/os-release ]; then cat /etc/os-release; else freebsd-version; fi; '
-  vmtxt+="$(printf '%q' "$bashp") --version | head -n 1; printf '%s\\n' $(printf '%q ' "${shas[@]}"); } > ~/vm.txt"
+  for e in "${envs[@]}"; do
+    envq+="${e%%=*}=$(printf '%q' "${e#*=}") "   # NAME=<%q VALUE> prefix of the gate command
+    envt+=" $(printf '%q' "env: $e")"            # extra line of vm.txt
+  done
+  vmtxt+="$(printf '%q' "$bashp") --version | head -n 1; printf '%s\\n' $(printf '%q ' "${shas[@]}")$envt; } > ~/vm.txt"
   rssh "$n" "$RUN_TIMEOUT" "$vmtxt" </dev/null || return $?
 
-  gcmd="rm -rf ~/gate-out; cd ~/kbool && KT_GATE_BASHES=$(printf '%q' "$bashp") timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out $(printf '%q ' "${gargs[@]}")"
+  gcmd="rm -rf ~/gate-out; cd ~/kbool && ${envq}KT_GATE_BASHES=$(printf '%q' "$bashp") timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out $(printf '%q ' "${gargs[@]}")"
   rssh "$n" 9300 "${gcmd% }" </dev/null
   grc=$?
 

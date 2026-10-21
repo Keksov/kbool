@@ -57,7 +57,10 @@ a kill fallback (`timeout -k 30 N …`). A script you write that starts
 children traps EXIT/TERM/INT and stops them. Stop only processes you started
 (by recorded pid) — **never by a name pattern or regex over the process list**
 (L1.2 attempt 2 killed its own tool shells that way; a pattern can just as
-well hit another session's work). Record every pid you start at start time. At the end list strays in both
+well hit another session's work). Record every pid you start at start time.
+This includes orphans of your own runs: an orphan you did not record is
+REPORTED (pid, cmdline, how it arose) and left for the supervisor — even
+when you are sure it is yours (broken twice more in L2.1). At the end list strays in both
 runtimes and the running VMs:
 
 ```bash
@@ -440,6 +443,30 @@ containing a space and a `;` → quoted as before.
 both runtimes; the two new test names; `VMLAB_DRY=1 bash tools/vmlab/vmlab.sh run kb-ubuntu -- 'uname -a; echo $0'` output shown.
 **Timebox.** 30 min.
 
+### L1.1c — vmlab: gate --env, down via ssh  [S] ready
+
+**Goal.** (1) A gate run in a VM under a given environment (L2.4's comma-locale
+run). (2) `down` without the 60-s ACPI wait when the guest is reachable.
+**Read.** `tools/vmlab/vmlab.sh`, `tools/vmlab/README.md`, `tools/vmlab/tests/run.sh`.
+**Write scope.** those three files.
+**Spec.**
+- `gate NAME … --env NAME=VALUE` (repeatable, before `--`): NAME must match
+  `^[A-Za-z_][A-Za-z0-9_]*$` (else rc 2); the pairs are prepended to the
+  remote gate command as `NAME=<printf %q of VALUE>` right before
+  `KT_GATE_BASHES=…`; they are also written into `~/vm.txt` (`env: NAME=VALUE`).
+- `down NAME`: if the VM is running and `ssh … true` answers within the
+  normal connect timeout, first run `sudo -n poweroff || doas -n poweroff || sudo -n shutdown -p now`
+  (whichever works; ssh exit status ignored — the connection drops), then
+  wait ≤ `VMLAB_DOWN_WAIT` for `poweroff` as today; only then ACPI, then hard
+  poweroff, as today.
+- DRY tests: `--env LC_ALL=de_DE.UTF-8` appears %q-quoted in the remote gate
+  line and in vm.txt; a bad NAME → rc 2; `down` order: ssh poweroff → wait →
+  (no ACPI when state becomes poweroff); `down` when ssh fails → ACPI path as before.
+**Acceptance.** `bash tools/vmlab/tests/run.sh` PASS n/n (n > 127) on both
+runtimes; live: `vmlab.sh up kb-alpine && time vmlab.sh down kb-alpine` and
+the same for kb-freebsd (both < 20 s, literal output); `VMLAB_DRY=1 … gate kb-debian --env LC_ALL=de_DE.UTF-8 -- kkore` shown.
+**Timebox.** 45 min.
+
 ### L1.2 — kb-ubuntu: create + provision  [S] ready after L0.6 (package list)
 
 **Goal.** A clean Ubuntu 24.04 lab VM with SSH key access and snapshot `clean`.
@@ -725,17 +752,42 @@ after the change because it expects `#!/bin/bash` → BLOCKED with the list.
 **Note.** Real old-bash checks happen in L4.2.
 **Timebox.** 45 min + gate.
 
-### L2.4 — Linux gate runs, no fixes  [S] draft (needs L2.1)
+### L2.4 — Linux gate runs, no fixes  [S] ready (finalized 2026-10-21 after L2.1)
 
-**Goal.** Every Linux failure recorded with a minimal reproduction.
-**Steps (to be completed by SV after L2.1).** For VM in kb-ubuntu, kb-debian,
-kb-fedora: `bash tools/vmlab/vmlab.sh gate VM` (background, one at a time);
-from each OUT, one row per failed test file into
-`docs/dev/launch/L2_failures.tsv`:
-`vm<TAB>suite<TAB>file<TAB>verdict<TAB>first_fail_line<TAB>repro<TAB>notes`;
-`repro` = the shortest command that shows the failure inside the VM
-(`vmlab.sh run VM -- 'cd ~/kbool && …'`), checked to reproduce. Rows that
-fail on all three VMs are grouped. No fixes, no classification of causes.
+**Goal.** Every Linux failure recorded with a minimal reproduction — the
+input for the L2.5 triage.
+**Read.** `tools/vmlab/README.md` (gate, run, fetch), `ktests/docs/GATE_FOR_AGENTS.md`
+(reading `__GATE__`, cells.tsv, fails.txt), `docs/dev/PORTING.md` §2 (to
+quote a hazard id in `notes` when one obviously matches — no other analysis).
+**Write scope.** `docs/dev/launch/L2_failures.tsv`, `docs/dev/launch/L2_runs.md`; `$SCRATCH`.
+**Steps.**
+1. Full gates, one VM at a time, each `run_in_background`, nothing else running:
+   `bash tools/vmlab/vmlab.sh gate kb-ubuntu -- --rerun-failed 1 all`, then
+   kb-debian, then kb-fedora; then on kb-debian once more with the comma locale:
+   `bash tools/vmlab/vmlab.sh gate kb-debian --env LC_ALL=de_DE.UTF-8 -- --rerun-failed 1 all`
+   (L1.1c).
+2. `L2_runs.md`: per run the OUT dir, the `gate:` header lines (bash, segment
+   start), the two counts lines, the `__GATE__` line, total wall time.
+3. `L2_failures.tsv`, header
+   `vm<TAB>locale<TAB>suite<TAB>file<TAB>verdict<TAB>first_fail_line<TAB>repro<TAB>repro_ok<TAB>notes`;
+   one row per failing (or FLAKY / STRAY / TIMEOUT) test FILE per run.
+   `first_fail_line` = the first `[FAIL]` line of that file (from the cell's
+   fails.txt / log), tabs→spaces, ≤ 200 chars.
+   `repro` = the shortest command that shows it inside the VM, e.g.
+   `cd ~/kbool && bash kcl/tpath/tests/tests.sh -n 7` (find the per-suite
+   runner options in `ktests/docs`), executed once via
+   `vmlab.sh up VM` + `sync` + `run VM -- '<repro>'` + `down`;
+   `repro_ok` = `yes` (failure shown), `no` (passed when run alone), `n/a`
+   (STRAY/TIMEOUT that needs the full gate). Batch the repros per VM (one up/down).
+   `notes` = a PORTING.md hazard id if one obviously matches, the known
+   items (`L2.1-o5` thttpserver 004, `L2.1-o6` tpipe 002 orphan,
+   `kkore/011 Windows-path tests`), or empty. **No cause analysis, no fixes.**
+4. Sort rows by suite, file, vm; a file failing on all three VMs gets
+   `notes` prefix `ALL3;`.
+**Acceptance.** The four `__GATE__` lines in L2_runs.md; `L2_failures.tsv`
+rows = the sum of non-PASS files over the four runs (show the arithmetic);
+every row has `repro_ok` filled; every lab VM `poweroff` at the end; hygiene.
+**Timebox.** 3 h.
 
 ### L*.fix — fix batch template  [S] (filled per batch by O/SV)
 
