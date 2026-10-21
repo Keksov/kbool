@@ -285,7 +285,7 @@
         "L2.5"
       ],
       "card": "L2_triage.md §2 + §7",
-      "status": "dispatched 2026-10-21 (Sonnet)"
+      "status": "DONE 2026-10-21 (Sonnet): tregex S2 enforced in _match1, tfile 042 backslash N/A off Windows; tregex+tfile PASS Windows x2, ubuntu, debian (+de_DE), fedora"
     },
     "L2.6-1": {
       "executor": "S",
@@ -294,7 +294,7 @@
         "L2.5"
       ],
       "card": "L2_triage.md §2 + §7",
-      "status": "planned"
+      "status": "dispatched 2026-10-21 (Sonnet)"
     },
     "L2.7-K": {
       "executor": "O",
