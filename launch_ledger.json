@@ -276,7 +276,7 @@
         "L2.5"
       ],
       "card": "L2_triage.md §2 + §7",
-      "status": "planned"
+      "status": "DONE 2026-10-21 (Sonnet): 10 drive-letter cases N/A off Windows; kkore 698/698 Windows x2 (SV re-run) and on ubuntu; 011 75/75 on ubuntu/debian/fedora/freebsd"
     },
     "L2.6-2": {
       "executor": "S",
@@ -285,7 +285,7 @@
         "L2.5"
       ],
       "card": "L2_triage.md §2 + §7",
-      "status": "planned"
+      "status": "dispatched 2026-10-21 (Sonnet)"
     },
     "L2.6-1": {
       "executor": "S",
