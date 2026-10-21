@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.2+L2.3 DONE; next L2.1 (Opus harness on Linux/FreeBSD)",
+  "status": "in progress — L2.1 DONE; next L2.4 (Sonnet: gate on 3 Linux VMs + de_DE run -> L2_failures.tsv), L1.7 (alpine timers)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -199,6 +199,15 @@
       "card": null,
       "status": "DONE 2026-10-21 (SV): vmlab gate kkore end-to-end on all VMs. Linux (ubuntu 5.2.21, debian 5.2.37, fedora 5.3.9) + alpine clean-gnu: 691/698 (fedora 690: +1 timing), the 7 = Windows-path tests (C: drive spelling, uf_win) -> L2.4; strays are blind (H1). FreeBSD clean-gnu + Alpine clean: no segment starts (env --default-signal: BSD env illegal option -d, busybox unrecognized) = H4 confirmed -> L2.1. Found+fixed: kb-freebsd RTC was local time (FreeBSD_64 default rtcuseutc off; guest clock +3h): create/freebsd.sh --rtc-use-utc on, snapshots rebuilt (clean-gnu deleted, clean replaced, pkg.sh --gnu, clean-gnu retaken)"
     },
+    "L1.7": {
+      "executor": "S",
+      "title": "kb-alpine timer stall when idle (sleep 1 took 5-50 s; linux-virt 6.18 guest): try --paravirt-provider legacy/none, clocksource, kernel cmdline; re-snapshot",
+      "dep": [
+        "L1.6"
+      ],
+      "card": "draft",
+      "status": "planned (found by L2.1)"
+    },
     "L2.1": {
       "executor": "O",
       "title": "ktests harness on Linux (gate, suitejob, strays, runner) + regression test: group-stop KILL deadline under LC_ALL=ru_RU.UTF-8",
@@ -206,7 +215,7 @@
         "L1.6"
       ],
       "card": null,
-      "status": "dispatched 2026-10-21 (Opus)"
+      "status": "DONE 2026-10-21 (Opus + critic round 1): Windows gate SV re-run PASS 18157/18157 (kt-gate/20261021-192622-666895), ktests PASS on all 7 VM targets. The \"5.3.9 TIMEOUT\" was a host sleep (Kernel-Power 42, laptop on battery) -> suspend-aware watchdog (KT_GATE_SUSPEND_GAP 30 s). Open: kb-alpine 049 flake (boot-epoch per snapshot vs wall-clock step; L1.7 timer stalls), kcl/tpipe 002 orphaned sleep 8 (pre-existing race) -> L2.4. Worker broke the recorded-pid rule once more (own orphan killed by cmdline match)"
     },
     "L2.2": {
       "executor": "S",
@@ -604,5 +613,14 @@
       "card": null,
       "status": "planned"
     }
+  },
+  "open": {
+    "L2.1-o1": "kkore/tests/014_FailedDepsAndLookup.sh runs bash -i -c: stops itself (SIGTTIN) on FreeBSD -> TIMEOUT; for L2.4/L2.5",
+    "L2.1-o2": "root tests/tests.sh:119 bare bash (H8) -> an L2.6 batch",
+    "L2.1-o3": "PORTING.md corrections: H6 FreeBSD 15 sed does not strip a literal r; FreeBSD clean has perl (git dep); no /dev/ptmx on FreeBSD; ps -o needs one -o per keyword; new hazards: FreeBSD timeout is a reaper, ssh sessions ignore TSTP/TTIN/TTOU, pkg bash <( ) uses FIFOs in TMPDIR, ps appends (comm) after exec -a; busybox timeout watcher, multi-call binaries break exec -a, setsid no -w/-f, grep no --include; BSD ps etimes +1 s",
+    "L2.1-o4": "ktest.sh pins LC_ALL=C.UTF-8, so H7 cannot fire inside harness runs; locale-dependent behaviour of units must be tested by tests that set the locale themselves",
+    "L2.1-o5": "kcl/thttpserver/tests/004_Server.sh 8/8 handled=7 flake exists with the HEAD harness (2/5 on 5.3.9) - kcl issue",
+    "L2.1-o6": "kcl/tpipe/tests/002_Stop.sh leaves an orphaned sleep 8 when its producer is TERMed (timing-dependent STRAY)",
+    "L2.1-o7": "TaskStop on a background Bash task kills only the tool shell; a gate under timeout survives and the parent watch does not catch it"
   }
 }

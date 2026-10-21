@@ -171,7 +171,7 @@ tzdata, perl, curl, openssl, the nc flavours for the L2.5 probes; FreeBSD:
 | L6.2 | S | DL3: `git mv` internal files to `docs/dev/` per the file list in the card; fix every link; `mdlinks.sh` clean | L6.1 |
 | L6.3 | S | move the current README reference text to `docs/reference.md` verbatim; anchors fixed; doctest still passes | L6.2 |
 | L6.4 | S | collect project numbers → `docs/dev/launch/numbers.json` (tests per runtime from the last gate summary, commits per repo, rounds and findings closed from the ledgers, units, examples) | L5.5 |
-| L6.5 | O | README front door (pitch, Pascal DSL first snippet, why, install, platforms from CI, requirements from tools.tsv), comparison with existing projects, "How it was built" (DL4, numbers from L6.4) | L6.3, L6.4 |
+| L6.5 | O | README front door (pitch, Pascal DSL first snippet, why, install, platforms from CI, requirements from tools.tsv), comparison with existing projects, "How it was built" (DL4, numbers from L6.4). Messaging point (owner, 2026-10-21): **one API across bash versions and platforms** — claim it only as far as the CI matrix proves it; name what still depends on GNU tools (per OG1) | L6.3, L6.4 |
 | L6.6 | S | stale-path / small-fix list from the card (examples README etc.); submodule READMEs point to the kbool front door | L6.2 |
 | L6.7 | S | CHANGELOG drafts per repo from `git log` (grouped by round/phase) | L6.2 |
 | L6.8 | O | fresh-reader critic of README + docs (no repo context) | L6.5–L6.7 |
