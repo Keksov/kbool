@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.4 DONE; L2.5 triage (Opus) running",
+  "status": "in progress — L2.5 DONE; executing L2.6-3 -> L2.6-2 -> L2.6-1 -> L2.7-K -> L2.7-C -> L2.7-P -> L2.7-M -> L2.7-N",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -16,7 +16,10 @@
     "DL7": "default: MIT for kbool, kkore, ktests",
     "DL8": "default: lab tooling in kbool/tools/vmlab/, portability scanner in kbool/tools/porting/; host side plain bash (Git-bash) + VBoxManage.exe + OpenSSH",
     "DL9": "owner 2026-10-20: well-specified technical tasks -> Sonnet 5.5 effort high (Agent model sonnet, effort high), brief = LAUNCH_TASKS.md §0 + one card; design/core layers/triage/public prose -> Opus worker; SV reviews every task",
-    "DL10": "owner 2026-10-20: turn off Memory integrity + hypervisorlaunchtype off (reboot) so VirtualBox gets AMD-V instead of the NEM/Hyper-V backend; rollback after lab work — APPLIED 2026-10-20 by SV on owner order (UAC): HVCI Enabled 1->0, bcd {current} hypervisorlaunchtype (default auto)->off; reboot pending; rollback: HVCI Enabled=1 + bcdedit /set {current} hypervisorlaunchtype auto | after reboot 2026-10-20: HVCI off (services_running 0) but HypervisorPresent=True, VBS status 2: registry DeviceGuard EnableVirtualizationBasedSecurity=1 keeps the hypervisor up despite hypervisorlaunchtype Off (bcd also has isolatedcontext Yes). Next step EnableVirtualizationBasedSecurity 1->0 was DENIED by the auto-mode classifier (Security Weaken) - owner runs scratchpad launch/dl10_vbs.ps1 himself or allows it; then reboot | owner ran dl10_vbs.ps1 (EnableVirtualizationBasedSecurity 1->0) + rebooted: HypervisorPresent=False, VBS 0; dism: Hyper-V/VMP/HypervisorPlatform/WSL/Containers all Disabled. Rollback = HVCI Enabled=1 + EnableVirtualizationBasedSecurity=1 + hypervisorlaunchtype auto + reboot"
+    "DL10": "owner 2026-10-20: turn off Memory integrity + hypervisorlaunchtype off (reboot) so VirtualBox gets AMD-V instead of the NEM/Hyper-V backend; rollback after lab work — APPLIED 2026-10-20 by SV on owner order (UAC): HVCI Enabled 1->0, bcd {current} hypervisorlaunchtype (default auto)->off; reboot pending; rollback: HVCI Enabled=1 + bcdedit /set {current} hypervisorlaunchtype auto | after reboot 2026-10-20: HVCI off (services_running 0) but HypervisorPresent=True, VBS status 2: registry DeviceGuard EnableVirtualizationBasedSecurity=1 keeps the hypervisor up despite hypervisorlaunchtype Off (bcd also has isolatedcontext Yes). Next step EnableVirtualizationBasedSecurity 1->0 was DENIED by the auto-mode classifier (Security Weaken) - owner runs scratchpad launch/dl10_vbs.ps1 himself or allows it; then reboot | owner ran dl10_vbs.ps1 (EnableVirtualizationBasedSecurity 1->0) + rebooted: HypervisorPresent=False, VBS 0; dism: Hyper-V/VMP/HypervisorPlatform/WSL/Containers all Disabled. Rollback = HVCI Enabled=1 + EnableVirtualizationBasedSecurity=1 + hypervisorlaunchtype auto + reboot",
+    "DL11": "owner 2026-10-21 (L2.5 D1): wrappers TGrep/TSed/TAwk strip a trailing CR in text mode on every platform; binary=1 keeps bytes everywhere",
+    "DL12": "owner 2026-10-21 (L2.5 D2): thttpserver second network backend = socat (Windows stays GNU netcat 0.7.1)",
+    "DL13": "owner 2026-10-21 (L2.5 D5): TPipe.stop stops the producer whole tree, fixed now"
   },
   "pending_owner_decisions": {
     "OG1": "L3: GNU-tool policy (recommended: core tool-free; wrappers require GNU tool, resolved by name gsed/gawk/gfind/ggrep; missing tool -> clear error, tests SKIP)",
@@ -264,24 +267,78 @@
         "L2.4"
       ],
       "card": null,
-      "status": "dispatched 2026-10-21 (Opus)"
+      "status": "DONE 2026-10-21 (Opus): docs/dev/launch/L2_triage.md (111 rows: 35 S rule, 1 O, 74 design, 1 flake); decisions D1-D11 in its §7 (owner: D1 strip CR everywhere, D2 socat, D5 fix TPipe.stop now)"
     },
-    "L2.6": {
+    "L2.6-3": {
       "executor": "S",
-      "title": "fix batches (L*.fix template)",
+      "title": "kkore 011 Windows-path cases -> N/A off Windows (R10)",
       "dep": [
         "L2.5"
       ],
-      "card": "template",
+      "card": "L2_triage.md §2 + §7",
       "status": "planned"
     },
-    "L2.7": {
-      "executor": "O",
-      "title": "core / netcat fixes",
+    "L2.6-2": {
+      "executor": "S",
+      "title": "tregex S2 enforced (R7), tfile 042 backslash (R8); R9 dropped (D5)",
       "dep": [
         "L2.5"
       ],
-      "card": null,
+      "card": "L2_triage.md §2 + §7",
+      "status": "planned"
+    },
+    "L2.6-1": {
+      "executor": "S",
+      "title": "wrapper tests C4/C5 (R2-R6) + R4b ttail ps check; R1 dropped (D1)",
+      "dep": [
+        "L2.5"
+      ],
+      "card": "L2_triage.md §2 + §7",
+      "status": "planned"
+    },
+    "L2.7-K": {
+      "executor": "O",
+      "title": "ktests suitejob stray attribution tolerance (C9)",
+      "dep": [
+        "L2.5"
+      ],
+      "card": "brief per task from L2_triage.md",
+      "status": "planned"
+    },
+    "L2.7-C": {
+      "executor": "O",
+      "title": "D1: strip CR in text mode in TUtil/TAwk/TSed/TGrep + C3 tests uniform",
+      "dep": [
+        "L2.5"
+      ],
+      "card": "brief per task from L2_triage.md",
+      "status": "planned"
+    },
+    "L2.7-P": {
+      "executor": "O",
+      "title": "D5: TPipe.stop stops the producer tree",
+      "dep": [
+        "L2.5"
+      ],
+      "card": "brief per task from L2_triage.md",
+      "status": "planned"
+    },
+    "L2.7-M": {
+      "executor": "O",
+      "title": "kcl/math engine portable (mawk) + prefer gawk + non-silent start failure (D3/D4)",
+      "dep": [
+        "L2.5"
+      ],
+      "card": "brief per task from L2_triage.md",
+      "status": "planned"
+    },
+    "L2.7-N": {
+      "executor": "O",
+      "title": "thttpserver socat backend + detect/SKIP (D2)",
+      "dep": [
+        "L2.5"
+      ],
+      "card": "brief per task from L2_triage.md",
       "status": "planned"
     },
     "L2.8": {
