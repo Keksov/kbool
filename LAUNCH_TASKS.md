@@ -21,6 +21,10 @@ Card fields: **Goal** · **Read** (the only files needed) · **Write scope**
 runtimes on this machine: Git-bash 5.2.37 (`C:/bin/Git/usr/bin/bash.exe`,
 what the Bash tool runs) and MSYS2 5.3.9 (`C:/bin/msys64/usr/bin/bash.exe`).
 Since L0.1 the tree is LF-only (`.gitattributes` `eol=lf`); keep it so.
+Check CRs with `git -C R ls-files --eol` (column `w/lf`) or
+`tr -cd '\r' < FILE | wc -c` — **not** with `grep -c $'\r'`, which misses CRs
+under Git-bash (found 2026-10-21). Python on Windows writes CRLF in text mode:
+use `newline='\n'`.
 
 **You execute exactly ONE task card.** Do only what it says. Write only
 inside its *Write scope*; a needed change outside it → stop, report BLOCKED.
