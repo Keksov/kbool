@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.7-K DONE; L2.7-C running; L1.7 (alpine timers) to precede L3",
+  "status": "in progress — L2.7-C DONE; next L2.7-P (TPipe tree stop)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -312,7 +312,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "dispatched 2026-10-22 (Opus)"
+      "status": "DONE 2026-10-22 (Opus, 2 rounds + critic): input-side CR normalization for TAwk (RS) and TSed (prelude), output strip + stdin prefilter for TGrep; deliberate CRs survive; Windows 18295/18295; wrapper suites PASS on ubuntu/debian/fedora; red-first of the owner examples on kb-ubuntu. Leftovers: stale CR wording thead README:280, thead.sh:101, tpipe README:95 (docs); BSD sed t__tsd_cr unchecked (L3)"
     },
     "L2.7-P": {
       "executor": "O",
@@ -321,7 +321,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "planned"
+      "status": "next"
     },
     "L2.7-M": {
       "executor": "O",
