@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-N1 DONE; next L2.7-N3 (S, card + lint)",
+  "status": "in progress — L2.7-N1, N3 DONE; next L2.7-N2 (Opus: TSocatTransport + server factory + the 3 direct nc starts; card lint + critic)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -367,7 +367,7 @@
         "L2.7-N1"
       ],
       "card": "to write",
-      "status": "dispatched 2026-10-22 (Sonnet) with card v2: lint found v1 unexecutable (argv-equality contradiction with BuildArgv -c, probe sites misdescribed, helpers absent in server child shells, 001 not sourcing _ths_socket.sh) - direct nc starts moved to N2"
+      "status": "DONE 2026-10-22 (Sonnet, card v2 after lint): process/fd helpers on kt_proc, backend markers, 004 flake 7/20 -> 0/20; Windows 508/508; full gate 18553/18553; helpers verified on ubuntu + freebsd"
     },
     "L2.7-N2": {
       "executor": "O",
@@ -746,6 +746,9 @@
     "L2.7-M-o2": "pre-existing inf results: expm1 inf -> nan (should be inf), expm1 1e308 -> nan, hypot inf inf -> nan (IEEE inf)",
     "L2.7-H-o1": "kcl/tsed/tests/008 pins rfIgnoreCase locale behaviour (C.UTF-8 vs C) against bare sed; check on VMs without C.UTF-8 (L2.8/L3) - note from kbool-6d",
     "L2.7-M2-o1": "ktests gate on Windows reported STRAY \"could NOT be stopped\" for a hung kcl/tcustomapplication runner (0/0 tests) and left it spinning a core for ~1h40 (WINPID 22252, SV stopped it by pid 2026-10-22): harness defect (stop path on cygwin for a spinning bash) + unknown tcustomapplication hang - investigate (O, ktests)",
-    "L2.7-M2-o2": "kb-fedora timer stalls (sleep 1 up to 21 s) observed while the host had that spinning stray - re-measure with an idle host before blaming the guest (L1.7)"
+    "L2.7-M2-o2": "kb-fedora timer stalls (sleep 1 up to 21 s) observed while the host had that spinning stray - re-measure with an idle host before blaming the guest (L1.7)",
+    "L2.7-N3-o1": "004 fact 5 once case: 1/20 baseline run spawned 3x instead of once (pre-existing, rare)",
+    "L2.7-N3-o2": "one full-gate attempt stalled ~9 min in 004 on 5.2.37: fixture server a ended after 2 requests while the test kept curling a dead port; not reproduced (right after a VM hard poweroff); watch for repeats",
+    "L2.7-N3-o3": "FreeBSD bash 5.3.20 under bash -s: kklass.sh:838 printf write error Bad file descriptor (function-text pipe) - L3"
   }
 }
