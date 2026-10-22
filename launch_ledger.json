@@ -385,7 +385,7 @@
         "L2.7-N2"
       ],
       "card": "brief to write",
-      "status": "planned - before L2.8"
+      "status": "dispatched 2026-10-22 (Opus): brief scratchpad launch/L2.7-G/brief.md (evidence: kt-gate 20261022-092825-1353 cell 006, 20261022-152431-1529 cell 014); fix root cause + Windows-side stop (taskkill by winpid) with red-first fixture"
     },
     "L2.8": {
       "executor": "SV",
@@ -569,7 +569,7 @@
         "L6.1"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "card written (scratchpad launch/L6.2/card.md), Sonnet lint running; dispatch after L2.7-G (ktests ledgers/PLAN move would collide with a worker in ktests)"
     },
     "L6.3": {
       "executor": "S",
@@ -763,6 +763,7 @@
     "L2.7-N2-o1": "Fedora coreutils 9.10: a background `timeout` keeps SIGINT ignored in its child (trap -- \"\" SIGINT) - servers started that way cannot be stopped by INT; TERM works",
     "L2.7-N2-o2": "socat log prefix assumed ` socat[PID] ` (argv[0]); a renamed binary (socat1) would not be parsed",
     "L2.7-N2-o3": "socat burst behaviour (two-slot backlog) unmeasured; a half-closing client is answered only within -t 0.5 s",
-    "L2.7-N2-o4": "SV stopped the hung thttpserver runner (Windows pid 18996, ppid gone, 0 children, since 15:26) by pid; second occurrence today -> task L2.7-G"
+    "L2.7-N2-o4": "SV stopped the hung thttpserver runner (Windows pid 18996, ppid gone, 0 children, since 15:26) by pid; second occurrence today -> task L2.7-G",
+    "L2.7-N2-o5": "PORTING.md §10 status appended (cde44e0) - closes the N2 OPEN about PORTING"
   }
 }
