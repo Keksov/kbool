@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-N cut into N1 (S) -> N3 (S) -> N2 (O + critic); N1 card in lint",
+  "status": "in progress — L2.7-N1 DONE; next L2.7-N3 (S, card + lint)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -358,11 +358,11 @@
         "L2.7-M2"
       ],
       "card": "scratchpad launch/L2.7-N1/card.md (card-lint by Sonnet first, DL9a)",
-      "status": "card lint running"
+      "status": "DONE 2026-10-22 (Sonnet, card v2 after lint, 1 BLOCKED -> option B): backend detection + refuse + SKIP; Windows 508/508; Ubuntu/Fedora PASS; full gate FLAKY only on pre-existing thttpserver 004 handled=7 (L2.1-o5; HEAD 2/10 vs 3/10) - accepted, fix moved to N3"
     },
     "L2.7-N3": {
       "executor": "S",
-      "title": "thttpserver tests backend-neutral (no cygwin /proc, ths_listen_argv, backend markers)",
+      "title": "thttpserver tests backend-neutral (no cygwin /proc, ths_listen_argv, backend markers) + fix the 004 \"8 parallel clients handled=7\" flake (reads access.log before the last OnLog line)",
       "dep": [
         "L2.7-N1"
       ],
