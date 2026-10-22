@@ -12,9 +12,10 @@ RTL/FCL classes. Pure bash (5.2 and 5.3 are tested), fork-free on its hot paths.
 | [`kcl/`](kcl/README.md) | 29 units in 26 folders: ports of FPC/Delphi classes (`TList`, `TStringList`, `TDictionary`, `TIniFile`, `TPath`, …) and CLI-tool wrappers (`TGrep`, `TSed`, `TAwk`, …) | [kcl/README.md](kcl/README.md) |
 | `ktests/` | the test framework and runner every suite uses | `ktests/ktest.sh` |
 | `tests/tests.sh` | the master runner: every `*/tests/tests.sh` of the tree | [Running the tests](#running-the-tests) |
+| [`docs/dev/`](docs/dev/README.md) | the development history: plans, ledgers, reviews, coverage notes | [docs/dev/README.md](docs/dev/README.md) |
 
 The design of units and `uses` — every decision, with its reasons — is
-[kklass/USES_PLAN.md](kklass/USES_PLAN.md).
+[kklass/USES_PLAN.md](kklass/docs/dev/USES_PLAN.md).
 
 ## Install
 

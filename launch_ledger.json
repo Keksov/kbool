@@ -219,8 +219,8 @@
       "dep": [
         "L1.6"
       ],
-      "card": "draft",
-      "status": "planned (found by L2.1)"
+      "card": "scratchpad launch/L1.7/card.md",
+      "status": "card written (scratchpad launch/L1.7/card.md), Sonnet lint running; dispatch after lint (VM-only task, may run beside L6.2 which runs no VM/gate)"
     },
     "L2.1": {
       "executor": "O",
@@ -579,7 +579,7 @@
         "L6.1"
       ],
       "card": "draft",
-      "status": "card v2 after lint (3 blockers fixed: doctest command was the master sweep; new docs/dev/README.md must be git add -N; root launch/optimization files excluded -> L6.2b by SV); 135 files kcl 126/kklass 5/ktests 4 (+SESSION_PROMPT.md x2); dispatch after L2.7-G with a clean tree"
+      "status": "dispatched 2026-10-22 (Sonnet, card v2)"
     },
     "L6.2b": {
       "executor": "SV",
