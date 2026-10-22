@@ -569,7 +569,16 @@
         "L6.1"
       ],
       "card": "draft",
-      "status": "card written (scratchpad launch/L6.2/card.md), Sonnet lint running; dispatch after L2.7-G (ktests ledgers/PLAN move would collide with a worker in ktests)"
+      "status": "card v2 after lint (3 blockers fixed: doctest command was the master sweep; new docs/dev/README.md must be git add -N; root launch/optimization files excluded -> L6.2b by SV); 135 files kcl 126/kklass 5/ktests 4 (+SESSION_PROMPT.md x2); dispatch after L2.7-G with a clean tree"
+    },
+    "L6.2b": {
+      "executor": "SV",
+      "title": "move the kbool root's LAUNCH_PLAN.md, LAUNCH_TASKS.md, launch_ledger.json, OPTIMIZATION_PLAN.md, optimization_ledger.json to docs/dev/ + fix README/SECURITY links, the preamble's 'LAUNCH_TASKS.md §0' mentions, my node paths; tell kbool-6d",
+      "dep": [
+        "L6.2"
+      ],
+      "card": null,
+      "status": "planned"
     },
     "L6.3": {
       "executor": "S",
