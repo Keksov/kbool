@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-20",
-  "status": "in progress — L2.7-C DONE; next L2.7-P (TPipe tree stop)",
+  "status": "in progress — L2.7-P DONE; next L2.7-M (math under mawk)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -321,7 +321,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "next"
+      "status": "DONE 2026-10-22 (Opus + A/B check): EOF-path rc 1 flake 0/20 in both arms (pre-existing, rare); old code 10/10 tpipe cells STRAY, new 0"
     },
     "L2.7-M": {
       "executor": "O",
@@ -330,7 +330,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "planned"
+      "status": "next"
     },
     "L2.7-N": {
       "executor": "O",
@@ -691,6 +691,9 @@
     "L2.1-o7": "TaskStop on a background Bash task kills only the tool shell; a gate under timeout survives and the parent watch does not catch it",
     "L2.7-K-o1": "linux backend recomputes boot epoch per snapshot (EPOCHREALTIME - uptime): a wall-clock step between window start and scan shifts starts (kb-alpine 049); correct fix = monotonic time base (kt_proc_stamp, --since-st, suitejob stores converted stamps) - design task, after L1.7",
     "L2.7-K-o2": "ktests 052 wdterm fails 2/3 under full-suite load on kb-alpine (rescue watchdog not stopping b_hang); passes alone 6/6 - suspect Alpine timer stalls (L1.7)",
-    "L2.7-K-o3": "procps lstart on Linux up to ~1 s early (btime whole seconds) - only with forced ps backend; documented"
+    "L2.7-K-o3": "procps lstart on Linux up to ~1 s early (btime whole seconds) - only with forced ps backend; documented",
+    "L2.7-P-o1": "ktests 053_GateReports flaked on 5.2.37 under a full gate (inner gate killed by timeout 150, rc 137) and left orphan ktests.sh fixture (Windows pid 11760) - SV stopped it by pid 2026-10-22",
+    "L2.7-P-o2": "Alpine tgrep 007_Bench over its timing ceiling (11-12x vs 10x) - Alpine timer issue (L1.7)?",
+    "L2.7-P-o3": "Linux bash 5.2 EOF-path sink rc 1 flake (wait procsub non-zero?) - rare, pre-existing, seen on reused VMs; watch at L2.8"
   }
 }
