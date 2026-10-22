@@ -551,7 +551,7 @@
         "L0.1"
       ],
       "card": "draft",
-      "status": "dispatched 2026-10-22 (Sonnet) with card v2 after lint (directory links need no README; tracked-set + exact-case existence; Cyrillic slug table under LC_ALL=C; empty/absolute targets skipped; #L<n> on non-md; no setext; no sort); runs beside N2 (docs tool, no gate)"
+      "status": "DONE 2026-10-22 (Sonnet, card v2): 91/91 tests both runtimes; tree 124 files/687 links in 6.9 s, byte-identical on 5.2/5.3; baseline 133 broken = 120 FPC .html refs (tcustomapplication docs, filter in L6.2) + 10 ktests/docs links to MIGRATION_GUIDE.md/QUICK_REFERENCE.md (missing files) + 3 tutil anchor typos (#33-c3-…set--u--and… vs set--u-and) -> L6.6"
     },
     "L6.2": {
       "executor": "S",
@@ -749,6 +749,7 @@
     "L2.7-M2-o2": "kb-fedora timer stalls (sleep 1 up to 21 s) observed while the host had that spinning stray - re-measure with an idle host before blaming the guest (L1.7)",
     "L2.7-N3-o1": "004 fact 5 once case: 1/20 baseline run spawned 3x instead of once (pre-existing, rare)",
     "L2.7-N3-o2": "one full-gate attempt stalled ~9 min in 004 on 5.2.37: fixture server a ended after 2 requests while the test kept curling a dead port; not reproduced (right after a VM hard poweroff); watch for repeats",
-    "L2.7-N3-o3": "FreeBSD bash 5.3.20 under bash -s: kklass.sh:838 printf write error Bad file descriptor (function-text pipe) - L3"
+    "L2.7-N3-o3": "FreeBSD bash 5.3.20 under bash -s: kklass.sh:838 printf write error Bad file descriptor (function-text pipe) - L3",
+    "L6.1-o1": "mdlinks: non-Cyrillic non-ASCII heading chars (µ ² ⚠️ 👋 «») are dropped from slugs where GitHub may keep some; no link targets them today"
   }
 }
