@@ -519,3 +519,30 @@ Debian de_DE 24.
 | D11 | keep kkore's USERPROFILE/ProgramData handling | — |
 
 Execution order (one gate slot): L2.6-3 → L2.6-2 → L2.6-1 (S) → L2.7-K → L2.7-C → L2.7-P → L2.7-M → L2.7-N (O; an Opus critic after L2.7-K, L2.7-C and L2.7-N).
+
+## 8. Re-verification of the netcat decision (owner's doubt, 2026-10-22)
+
+The owner asked whether "nc under Windows can do something nc under Linux cannot" really
+justifies a socat backend. Re-checked against primary sources and a repeated probe:
+
+- The Windows `nc` is **GNU Netcat 0.7.1** (`nc.exe --version`), a portable program also packaged
+  as Homebrew `netcat` 0.7.1, FreeBSD `net/gnetcat`, Arch `gnu-netcat`, MacPorts `gnetcat`,
+  Guix — just not by Debian/Ubuntu/Fedora/Alpine. So the gap is "GNU netcat vs the netcats the
+  mainstream Linux distros ship", not Windows vs Linux.
+- OpenBSD nc, from the man page and `usr.bin/nc/netcat.c`: `-w` has no effect on `-l` (accept
+  has no timeout); `local_listen()` sets `SO_REUSEPORT`; the listening socket stays open during
+  `readwrite()` and is closed only at exit (without `-k`).
+- Consequence, measured on kb-debian (OpenBSD nc 1.229, 20 runs): while A serves c1 there is
+  1 LISTEN socket; after B starts there are 2; c2 is served by B in **10/20** runs and lands in
+  A's backlog (never served) in **10/20** — the Linux `SO_REUSEPORT` load-balancing coin flip.
+  §3.1's "works on 1.226, fails on 1.229/1.237" was luck of single samples, not a version
+  difference: OpenBSD nc is unfit for the two-slot model on every version, and that cannot be
+  fixed from bash. socat 1.8.0.3 and ncat 7.95 (10 runs each): 0 LISTEN sockets during A's
+  connection, B binds, c2 → B 10/10 (the bind succeeding without SO_REUSEPORT is the proof that
+  A closed its listener).
+- ncat remains the only other candidate (no accept timeout → a bash-side `timeout` wrapper; it
+  half-closes on stdin EOF and lingers until the client closes). socat matches GNU nc's one-shot
+  STDIO semantics natively. **D2 stands**: GNU netcat first (documented as available on every
+  platform, not "Windows"), socat second. An architectural alternative (one persistent
+  `fork` listener + a relay to the server process, usable with any nc that has `-e`) is a
+  redesign, not for the launch.
