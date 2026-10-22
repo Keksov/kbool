@@ -417,3 +417,32 @@ Needs design (O):
   measure the library separately.
 * **L2.1 scope** should include H5-H8 (harness one-liners) and H4, which
   blocks FreeBSD/Alpine-clean/macOS gates entirely — L3.1 depends on it.
+
+## 10. Status after L2.7 (2026-10-22)
+
+Implemented since this document was written (details: `docs/dev/launch/L2_triage.md`
+§7–§8 and the ledger):
+
+- **H1/H4–H8 (harness)**: `ktests/ktest_proc.sh` process table with cygwin / linux / ps
+  backends; gate segments start via `env --default-signal` | perl | `set -m`; the stray
+  check is real on Linux and FreeBSD (L2.1, L2.7-K).
+- **H7 (comma locale)**: fixed (L0.7); the group-stop deadline has a regression test.
+- **Netcat (§4)**: D2 — GNU netcat 0.7.1 stays the first backend (packaged as Homebrew
+  `netcat`, FreeBSD `net/gnetcat`, Arch `gnu-netcat`, MSYS2 `gnu-netcat`; not by
+  Debian/Ubuntu/Fedora/Alpine); **socat** is the second backend (`TSocatTransport`,
+  L2.7-N2); OpenBSD nc / ncat / busybox nc are refused by name — OpenBSD nc keeps its
+  listening socket open while serving and sets SO_REUSEPORT, so the two-slot model loses
+  every second client (measured 10/20, §8 of the triage). Detection precedence: explicit
+  nc (`NcBinary`/`KCL_NC`) > explicit socat (`SocatBinary`/`KCL_SOCAT`, must support
+  `accept-timeout`, socat ≥ 1.7.4) > auto (GNU nc on PATH, else socat on PATH); the exact
+  refusal texts are in `kcl/thttpserver/README.md` "Network backend".
+- **CR (§2, wrappers)**: DL11 — TGrep/TSed/TAwk strip the trailing CR in text mode on
+  every platform (input-side for sed/awk, output-side for grep); `binary = 1` keeps bytes
+  everywhere (L2.7-C).
+- **kcl/math under mawk**: the engine is mawk-compatible (flat dispatch, `-W interactive`,
+  NaN guards — gawk orders NaN greater than numbers, mawk's `x!=x` is false), gawk preferred
+  when present, `MATH_FE_ERROR` on a failed start, the 4095-character request limit only for
+  mawk dated before 20250131 (L2.7-M, M2).
+- **TPipe.stop** stops the producer's whole tree (DL13, L2.7-P).
+- Linux after L2.6/L2.7: Ubuntu/Debian/Fedora full gates are expected clean except
+  the flakes listed in the ledger's `open`; the closing measurement is L2.8.
