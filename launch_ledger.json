@@ -367,11 +367,11 @@
         "L2.7-N1"
       ],
       "card": "to write",
-      "status": "planned"
+      "status": "dispatched 2026-10-22 (Sonnet) with card v2: lint found v1 unexecutable (argv-equality contradiction with BuildArgv -c, probe sites misdescribed, helpers absent in server child shells, 001 not sourcing _ths_socket.sh) - direct nc starts moved to N2"
     },
     "L2.7-N2": {
       "executor": "O",
-      "title": "TSocatTransport + server factory (DL12); critic after",
+      "title": "TSocatTransport + server factory (DL12); critic after + the three direct netcat starts in tests (004:687, 005:230, 006:780) via the transport argv",
       "dep": [
         "L2.7-N3"
       ],
