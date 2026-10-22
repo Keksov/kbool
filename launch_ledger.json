@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-M DONE (critic pending); gate slot handed to kbool-6d for L2.7-H; then L2.7-N",
+  "status": "in progress — L2.7-H DONE (kbool-6d, a29b2e8); L2.7-M2 running; then L2.7-N",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -332,6 +332,15 @@
       ],
       "card": "brief per task from L2_triage.md",
       "status": "DONE 2026-10-22 (Opus; interrupted once by the host crash): flat dispatch, gawk preferred, -W interactive, MATH_FE_ERROR, NaN audit + non-finite guards, mawk 4095-char request limit refused fast; Windows 18347/18347, 3 Linux VMs + mawk-only path PASS; matrix 34 hangs -> 0. Committed before its critic review (DL9a) to free the gate slot for L2.7-H; critic runs on the committed diff, findings -> follow-up after L2.7-H"
+    },
+    "L2.7-M2": {
+      "executor": "O",
+      "title": "L2.7-M critic follow-up: coproc kill reaches awk (exec), exact mawk line limit, limit only for real mawk (busybox), test 019 C1b mutation-proof, IFS, rewrite perf, failed-start caching, IEEE doc claims, -0 spellings, ldexp LONG_MIN",
+      "dep": [
+        "L2.7-M"
+      ],
+      "card": "scratchpad launch/L2.7-M2/brief.md",
+      "status": "dispatched 2026-10-22 (Opus)"
     },
     "L2.7-H": {
       "executor": "O",
@@ -716,6 +725,7 @@
     "L2.7-P-o2": "Alpine tgrep 007_Bench over its timing ceiling (11-12x vs 10x) - Alpine timer issue (L1.7)?",
     "L2.7-P-o3": "Linux bash 5.2 EOF-path sink rc 1 flake (wait procsub non-zero?) - rare, pre-existing, seen on reused VMs; watch at L2.8",
     "L2.7-M-o1": "mawk: statistics over > ~200 values (request > 4095 chars) is rc 1; a chunked accumulator protocol would lift it (design, not done)",
-    "L2.7-M-o2": "pre-existing inf results: expm1 inf -> nan (should be inf), expm1 1e308 -> nan, hypot inf inf -> nan (IEEE inf)"
+    "L2.7-M-o2": "pre-existing inf results: expm1 inf -> nan (should be inf), expm1 1e308 -> nan, hypot inf inf -> nan (IEEE inf)",
+    "L2.7-H-o1": "kcl/tsed/tests/008 pins rfIgnoreCase locale behaviour (C.UTF-8 vs C) against bare sed; check on VMs without C.UTF-8 (L2.8/L3) - note from kbool-6d"
   }
 }
