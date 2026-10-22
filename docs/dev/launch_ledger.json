@@ -597,7 +597,7 @@
         "L6.2"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "card written (scratchpad launch/L6.3/card.md: README lines 71-382 -> docs/reference.md verbatim, kkore 015 file list extended), Sonnet lint running; docs-only, may run beside L1.7; doctest gate by SV after"
     },
     "L6.4": {
       "executor": "S",
@@ -606,7 +606,7 @@
         "L5.5"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "card written (scratchpad launch/L6.4/card.md: tools/porting/numbers.sh -> docs/dev/launch/numbers.json with sources), Sonnet lint running"
     },
     "L6.5": {
       "executor": "O",
