@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-M2 DONE; next L2.7-N (cut into N1/N2/N3, card-lint, critic after N2)",
+  "status": "in progress — L2.7-N cut into N1 (S) -> N3 (S) -> N2 (O + critic); N1 card in lint",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -351,13 +351,31 @@
       "card": "kcl/tutil/HELPERS_PLAN.md s2; brief scratchpad launch/L2.7-H/brief.md",
       "status": "DONE 2026-10-22 (Opus, 3 rounds + critic): kcl 8928a1b — TSed.quoteRe/quoteRepl/addReplace/replace/replaceInFile, _exprs marker + _rfrom/_rto/_rflags, escaping in buildArgv at build time; tutil registry pins = seven suffixes. Built in a private tree copy while the L2.7-M gate ran. Gates: 20261022-083528-1679 PASS 6 cells 1612/1612 (tsed 315->401), final 20261022-084902-1021 PASS 16 cells 4442/4442 (tsed 402). Critic: no blocker, 10 findings (F1 locale note+test, F2 docs, F6 quoteRe dialect fail closed, F10 wording fixed; 6 hardening items open in kcl/tsed/tsed_ledger.json phases[H1].open). Measured: rfIgnoreCase folds non-ASCII only under UTF-8 LC_CTYPE."
     },
-    "L2.7-N": {
-      "executor": "O",
-      "title": "thttpserver socat backend + detect/SKIP (D2)",
+    "L2.7-N1": {
+      "executor": "S",
+      "title": "thttpserver backend detection (GNU nc identity) + refuse + SKIP with reason; Windows unchanged",
       "dep": [
-        "L2.5"
+        "L2.7-M2"
       ],
-      "card": "brief per task from L2_triage.md",
+      "card": "scratchpad launch/L2.7-N1/card.md (card-lint by Sonnet first, DL9a)",
+      "status": "card lint running"
+    },
+    "L2.7-N3": {
+      "executor": "S",
+      "title": "thttpserver tests backend-neutral (no cygwin /proc, ths_listen_argv, backend markers)",
+      "dep": [
+        "L2.7-N1"
+      ],
+      "card": "to write",
+      "status": "planned"
+    },
+    "L2.7-N2": {
+      "executor": "O",
+      "title": "TSocatTransport + server factory (DL12); critic after",
+      "dep": [
+        "L2.7-N3"
+      ],
+      "card": "to write",
       "status": "planned"
     },
     "L2.8": {
