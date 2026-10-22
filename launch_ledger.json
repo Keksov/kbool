@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-N1, N3 DONE; next L2.7-N2 (Opus: TSocatTransport + server factory + the 3 direct nc starts; card lint + critic)",
+  "status": "in progress — L2.7-N2 (socat backend) running; then critic, L1.7, L2.8",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -376,7 +376,7 @@
         "L2.7-N3"
       ],
       "card": "to write",
-      "status": "planned"
+      "status": "dispatched 2026-10-22 (Opus) with brief v2 after lint: lint found 2 blockers (ths_have_backend always sets KCL_NC -> Linux would SKIP everything under the explicit-nc rule; missing-nc+no-socat result undefined) + precedence/WHY/markers/-t/bench/005:285 gaps - all decided in v2; step 0 = red-first + socat line measurements in VMs"
     },
     "L2.8": {
       "executor": "SV",
