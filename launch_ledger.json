@@ -551,7 +551,7 @@
         "L0.1"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "dispatched 2026-10-22 (Sonnet) with card v2 after lint (directory links need no README; tracked-set + exact-case existence; Cyrillic slug table under LC_ALL=C; empty/absolute targets skipped; #L<n> on non-md; no setext; no sort); runs beside N2 (docs tool, no gate)"
     },
     "L6.2": {
       "executor": "S",
