@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7 ALL DONE (K,C,P,M,M2,H,N1,N3,N2); next L2.7-G (runner hang), L6.2 (docs/dev move), L1.7, L2.8",
+  "status": "in progress — L2.7-G DONE; next L6.2 (docs/dev move, S), then L6.2b (SV), L1.7, L2.8",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -386,7 +386,7 @@
         "L2.7-N2"
       ],
       "card": "brief to write",
-      "status": "round 2 (2026-10-22): root cause = cygwin FIFO open/close owner-handoff wedge in Git for Windows msys 3.6.3 (ktest_runner.sh:893/:918; 2/2689 under Windows-level teardown churn; MSYS2 3.6.9 0/2000; wedged process ignores TERM+KILL); 3b done: kt_proc_winkill (taskkill by winpid) in strays/suitejob stop paths, red-first both runtimes, 057 + deaf/deafjob fixtures; decisions: O5 + 3c early start-timeout (120 s) now, O1 anonymous-pipe watchdog = task L2.7-G2 later, O4 = owner recommendation"
+      "status": "DONE 2026-10-22 (Opus, 3 rounds + critic): cygwin kill -f -9 stop path, surviving leader -> STRAY, start grace with sparse looks; Windows 18621/18621, ubuntu 664, freebsd 663"
     },
     "L2.7-G2": {
       "executor": "O",
@@ -785,6 +785,10 @@
     "L2.7-N2-o4": "SV stopped the hung thttpserver runner (Windows pid 18996, ppid gone, 0 children, since 15:26) by pid; second occurrence today -> task L2.7-G",
     "L2.7-N2-o5": "PORTING.md §10 status appended (cde44e0) - closes the N2 OPEN about PORTING",
     "L2.7-G-o1": "SV stopped the worker's orphan fork loop (MSYS2 winpid 20420) by pid; workers must pid-file every churn subshell",
-    "L2.7-G-o2": "kcl/thttpserver tests use FIFOs too: the same wedge can hit them on Git-bash 5.2"
+    "L2.7-G-o2": "kcl/thttpserver tests use FIFOs too: the same wedge can hit them on Git-bash 5.2",
+    "L2.7-G-o3": "one unexplained CRASH in a full gate: 5.2 kcl/thttpserver runner got TERM (rc 143) after 11 s, empty log, no strays; not reproduced in 3 runs; hypothesis: thttpserver tests kill -TERM $(<pid file) with a reused cygwin pid - watch at L2.8",
+    "L2.7-G-o4": "a wedged/suspended process slows every cygwin stray scan of its runtime by ~1 s per scan (per-process argv wait)",
+    "L2.7-G-o5": "ktests cell time grew ~194 s -> ~359 s per runtime (057: nested gates, 18 s silentalive, deadstart grace) - shrink later",
+    "L2.7-G-o6": "056 busybox-timeout check (life=1.6 s) is load-sensitive; failed once in a direct combined run, passes in gates"
   }
 }
