@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-M resumed after host crash",
+  "status": "in progress — L2.7-M DONE (critic pending); gate slot handed to kbool-6d for L2.7-H; then L2.7-N",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -331,7 +331,7 @@
         "L2.5"
       ],
       "card": "brief per task from L2_triage.md",
-      "status": "interrupted 2026-10-22 07:10 by a host crash: the worker probe (nan/inf matrix on the host) made gawk eat ~16 GB. Root cause: gawk NaN>0 is true -> _ipow while(e>0) infinite for e=nan (and e=inf); reachable via math.futureValue/presentValue/payment n=nan|inf. Tree: math.sh dispatch flattening only (uncommitted). Resumed with VM-only risky probes (ulimit -v) + _ipow guard in scope"
+      "status": "DONE 2026-10-22 (Opus; interrupted once by the host crash): flat dispatch, gawk preferred, -W interactive, MATH_FE_ERROR, NaN audit + non-finite guards, mawk 4095-char request limit refused fast; Windows 18347/18347, 3 Linux VMs + mawk-only path PASS; matrix 34 hangs -> 0. Committed before its critic review (DL9a) to free the gate slot for L2.7-H; critic runs on the committed diff, findings -> follow-up after L2.7-H"
     },
     "L2.7-H": {
       "executor": "O",
@@ -714,6 +714,8 @@
     "L2.7-K-o3": "procps lstart on Linux up to ~1 s early (btime whole seconds) - only with forced ps backend; documented",
     "L2.7-P-o1": "ktests 053_GateReports flaked on 5.2.37 under a full gate (inner gate killed by timeout 150, rc 137) and left orphan ktests.sh fixture (Windows pid 11760) - SV stopped it by pid 2026-10-22",
     "L2.7-P-o2": "Alpine tgrep 007_Bench over its timing ceiling (11-12x vs 10x) - Alpine timer issue (L1.7)?",
-    "L2.7-P-o3": "Linux bash 5.2 EOF-path sink rc 1 flake (wait procsub non-zero?) - rare, pre-existing, seen on reused VMs; watch at L2.8"
+    "L2.7-P-o3": "Linux bash 5.2 EOF-path sink rc 1 flake (wait procsub non-zero?) - rare, pre-existing, seen on reused VMs; watch at L2.8",
+    "L2.7-M-o1": "mawk: statistics over > ~200 values (request > 4095 chars) is rc 1; a chunked accumulator protocol would lift it (design, not done)",
+    "L2.7-M-o2": "pre-existing inf results: expm1 inf -> nan (should be inf), expm1 1e308 -> nan, hypot inf inf -> nan (IEEE inf)"
   }
 }
