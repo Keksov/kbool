@@ -340,7 +340,7 @@
         "L2.7-C"
       ],
       "card": "kcl/tutil/HELPERS_PLAN.md s2; brief scratchpad launch/L2.7-H/brief.md",
-      "status": "running 2026-10-22 (Opus; inserted by owner request 'the sooner the better'; implementation overlaps the L2.7-M gate, its own gate waits for the slot; critic after)"
+      "status": "DONE 2026-10-22 (Opus, 3 rounds + critic): kcl 8928a1b — TSed.quoteRe/quoteRepl/addReplace/replace/replaceInFile, _exprs marker + _rfrom/_rto/_rflags, escaping in buildArgv at build time; tutil registry pins = seven suffixes. Built in a private tree copy while the L2.7-M gate ran. Gates: 20261022-083528-1679 PASS 6 cells 1612/1612 (tsed 315->401), final 20261022-084902-1021 PASS 16 cells 4442/4442 (tsed 402). Critic: no blocker, 10 findings (F1 locale note+test, F2 docs, F6 quoteRe dialect fail closed, F10 wording fixed; 6 hardening items open in kcl/tsed/tsed_ledger.json phases[H1].open). Measured: rfIgnoreCase folds non-ASCII only under UTF-8 LC_CTYPE."
     },
     "L2.7-N": {
       "executor": "O",
