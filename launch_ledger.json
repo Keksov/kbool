@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-N2 (socat backend) running; then critic, L1.7, L2.8",
+  "status": "in progress — L2.7 ALL DONE (K,C,P,M,M2,H,N1,N3,N2); next L2.7-G (runner hang), L6.2 (docs/dev move), L1.7, L2.8",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -376,7 +376,16 @@
         "L2.7-N3"
       ],
       "card": "to write",
-      "status": "dispatched 2026-10-22 (Opus) with brief v2 after lint: lint found 2 blockers (ths_have_backend always sets KCL_NC -> Linux would SKIP everything under the explicit-nc rule; missing-nc+no-socat result undefined) + precedence/WHY/markers/-t/bench/005:285 gaps - all decided in v2; step 0 = red-first + socat line measurements in VMs"
+      "status": "DONE 2026-10-22 (Opus + critic round 1, 8 fixes): socket cases run on 3 Linux VMs 533/533; Windows full 18603/18603; FreeBSD 494/528 known noise; kcl 542de10"
+    },
+    "L2.7-G": {
+      "executor": "O",
+      "title": "ktests runner hang at start on Windows 5.2 (ktests.sh produces nothing, no children, gate STRAY 'could NOT be stopped'): twice today (tcustomapplication 09:29, thttpserver 15:26); diagnose + make the gate stop it",
+      "dep": [
+        "L2.7-N2"
+      ],
+      "card": "brief to write",
+      "status": "planned - before L2.8"
     },
     "L2.8": {
       "executor": "SV",
@@ -750,6 +759,10 @@
     "L2.7-N3-o1": "004 fact 5 once case: 1/20 baseline run spawned 3x instead of once (pre-existing, rare)",
     "L2.7-N3-o2": "one full-gate attempt stalled ~9 min in 004 on 5.2.37: fixture server a ended after 2 requests while the test kept curling a dead port; not reproduced (right after a VM hard poweroff); watch for repeats",
     "L2.7-N3-o3": "FreeBSD bash 5.3.20 under bash -s: kklass.sh:838 printf write error Bad file descriptor (function-text pipe) - L3",
-    "L6.1-o1": "mdlinks: non-Cyrillic non-ASCII heading chars (µ ² ⚠️ 👋 «») are dropped from slugs where GitHub may keep some; no link targets them today"
+    "L6.1-o1": "mdlinks: non-Cyrillic non-ASCII heading chars (µ ² ⚠️ 👋 «») are dropped from slugs where GitHub may keep some; no link targets them today",
+    "L2.7-N2-o1": "Fedora coreutils 9.10: a background `timeout` keeps SIGINT ignored in its child (trap -- \"\" SIGINT) - servers started that way cannot be stopped by INT; TERM works",
+    "L2.7-N2-o2": "socat log prefix assumed ` socat[PID] ` (argv[0]); a renamed binary (socat1) would not be parsed",
+    "L2.7-N2-o3": "socat burst behaviour (two-slot backlog) unmeasured; a half-closing client is answered only within -t 0.5 s",
+    "L2.7-N2-o4": "SV stopped the hung thttpserver runner (Windows pid 18996, ppid gone, 0 children, since 15:26) by pid; second occurrence today -> task L2.7-G"
   }
 }
