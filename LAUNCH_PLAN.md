@@ -88,6 +88,31 @@ Rules:
 * **One gate at a time on the machine**, and no Windows gate while a VM gate
   runs (shared CPU — timing tests). One lab VM running at a time by default.
 
+**DL9a — delegation rules from experience (owner, 2026-10-22)**, after L0–L2.7:
+
+1. **Opus as analyst and critic — always worth it.** Analysis tasks (PORTING,
+   triage) and an independent read-only **critic after every O task that
+   touches a core layer** (kkore, kklass runtime, ktests harness) or that is
+   large (> ~300 changed lines). The critic is cheap relative to the task and
+   found what the worker and the gate did not (L2.1: 12 findings; L2.7-C: the
+   change met the tests but not the owner's intent). A small reviewed diff
+   (e.g. L2.7-K, 85 lines) may skip the critic — the SV records why.
+2. **Opus for large changes — but cut small.** An O task should be one
+   subsystem × one concern, ideally ≤ ~300 changed lines, each with its own
+   gate and commit. L2.1 (25 files, +940) showed that a regression in a big
+   diff costs hours to find and every review round risks a new one.
+3. **Sonnet can take more.** With a card that states goal, checks and stop
+   rules, Sonnet High handled long multi-step work with uncertainty (the five
+   lab VMs, console automation). Default new tasks to S when the card can be
+   written; O only for design, judgment and the core layers.
+4. **Card quality is the main lever.** Most returns (BLOCKED/PARTIAL/rework)
+   came from gaps in the SV's cards, not from the executors. Before dispatching
+   a non-trivial card, let a Sonnet pass "find ambiguities, unverifiable
+   criteria and wrong assumptions in this card" and fix what it finds.
+5. **Check a "uniform behaviour" decision against the owner's own motivating
+   examples as real-tool tests** (L2.7-C round 1 passed every test and missed
+   them).
+
 ## 4. Phases and tasks
 
 `dep` = tasks that must be committed (or, for SV/OW items, done) first.
