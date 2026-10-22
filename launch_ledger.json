@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
-  "updated": "2026-10-20",
+  "updated": "2026-10-22",
   "status": "in progress — L2.7-M resumed after host crash",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
@@ -333,6 +333,15 @@
       "card": "brief per task from L2_triage.md",
       "status": "interrupted 2026-10-22 07:10 by a host crash: the worker probe (nan/inf matrix on the host) made gawk eat ~16 GB. Root cause: gawk NaN>0 is true -> _ipow while(e>0) infinite for e=nan (and e=inf); reachable via math.futureValue/presentValue/payment n=nan|inf. Tree: math.sh dispatch flattening only (uncommitted). Resumed with VM-only risky probes (ulimit -v) + _ipow guard in scope"
     },
+    "L2.7-H": {
+      "executor": "O",
+      "title": "HELPERS_PLAN H1: TSed literal replace (quoteRe, quoteRepl, addReplace, TSed.replace, TSed.replaceInFile); _exprs -> tagged records",
+      "dep": [
+        "L2.7-C"
+      ],
+      "card": "kcl/tutil/HELPERS_PLAN.md s2; brief scratchpad launch/L2.7-H/brief.md",
+      "status": "running 2026-10-22 (Opus; inserted by owner request 'the sooner the better'; implementation overlaps the L2.7-M gate, its own gate waits for the slot; critic after)"
+    },
     "L2.7-N": {
       "executor": "O",
       "title": "thttpserver socat backend + detect/SKIP (D2)",
@@ -496,6 +505,16 @@
         "L5.4"
       ],
       "card": null,
+      "status": "planned"
+    },
+    "L6.0": {
+      "executor": "S",
+      "title": "HELPERS_PLAN H2: TGrep quiet var + contains + countMatching (count sink), TFind.quoteGlob",
+      "dep": [
+        "L2.7-H",
+        "L5.5"
+      ],
+      "card": "kcl/tutil/HELPERS_PLAN.md s3",
       "status": "planned"
     },
     "L6.1": {

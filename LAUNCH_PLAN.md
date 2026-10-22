@@ -155,6 +155,7 @@ tzdata, perl, curl, openssl, the nc flavours for the L2.5 probes; FreeBSD:
 | L2.5 | O | triage of L2_failures: cause per row, fix rule per row, batches; thttpserver: detect + SKIP as the floor plus a second backend (OpenBSD nc if the probe passes, else socat — PORTING.md §4); until then its suite SKIPs on the Linux VMs | L2.4 |
 | L2.6 | S | fix batches (card template L*.fix), one batch per dispatch; Windows 5.2 + 5.3 gate stays green | L2.5 |
 | L2.7 | O | fixes the triage assigned to O (core layers, netcat) | L2.5 |
+| L2.7-H | O | **inserted 2026-10-22 (owner: "the sooner the better")**: TSed literal-replace helpers — `quoteRe`, `quoteRepl`, `addReplace`, `TSed.replace`, `TSed.replaceInFile` per `kcl/tutil/HELPERS_PLAN.md` §2 (H1); kcl/tsed only, own gate; runs between L2.7-M and L2.7-N so L2.8's closing gate covers it on the VMs; critic after (storage change touches every TSed test). H2 of that plan (TGrep/TFind) is L6.0, after L5 | L2.7-C |
 | L2.8 | SV | closing gate: Windows ×2 + three VMs; re-run `scan.sh`, diff vs L0 inventory, **and walk the PORTING.md §2.7 list of lexical misses by hand** (the scan cannot see them); commit | L2.6, L2.7 |
 
 ### L3 — non-GNU userland (Alpine/busybox, FreeBSD)
@@ -192,6 +193,7 @@ tzdata, perl, curl, openssl, the nc flavours for the L2.5 probes; FreeBSD:
 
 | id | ex | task | dep |
 |---|---|---|---|
+| L6.0 | S | `kcl/tutil/HELPERS_PLAN.md` §3 (H2): TGrep `quiet` var + `TGrep.contains` + `TGrep.countMatching`, `TFind.quoteGlob`; cards from the L2.7-H pattern; after L5 so the CI matrix exists | L2.7-H, L5.5 |
 | L6.1 | S | markdown link checker `tools/porting/mdlinks.sh` (relative links + `#anchors`, all five repos) + its tests | L0.1 |
 | L6.2 | S | DL3: `git mv` internal files to `docs/dev/` per the file list in the card; fix every link; `mdlinks.sh` clean | L6.1 |
 | L6.3 | S | move the current README reference text to `docs/reference.md` verbatim; anchors fixed; doctest still passes | L6.2 |
