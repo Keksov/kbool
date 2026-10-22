@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-H DONE (kbool-6d, a29b2e8); L2.7-M2 running; then L2.7-N",
+  "status": "in progress — L2.7-M2 DONE; next L2.7-N (cut into N1/N2/N3, card-lint, critic after N2)",
   "plan": "LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -340,7 +340,7 @@
         "L2.7-M"
       ],
       "card": "scratchpad launch/L2.7-M2/brief.md",
-      "status": "dispatched 2026-10-22 (Opus)"
+      "status": "DONE 2026-10-22 (Opus, 2 rounds): coproc exec awk, mawk-only limit for < 20250131, 019 mutation-proof, IFS, rewrite perf, failed-start no-retry, ldexp clamp, IEEE table; Windows full 18531/18531"
     },
     "L2.7-H": {
       "executor": "O",
@@ -726,6 +726,8 @@
     "L2.7-P-o3": "Linux bash 5.2 EOF-path sink rc 1 flake (wait procsub non-zero?) - rare, pre-existing, seen on reused VMs; watch at L2.8",
     "L2.7-M-o1": "mawk: statistics over > ~200 values (request > 4095 chars) is rc 1; a chunked accumulator protocol would lift it (design, not done)",
     "L2.7-M-o2": "pre-existing inf results: expm1 inf -> nan (should be inf), expm1 1e308 -> nan, hypot inf inf -> nan (IEEE inf)",
-    "L2.7-H-o1": "kcl/tsed/tests/008 pins rfIgnoreCase locale behaviour (C.UTF-8 vs C) against bare sed; check on VMs without C.UTF-8 (L2.8/L3) - note from kbool-6d"
+    "L2.7-H-o1": "kcl/tsed/tests/008 pins rfIgnoreCase locale behaviour (C.UTF-8 vs C) against bare sed; check on VMs without C.UTF-8 (L2.8/L3) - note from kbool-6d",
+    "L2.7-M2-o1": "ktests gate on Windows reported STRAY \"could NOT be stopped\" for a hung kcl/tcustomapplication runner (0/0 tests) and left it spinning a core for ~1h40 (WINPID 22252, SV stopped it by pid 2026-10-22): harness defect (stop path on cygwin for a spinning bash) + unknown tcustomapplication hang - investigate (O, ktests)",
+    "L2.7-M2-o2": "kb-fedora timer stalls (sleep 1 up to 21 s) observed while the host had that spinning stray - re-measure with an idle host before blaming the guest (L1.7)"
   }
 }
