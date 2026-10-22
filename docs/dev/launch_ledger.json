@@ -3,8 +3,8 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-22",
-  "status": "in progress — L2.7-G DONE; next L6.2 (docs/dev move, S), then L6.2b (SV), L1.7, L2.8",
-  "plan": "LAUNCH_PLAN.md",
+  "status": "in progress — L6.2/L6.2b DONE (docs/dev everywhere); L1.7 running (alpine timers); then L2.8 closing gates",
+  "plan": "docs/dev/LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
     "DL1": "owner 2026-10-20: VM matrix Ubuntu 24.04, Debian 13, Fedora (current), Alpine (current), FreeBSD (current RELEASE, 15.x preferred); exact versions recorded at L1; other releases in CI",
@@ -51,7 +51,7 @@
     "gitattributes": false,
     "thttpserver_needs": "GNU netcat 0.7.1 (absent on Debian/Fedora/Alpine/FreeBSD)"
   },
-  "tasks_file": "LAUNCH_TASKS.md",
+  "tasks_file": "docs/dev/LAUNCH_TASKS.md",
   "tasks": {
     "L0.1": {
       "executor": "S",
@@ -220,7 +220,7 @@
         "L1.6"
       ],
       "card": "scratchpad launch/L1.7/card.md",
-      "status": "card written (scratchpad launch/L1.7/card.md), Sonnet lint running; dispatch after lint (VM-only task, may run beside L6.2 which runs no VM/gate)"
+      "status": "dispatched 2026-10-22 (Sonnet, card v2 after lint: overshoot metric, baseline rule, snapshot/modifyvm order, ntpd + guest-additions candidates, uptime clock, repeat 6)"
     },
     "L2.1": {
       "executor": "O",
@@ -579,7 +579,7 @@
         "L6.1"
       ],
       "card": "draft",
-      "status": "dispatched 2026-10-22 (Sonnet, card v2)"
+      "status": "DONE 2026-10-22 (Sonnet): 135 files moved (kcl 126, kklass 5, ktests 4), mdlinks 133 before/after, scan unchanged; kcl 82057ad kklass 0cace33 kkore f564bf2 ktests 609f161 kbool 56180c6; doctests kkore 015 + kklass 142 PASS 64/64 after"
     },
     "L6.2b": {
       "executor": "SV",
@@ -588,7 +588,7 @@
         "L6.2"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-10-22 (SV): LAUNCH_PLAN.md, LAUNCH_TASKS.md, launch_ledger.json, OPTIMIZATION_PLAN.md, optimization_ledger.json -> docs/dev/; SECURITY.md + LAUNCH_PLAN:29 links fixed; preamble mentions updated; THIS LEDGER NOW LIVES AT docs/dev/launch_ledger.json"
     },
     "L6.3": {
       "executor": "S",

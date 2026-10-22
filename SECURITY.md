@@ -3,7 +3,7 @@
 This project is a Bash OOP framework and class library. Its object model is a
 **code generator**: class/method bodies are stored as strings and materialized via
 `eval` and template substitution. That is by design (analogous to compilation).
-The hardening below (see [`optimization_ledger.json`](optimization_ledger.json))
+The hardening below (see [`optimization_ledger.json`](docs/dev/optimization_ledger.json))
 neutralizes paths where **untrusted input** could reach code execution, and
 documents the by-design string-eval APIs that must only receive trusted input.
 
