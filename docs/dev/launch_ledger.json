@@ -47,6 +47,7 @@
     ],
     "tags": 0,
     "host": "VirtualBox 7.1.12, 16 cores, 28 GB RAM, 199 GB free on C:",
+    "os": "Windows 11 Pro 10.0.26200",
     "exec_bit_files": 0,
     "gitattributes": false,
     "thttpserver_needs": "GNU netcat 0.7.1 (absent on Debian/Fedora/Alpine/FreeBSD)"
@@ -597,7 +598,7 @@
         "L6.2"
       ],
       "card": "draft",
-      "status": "card written (scratchpad launch/L6.3/card.md: README lines 71-382 -> docs/reference.md verbatim, kkore 015 file list extended), Sonnet lint running; docs-only, may run beside L1.7; doctest gate by SV after"
+      "status": "DONE by worker 2026-10-22 (Sonnet): README 71-381 -> docs/reference.md verbatim (1 link line changed), README line 64 + ## Reference bullets, 015 want 9->1 + reference.md 8, 3 inbound links; mdlinks 133 unchanged. UNCOMMITTED: waiting for the doctest gate (kkore -n 15, expect 19) which must not run while L1.7 measures VM timers"
     },
     "L6.4": {
       "executor": "S",
@@ -605,8 +606,8 @@
       "dep": [
         "L5.5"
       ],
-      "card": "draft",
-      "status": "card written (scratchpad launch/L6.4/card.md: tools/porting/numbers.sh -> docs/dev/launch/numbers.json with sources), Sonnet lint running"
+      "card": "done",
+      "status": "DONE 2026-10-22 (Sonnet worker + SV fixes): tools/porting/numbers.sh -> docs/dev/launch/numbers.json (every figure {value,source}); worker spot checks all PASS (18621 tests, 26 folders/29 unit files, 48 examples, 27 ledgers), Git-bash/MSYS2 output identical except timestamp, ~8.5 s. SV fixes after review: gate selection by summary.json .gate.argv containing \"all\" instead of the brittle :60: cell count (partial gates rejected, rc 3 verified); Windows OS string moved into the ledger baseline.os and read from there (the worker reported the card's baseline.host source was untrue). Card errors noted: ledger split is kcl 21 not 18; expected run time 2 s was wrong (8.5 s, many git calls). numbers.json is a snapshot: L6.5/L8.5 rerun before quoting; its test figures come from gate 20261022-203515-1751 whose repo shas predate the current heads."
     },
     "L6.5": {
       "executor": "O",

@@ -1,0 +1,162 @@
+{
+  "tests": {
+    "runtimes": {
+      "5.2.37": {
+        "total_tests": {"value": 9310, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.2.37\"].total_tests"},
+        "passed_tests": {"value": 9310, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.2.37\"].passed_tests"},
+        "cells": {"value": 30, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.2.37\"].cells"},
+        "duration_ms": {"value": 687456, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.2.37\"].duration_ms (the gate's own total of the cells' durations, not wall time; the cells.tsv duration_ms column itself sums to 682898)"}
+      },
+      "5.3.9": {
+        "total_tests": {"value": 9311, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.3.9\"].total_tests"},
+        "passed_tests": {"value": 9311, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.3.9\"].passed_tests"},
+        "cells": {"value": 30, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.3.9\"].cells"},
+        "duration_ms": {"value": 660066, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .totals[\"5.3.9\"].duration_ms (the gate's own total of the cells' durations, not wall time; the cells.tsv duration_ms column itself sums to 655561)"}
+      }
+    },
+    "total_both_runtimes": {"value": 18621, "source": "sum of .totals[*].total_tests in C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json"},
+    "gate": {
+      "out": {"value": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751", "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .gate.out"},
+      "line": {"value": "__GATE__:PASS:60:60:0:0:0:0:0:18621:18621", "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/progress.txt (last line; VERDICT:cells:pass:fail:flaky:env:timeout:stray:passed:total, combined over the runtimes)"},
+      "verdict": {"value": "PASS", "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .verdict"},
+      "exit": {"value": 0, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .exit"},
+      "repos": {"value": {"kbool":{"sha":"26f3097","dirty":true},"ktests":{"sha":"7cb90ec","dirty":true},"kcl":{"sha":"542de10","dirty":false},"kklass":{"sha":"a0421b4","dirty":false},"kkore":{"sha":"3435446","dirty":false}}, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .gate.repos"}
+    },
+    "per_suite": {
+      "5.2.37": {"value": {"kcl":179,"kcl/dateutils":444,"kcl/math":197,"kcl/tarray":98,"kcl/tawk":609,"kcl/tcustomapplication":377,"kcl/tdictionary":148,"kcl/tdirectory":320,"kcl/tfile":250,"kcl/tfind":226,"kcl/tgrep":197,"kcl/thashset":149,"kcl/thead":182,"kcl/thttpserver":533,"kcl/tinifile":191,"kcl/tlist":134,"kcl/tobjectlist":52,"kcl/tpath":243,"kcl/tpipe":205,"kcl/tqueuestack":98,"kcl/tregex":246,"kcl/tsed":402,"kcl/tstopwatch":61,"kcl/tstringhelper":922,"kcl/tstringlist":192,"kcl/ttail":200,"kcl/tutil":226,"kklass":853,"kkore":698,"ktests":678}, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/cells.tsv (columns bash_version=5.2.37, suite, total)"},
+      "5.3.9": {"value": {"kcl":179,"kcl/dateutils":444,"kcl/math":197,"kcl/tarray":98,"kcl/tawk":609,"kcl/tcustomapplication":377,"kcl/tdictionary":148,"kcl/tdirectory":320,"kcl/tfile":250,"kcl/tfind":226,"kcl/tgrep":197,"kcl/thashset":149,"kcl/thead":182,"kcl/thttpserver":533,"kcl/tinifile":191,"kcl/tlist":134,"kcl/tobjectlist":52,"kcl/tpath":243,"kcl/tpipe":205,"kcl/tqueuestack":98,"kcl/tregex":246,"kcl/tsed":402,"kcl/tstopwatch":61,"kcl/tstringhelper":922,"kcl/tstringlist":192,"kcl/ttail":200,"kcl/tutil":226,"kklass":853,"kkore":698,"ktests":679}, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/cells.tsv (columns bash_version=5.3.9, suite, total)"}
+    },
+    "suites": {
+      "5.2.37": {"value": 30, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/cells.tsv (distinct suite ids, bash_version=5.2.37)"},
+      "5.3.9": {"value": 30, "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/cells.tsv (distinct suite ids, bash_version=5.3.9)"}
+    }
+  },
+  "repos": {
+    "kbool": {
+      "commits": {"value": 181, "source": "git rev-list --count HEAD"},
+      "head": {"value": "b857f65", "source": "git log -1 --format=%h"},
+      "dirty": {"value": true, "source": "git status --porcelain --untracked-files=no non-empty (tracked files only; for kbool a modified submodule counts)"},
+      "first_commit_date": {"value": "2025-12-01", "source": "git log --format=%ad --date=short | sort first line (author date)"},
+      "last_commit_date": {"value": "2026-10-22", "source": "git log --format=%ad --date=short | sort last line (author date)"},
+      "tracked_files": {"value": 52, "source": "git ls-files | wc -l (counts the 4 submodule gitlinks and .gitmodules)"},
+      "sh_files": {"value": 20, "source": "git ls-files -z -- '*.sh' (NUL count)"},
+      "sh_lines": {"value": 3548, "source": "git ls-files -z -- '*.sh' | xargs -0 cat | wc -l (= sum of the totals of xargs -0 wc -l)"},
+      "md_files": {"value": 12, "source": "git ls-files -z -- '*.md' (NUL count)"},
+      "md_lines": {"value": 3726, "source": "git ls-files -z -- '*.md' | xargs -0 cat | wc -l (= sum of the totals of xargs -0 wc -l)"}
+    },
+    "kcl": {
+      "commits": {"value": 198, "source": "(cd kcl && git rev-list --count HEAD)"},
+      "head": {"value": "82057ad", "source": "(cd kcl && git log -1 --format=%h)"},
+      "dirty": {"value": true, "source": "(cd kcl && git status --porcelain --untracked-files=no) non-empty (tracked files only; for kbool a modified submodule counts)"},
+      "first_commit_date": {"value": "2025-10-30", "source": "(cd kcl && git log --format=%ad --date=short | sort) first line (author date)"},
+      "last_commit_date": {"value": "2026-10-22", "source": "(cd kcl && git log --format=%ad --date=short | sort) last line (author date)"},
+      "tracked_files": {"value": 688, "source": "(cd kcl && git ls-files | wc -l)"},
+      "sh_files": {"value": 560, "source": "(cd kcl && git ls-files -z -- '*.sh') (NUL count)"},
+      "sh_lines": {"value": 109349, "source": "(cd kcl && git ls-files -z -- '*.sh' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"},
+      "md_files": {"value": 103, "source": "(cd kcl && git ls-files -z -- '*.md') (NUL count)"},
+      "md_lines": {"value": 36672, "source": "(cd kcl && git ls-files -z -- '*.md' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"}
+    },
+    "kklass": {
+      "commits": {"value": 118, "source": "(cd kklass && git rev-list --count HEAD)"},
+      "head": {"value": "0cace33", "source": "(cd kklass && git log -1 --format=%h)"},
+      "dirty": {"value": true, "source": "(cd kklass && git status --porcelain --untracked-files=no) non-empty (tracked files only; for kbool a modified submodule counts)"},
+      "first_commit_date": {"value": "2025-10-30", "source": "(cd kklass && git log --format=%ad --date=short | sort) first line (author date)"},
+      "last_commit_date": {"value": "2026-10-22", "source": "(cd kklass && git log --format=%ad --date=short | sort) last line (author date)"},
+      "tracked_files": {"value": 173, "source": "(cd kklass && git ls-files | wc -l)"},
+      "sh_files": {"value": 161, "source": "(cd kklass && git ls-files -z -- '*.sh') (NUL count)"},
+      "sh_lines": {"value": 23647, "source": "(cd kklass && git ls-files -z -- '*.sh' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"},
+      "md_files": {"value": 5, "source": "(cd kklass && git ls-files -z -- '*.md') (NUL count)"},
+      "md_lines": {"value": 4930, "source": "(cd kklass && git ls-files -z -- '*.md' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"}
+    },
+    "kkore": {
+      "commits": {"value": 34, "source": "(cd kkore && git rev-list --count HEAD)"},
+      "head": {"value": "f564bf2", "source": "(cd kkore && git log -1 --format=%h)"},
+      "dirty": {"value": true, "source": "(cd kkore && git status --porcelain --untracked-files=no) non-empty (tracked files only; for kbool a modified submodule counts)"},
+      "first_commit_date": {"value": "2025-11-28", "source": "(cd kkore && git log --format=%ad --date=short | sort) first line (author date)"},
+      "last_commit_date": {"value": "2026-10-22", "source": "(cd kkore && git log --format=%ad --date=short | sort) last line (author date)"},
+      "tracked_files": {"value": 30, "source": "(cd kkore && git ls-files | wc -l)"},
+      "sh_files": {"value": 25, "source": "(cd kkore && git ls-files -z -- '*.sh') (NUL count)"},
+      "sh_lines": {"value": 9148, "source": "(cd kkore && git ls-files -z -- '*.sh' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"},
+      "md_files": {"value": 1, "source": "(cd kkore && git ls-files -z -- '*.md') (NUL count)"},
+      "md_lines": {"value": 446, "source": "(cd kkore && git ls-files -z -- '*.md' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"}
+    },
+    "ktests": {
+      "commits": {"value": 66, "source": "(cd ktests && git rev-list --count HEAD)"},
+      "head": {"value": "609f161", "source": "(cd ktests && git log -1 --format=%h)"},
+      "dirty": {"value": false, "source": "(cd ktests && git status --porcelain --untracked-files=no) non-empty (tracked files only; for kbool a modified submodule counts)"},
+      "first_commit_date": {"value": "2025-11-22", "source": "(cd ktests && git log --format=%ad --date=short | sort) first line (author date)"},
+      "last_commit_date": {"value": "2026-10-22", "source": "(cd ktests && git log --format=%ad --date=short | sort) last line (author date)"},
+      "tracked_files": {"value": 137, "source": "(cd ktests && git ls-files | wc -l)"},
+      "sh_files": {"value": 125, "source": "(cd ktests && git ls-files -z -- '*.sh') (NUL count)"},
+      "sh_lines": {"value": 19831, "source": "(cd ktests && git ls-files -z -- '*.sh' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"},
+      "md_files": {"value": 6, "source": "(cd ktests && git ls-files -z -- '*.md') (NUL count)"},
+      "md_lines": {"value": 2282, "source": "(cd ktests && git ls-files -z -- '*.md' | xargs -0 cat | wc -l) (= sum of the totals of xargs -0 wc -l)"}
+    }
+  },
+  "units": {
+    "kcl": {
+      "folders": {"value": {"count":26,"names":["dateutils","math","tarray","tawk","tcustomapplication","tdictionary","tdirectory","tfile","tfind","tgrep","thashset","thead","thttpserver","tinifile","tlist","tobjectlist","tpath","tpipe","tqueuestack","tregex","tsed","tstopwatch","tstringhelper","tstringlist","ttail","tutil"]}, "source": "kcl/<dir>/ holding at least one unit file; a unit file = a tracked *.sh outside tests/ and examples/ whose first 512 bytes hold a line beginning 'kk.unit '"},
+      "unit_files": {"value": {"count":29,"names":["dateutils","math","tarray","tawk","tcustomapplication","tdictionary","tdirectory","tfile","tfind","tgrep","thashset","thead","thttpapplication","thttpmessage","thttprouter","thttpserver","tinifile","tlist","tobjectlist","tpath","tpipe","tqueuestack","tregex","tsed","tstopwatch","tstringhelper","tstringlist","ttail","tutil"]}, "source": "a unit file = a tracked *.sh outside tests/ and examples/ whose first 512 bytes hold a line beginning 'kk.unit ' (cd kcl; git ls-files -z -- '*.sh'; names without .sh)"}
+    },
+    "kklass": {
+      "unit_files": {"value": {"count":5,"names":["kklass","kklass_autoload","kklass_decl","kklass_pascal","kklass_serializable"]}, "source": "a unit file = a tracked *.sh outside tests/ and examples/ whose first 512 bytes hold a line beginning 'kk.unit ' (cd kklass; git ls-files -z -- '*.sh'; names without .sh)"}
+    },
+    "kkore": {
+      "system_units": {"value": {"count":5,"names":["kuse","klib","kerr","kvar","kcfg"]}, "source": "kbool.sh:181 (the for-loop over the system units; kuse.sh is the loader and carries no kk.unit line)"}
+    }
+  },
+  "examples": {"value": 48, "source": "git -C kklass ls-files 'examples/[0-9]*.sh' | wc -l"},
+  "thttpserver_examples": {"value": 2, "source": "git -C kcl ls-files 'thttpserver/examples/*.sh' | wc -l"},
+  "platforms": {
+    "note": "provisioned lab VMs and Windows runtimes; gate results are the ledger's, not this file's",
+    "vms": {
+      "kb-ubuntu": {"value": {"os":"Ubuntu 24.04.5 LTS","bash":"5.2.21"}, "source": "tools/vmlab/README.md \"## kb-ubuntu\" / \"### Versions recorded at creation\""},
+      "kb-debian": {"value": {"os":"Debian GNU/Linux 13.7 (trixie)","bash":"5.2.37"}, "source": "tools/vmlab/README.md \"## kb-debian\" / \"### Versions recorded at creation\""},
+      "kb-fedora": {"value": {"os":"Fedora 44","bash":"5.3.9"}, "source": "tools/vmlab/README.md \"## kb-fedora\" / \"### Versions recorded at creation\""},
+      "kb-freebsd": {"value": {"os":"FreeBSD 15.1-RELEASE","bash":"5.3.20"}, "source": "tools/vmlab/README.md \"## kb-freebsd\" / \"### Versions recorded at creation\""},
+      "kb-alpine": {"value": {"os":"Alpine Linux 3.24.2","bash":"5.3.9"}, "source": "tools/vmlab/README.md \"## kb-alpine\" / \"### Versions recorded at creation\""}
+    },
+    "windows": {
+      "runtimes": {"value": [
+          {"name":"Git-bash","bash":"5.2.37"},
+          {"name":"MSYS2","bash":"5.3.9"}
+        ], "source": "C:/Users/1/AppData/Local/Temp/kt-gate/20261022-203515-1751/summary.json .bashes"},
+      "os": {"value": "Windows 11 Pro 10.0.26200", "source": "docs/dev/launch_ledger.json baseline.os"}
+    }
+  },
+  "ledgers": {"value": [
+      {"repo":"kbool","path":"docs/dev/launch_ledger.json","phases":{"kind":null,"count":null},"named_rounds":0},
+      {"repo":"kbool","path":"docs/dev/optimization_ledger.json","phases":{"kind":"array","count":8},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/dateutils/dateutils_ledger.json","phases":{"kind":"array","count":8},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/fpjson/fpjson_ledger.json","phases":{"kind":"array","count":9},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/kcl_ledger.json","phases":{"kind":"object","count":11},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/math/math_ledger.json","phases":{"kind":"array","count":9},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tarray/tarray_ledger.json","phases":{"kind":"array","count":5},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tawk/tawk_ledger.json","phases":{"kind":"array","count":2},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tdictionary/tdictionary_ledger.json","phases":{"kind":"array","count":8},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tfind/tfind_ledger.json","phases":{"kind":"array","count":2},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/thashset/thashset_ledger.json","phases":{"kind":"array","count":5},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/thead/thead_ledger.json","phases":{"kind":"array","count":2},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/thttpserver/thttpserver_ledger.json","phases":{"kind":"array","count":4},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tinifile/tinifile_ledger.json","phases":{"kind":"array","count":5},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tobjectlist/tobjectlist_ledger.json","phases":{"kind":"array","count":3},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tpipe/tpipe_ledger.json","phases":{"kind":"array","count":4},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tqueuestack/tqueuestack_ledger.json","phases":{"kind":"array","count":6},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tregex/tregex_ledger.json","phases":{"kind":"array","count":5},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tsed/tsed_ledger.json","phases":{"kind":"array","count":3},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tstopwatch/tstopwatch_ledger.json","phases":{"kind":"array","count":3},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/ttail/ttail_ledger.json","phases":{"kind":"array","count":2},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tutil/helpers_ledger.json","phases":{"kind":"array","count":2},"named_rounds":0},
+      {"repo":"kcl","path":"docs/dev/tutil/tutil_ledger.json","phases":{"kind":"array","count":5},"named_rounds":0},
+      {"repo":"kklass","path":"docs/dev/kklass_ledger.json","phases":{"kind":"object","count":8},"named_rounds":5},
+      {"repo":"kklass","path":"docs/dev/uses_ledger.json","phases":{"kind":"object","count":6},"named_rounds":0},
+      {"repo":"ktests","path":"docs/dev/gate_ledger.json","phases":{"kind":"object","count":5},"named_rounds":0},
+      {"repo":"ktests","path":"docs/dev/ktests_ledger.json","phases":{"kind":"object","count":1},"named_rounds":4}
+    ], "source": "git -C <repo> ls-files | grep '_ledger\\.json$' | sort, over kbool kcl kklass kkore ktests; each file parsed with node (phases = top-level key; named_rounds = top-level keys matching ^round[0-9]+$)"},
+  "generated": {
+    "timestamp": "2026-10-22T18:28:47Z",
+    "host": "dima-nb",
+    "kbool_head": "b857f65",
+    "kbool_dirty": true
+  }
+}
