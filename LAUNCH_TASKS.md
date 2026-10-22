@@ -75,6 +75,13 @@ PATH="/c/bin/msys64/usr/bin:$PATH" /c/bin/msys64/usr/bin/bash.exe ktests/tools/s
 
 Each strays listing must say `strays: none (…)`; no `kb-*` VM may be running.
 
+**Risky probes never on the host.** A probe that may loop or allocate
+without bound (awk/engine fuzzing, nan/inf matrices, regex backtracking,
+recursion, big generated inputs) runs INSIDE a lab VM under
+`ulimit -v 1000000` (≈1 GB) and `timeout -k 5 N`. On the Windows host only
+tiny, bounded one-liners under `timeout -k 2 10`. (2026-10-22: a gawk probe
+of the math engine grew to ~16 GB on the host and killed the owner's machine.)
+
 **Downloads.** Only from the URLs/hosts the card names, into the folder it
 names; verify the checksum the card names before use; never execute a
 downloaded file on the host.
