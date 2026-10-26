@@ -67,6 +67,17 @@ case $MODE in
     sshd -t
     rc-service sshd reload
 
+    # Timer stalls: with the tickless idle (NO_HZ_FULL) the idle guest's timers stall for
+    # seconds to minutes on this host (`sleep 1` up to 119 s). `nohz=off` (periodic tick)
+    # cures it (checks/timer.sh, README "kb-alpine"). Takes effect after the next boot.
+    if ! grep -q '^default_kernel_opts=.*nohz=off' /etc/update-extlinux.conf; then
+      sed -i 's/^\(default_kernel_opts="[^"]*\)"/\1 nohz=off"/' /etc/update-extlinux.conf
+      grep -q '^default_kernel_opts=.*nohz=off' /etc/update-extlinux.conf \
+        || { echo "apk.sh: could not add nohz=off to default_kernel_opts in /etc/update-extlinux.conf" >&2; exit 1; }
+      update-extlinux >/dev/null
+    fi
+    grep '^default_kernel_opts=' /etc/update-extlinux.conf
+
     # ACPI power button (vmlab `down`): linux-virt's `button` driver does not register an
     # input device for VirtualBox's fixed power button, so acpid never hears it. The
     # `tiny-power-button` module does, and signals init: SIGUSR2 (12) = busybox poweroff

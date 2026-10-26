@@ -690,7 +690,8 @@ The script (refuses with rc 13 if `kb-alpine` exists):
 5. `provision/apk.sh` through `doas -n sh`: `apk add bash git`, kb's login shell
    (`sed -i 's#^\(kb:.*:\)[^:]*$#\1/bin/bash#' /etc/passwd`, checked with `grep '^kb:'` ->
    `kb:x:1000:1000::/home/kb:/bin/bash`), sshd key-only (`sshd_config.d/00-kbool-lab.conf`), the
-   ACPI power-button fix below; `vmlab snapshot kb-alpine clean`;
+   ACPI power-button fix below, the `nohz=off` kernel option ("Timer stalls" below);
+   `vmlab snapshot kb-alpine clean`;
 6. `provision/apk.sh --gnu`: `coreutils sed grep findutils diffutils gawk procps-ng util-linux
    perl curl openssl netcat-openbsd tzdata` (a name missing from the index prints `apk.sh:
    MISSING <pkg>`; `procps-ng` would fall back to `procps`, reported; neither happened);
@@ -734,6 +735,70 @@ Execution engine, from `C:\var\vbox\kb-lab\kb-alpine\Logs\VBox.log`:
 ```
 HM: HMR3Init: AMD-V w/ nested paging
 ```
+
+### Timer stalls and the fix (2026-10-22, card L1.7)
+
+**The stall.** In an idle kb-alpine `sleep 1` took 5-119 s and `read -t 1` up to 24 s (the kernel
+itself logged `clocksource: Long readout interval ... cs_nsec: 112754449594`); a busy CPU stayed
+steady, busybox init reaped orphans seconds late, and ktests 052 (wdterm) failed under it.
+kb-ubuntu / kb-debian never did. The VirtualBox settings of kb-alpine and kb-debian are the same
+where it matters (`paravirtprovider=default` -> kvm, `hpet=off`, piix3, 4 CPUs, nested paging,
+`rtcuseutc=on`); the difference is in the guest. Alpine `linux-virt` 6.18 is `CONFIG_HZ=1000`,
+`CONFIG_NO_HZ_FULL=y` (no `NO_HZ_IDLE`), clocksource `tsc` (`kvm-clock` and `acpi_pm` available),
+clockevent `lapic`, cpuidle driver `none` (plain HLT), and runs busybox `ntpd`; Debian 6.12 is `HZ=250`.
+
+**The check.** `checks/timer.sh` (plain bash, ~2 min when healthy; minutes when the VM stalls):
+
+```
+bash tools/vmlab/vmlab.sh run kb-alpine -- sh -c 'cat > /tmp/timer.sh' < tools/vmlab/checks/timer.sh
+bash tools/vmlab/vmlab.sh run kb-alpine -- 'bash /tmp/timer.sh'     # TIMER_N=15 for a short probe
+```
+
+60 x `sleep 1` and 60 x `read -t 1` on a FIFO, each timed with `EPOCHREALTIME` and with
+`/proc/uptime` (10 ms steps, monotonic); output `sleep n=60 min= med= p95= max= (uptime: p95= max=)`
+and the same for `read` (overshoot over 1000 ms, in ms), then an info block (kernel, cmdline,
+clocksource, clockevent, `CONFIG_HZ/NO_HZ/CPU_IDLE`, ntpd, dmesg lines). rc 0; 1 when the
+uptime-based p95 is over 500 ms or the max over 2000 ms; 2 for an invalid measurement.
+
+**Measurements** (overshoot in ms, EPOCHREALTIME; p95 / max of `sleep`, then of `read`; the uptime
+clock agrees to 10 ms; "x3" = three runs back to back in one boot, each from `reset clean` + `up`):
+
+| state | run 1 | run 2 | run 3 |
+|---|---|---|---|
+| baseline (ntpd, `tsc`, kvm) | 20923 / 25485 ; 9798 / 19526 | 31207 / 119118 ; 15280 / 23969 | 23253 / 77261 ; 431 / 2848 |
+| kb-debian (reference, 1 run) | 218 / 897 ; 332 / 827 | | |
+| a. ntpd stopped right after boot | 4 / 7 ; 5 / 6 | 2 / 4 ; 1 / 2 | 4 / 6 ; 3 / 4 |
+| a'. ntpd never started (the rebuilt `clean`) | probe n=15: 54002 / 54002 ; 102 / 102 | | |
+| b. guest additions (`virtualbox-guest-additions` only) | probe n=30: 18500 / 19211 ; 174 / 8676 | | |
+| c. `--paravirt-provider none` | 411 / 723 ; 460 / 876 | 847 / 950 ; 678 / 947 | 721 / 924 ; 899 / 970 |
+| c. `legacy` (effective provider is `none`, as above) | probe n=30: 862 / 864 ; 638 / 845 | | |
+| d. `--hpet on` + `clocksource=hpet` | 5 / 6 ; 6 / 7 | 4 / 13 ; 6 / 8 | 4 / 11 ; 7 / 11 |
+| e. `clocksource=acpi_pm` (`tsc` is the baseline's, skipped) | probe n=30: 427 / 868 ; 20 / 21 | | |
+| f. `idle=poll` | 4 / 10 ; 5 / 11 | 5 / 13 ; 4 / 6 | 6 / 8 ; 4 / 5 |
+| f. `nohz=off` | 1 / 2 ; 1 / 1 | 1 / 3 ; 1 / 2 | 1 / 2 ; 1 / 1 |
+| **winner `nohz=off`, rebuilt `clean`, ntpd running** | 1 / 2 ; 1 / 1 | 2 / 2 ; 1 / 1 | 1 / 2 ; 1 / 1 |
+
+What it says. The stall is in the idle path: with `idle=poll` (the vCPU never executes HLT) it is
+gone, so the cause is the tickless idle / HLT wake-up on this host, not the clocksource (`tsc`
+stalls; `acpi_pm` and `paravirt none` lose the minute-long stalls but keep a sub-second jitter
+of 400-900 ms; Debian shows the same jitter, 200-900 ms) and not the guest additions (the
+kernel already has `vboxguest`; the card's second package `virtualbox-guest-modules-virt` does
+not exist). `idle=poll` cures it but keeps all four host cores at 395 % CPU for an idle VM and is
+not used. `d` (VirtualBox `--hpet on` + `clocksource=hpet`) also works but is VBox-side. **`nohz=off`
+(periodic tick) works and costs about 17 % of one host core while idle**; it is guest-side, so it
+is the fix. Candidate a (ntpd off) passed three runs in one boot but did not reproduce on the next
+boots (ntpd never started: stalled again), so ntpd is not the cause and is left running; the
+single passing boot is unexplained. Not tried: `linux-lts` (g), as a winner was found.
+
+**The fix.** `provision/apk.sh` (the `clean)` branch, idempotent) appends `nohz=off` to
+`default_kernel_opts` in `/etc/update-extlinux.conf` if it is not there and runs `update-extlinux`
+(effective after the next boot; check `grep nohz /proc/cmdline`). `create/alpine.sh` needs nothing
+else (it runs `apk.sh`). Both snapshots were rebuilt from the old `clean`: `clean` (with the
+option), then `clean-gnu` from it. Effect: `vmlab up kb-alpine` after `reset clean` takes
+16.6 s (median of 3: 16.9, 16.6, 16.6; one baseline sample was 39.6 s: the boot itself stalled), and `vmlab gate kb-alpine --snapshot clean --
+--timeout 600 --repeat 6 ktests` is 6/6 PASS (3984/3984; before: 4 PASS, 2 FAIL, both `052 wdterm`,
+3982/3984). `kcl/tgrep` 007 (a fork-ratio bench, not a timer test) still fails on `clean-gnu`
+(14.1 x: grep 1616 us, search 22805 us).
 
 ### Versions recorded at creation (2026-10-21)
 

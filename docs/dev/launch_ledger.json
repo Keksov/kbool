@@ -227,8 +227,8 @@
       "dep": [
         "L1.6"
       ],
-      "card": "scratchpad launch/L1.7/card.md",
-      "status": "PARTIAL report by worker 2026-10-22 night (Sonnet), UNCOMMITTED, review pending (owner paused). Stall reproduced on kb-alpine clean: sleep overshoot p95 20-31 s, max up to 119 s; dmesg \"clocksource: Long readout interval\". Candidates: ntpd off = not the cause; guest additions FAIL; paravirt none/legacy = sub-second jitter stays; hpet on + clocksource=hpet PASS (VBox-side); acpi_pm FAIL; idle=poll PASS (discriminator: HLT/idle wake-up is the cause; 395% host CPU); nohz=off PASS p95 1 ms max 3 ms, idle ~17% of a core = WINNER (guest-side, kernel option in /etc/update-extlinux.conf via provision/apk.sh clean branch). Snapshots clean (replaced) + clean-gnu rebuilt. ktests --repeat 6: BEFORE FAIL 4/6 (052 wdterm x2), AFTER PASS 6/6 3984/3984. tgrep 007 still ~14x fork ratio (expected PARTIAL). up median 16.6 s. Deviations: kb-debian booted twice; tmp-baseline snapshot created+deleted; one git add -N/reset on tools/vmlab/checks; create/alpine.sh comment only (step lives in apk.sh). Files: tools/vmlab/README.md, create/alpine.sh, provision/apk.sh, checks/timer.sh (new). Gate OUTs under C:/Users/1/AppData/Local/Temp/kb-vmlab/20261022-23{2350,3542,4559}-kb-alpine-*."
+      "card": "done",
+      "status": "DONE 2026-10-26 (Sonnet worker, PARTIAL only for tgrep 007 = fork-ratio bench, not timers; SV review). Cause: tickless idle / HLT wake-up of the kb-alpine guest on this host (idle=poll cures it); fix = kernel option nohz=off via provision/apk.sh clean branch (SV added a fail-loud check after the sed); sleep overshoot p95 20-31 s / max 119 s -> p95 1-2 ms / max 3 ms; ktests --repeat 6: 4/6 -> 6/6 (3984/3984); vmlab up 39.6 s -> 16.6 s; snapshots clean + clean-gnu rebuilt; tools/vmlab/checks/timer.sh new. Open: L1.7-o1 (mitigation vs root cause, kb-fedora check, ~1 s guest/host clock offset)."
     },
     "L2.1": {
       "executor": "O",

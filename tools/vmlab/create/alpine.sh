@@ -29,6 +29,11 @@
 # while it runs and retries. The installed system's /etc/hosts keeps the install-time lines
 # until apk.sh removes them.
 #
+# Timer stalls. linux-virt idles with the tickless idle (NO_HZ_FULL) and, on this host, the idle
+# guest's timers stall for seconds to minutes (`sleep 1` took up to 119 s). provision/apk.sh adds
+# the kernel option `nohz=off` (periodic tick) to /etc/update-extlinux.conf; see README
+# "kb-alpine" and checks/timer.sh.
+#
 # Console typing: US layout, one line per keyboardputstring + Enter (scancode 1c 9c).
 # Screenshot: VBoxManage controlvm kb-alpine screenshotpng X.png
 set -u
