@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
-  "updated": "2026-10-22",
+  "updated": "2026-10-26",
   "status": "in progress — L6.2/L6.2b DONE (docs/dev everywhere); L1.7 running (alpine timers); then L2.8 closing gates",
   "plan": "docs/dev/LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
@@ -29,7 +29,10 @@
     "OG4": "L6: GitHub descriptions + topics text",
     "OG5": "L8: version number (v1.0.0 vs 0.9.0)",
     "OG6": "L8: announcement texts, venues, timing (owner posts)",
-    "OG7": "Git for Windows msys runtime 3.6.3 has a FIFO owner-handoff wedge (L2.7-G); MSYS2 3.6.9 showed 0/2000 — recommend updating Git for Windows (owner's environment); not blocking"
+    "OG7": {
+      "was": "Git for Windows msys runtime 3.6.3 has a FIFO owner-handoff wedge (L2.7-G); MSYS2 3.6.9 showed 0/2000 — recommend updating Git for Windows (owner's environment); not blocking",
+      "status": "RESOLVED 2026-10-26: owner updated Git for Windows -> git 2.56.0.windows.3, bash 5.3.15(2), msys runtime 3.6.10 (was bash 5.2.37 / msys 3.6.3). Consequence: Windows gate pair is now 5.3.15 + 5.3.9; bash 5.2 is covered only by kb-ubuntu 5.2.21 and kb-debian 5.2.37. Git-bash has no nc/socat of its own (thttpserver tests fall back to /c/bin/msys64/usr/bin/nc.exe, as before)."
+    }
   },
   "baseline": {
     "platforms_tested": [
@@ -50,7 +53,11 @@
     "os": "Windows 11 Pro 10.0.26200",
     "exec_bit_files": 0,
     "gitattributes": false,
-    "thttpserver_needs": "GNU netcat 0.7.1 (absent on Debian/Fedora/Alpine/FreeBSD)"
+    "thttpserver_needs": "GNU netcat 0.7.1 (absent on Debian/Fedora/Alpine/FreeBSD)",
+    "windows_runtimes_2026_10_26": [
+      "Windows Git-bash 5.3.15 (msys 3.6.10)",
+      "Windows MSYS2 5.3.9 (msys 3.6.9)"
+    ]
   },
   "tasks_file": "docs/dev/LAUNCH_TASKS.md",
   "tasks": {
@@ -221,7 +228,7 @@
         "L1.6"
       ],
       "card": "scratchpad launch/L1.7/card.md",
-      "status": "dispatched 2026-10-22 (Sonnet, card v2 after lint: overshoot metric, baseline rule, snapshot/modifyvm order, ntpd + guest-additions candidates, uptime clock, repeat 6)"
+      "status": "PARTIAL report by worker 2026-10-22 night (Sonnet), UNCOMMITTED, review pending (owner paused). Stall reproduced on kb-alpine clean: sleep overshoot p95 20-31 s, max up to 119 s; dmesg \"clocksource: Long readout interval\". Candidates: ntpd off = not the cause; guest additions FAIL; paravirt none/legacy = sub-second jitter stays; hpet on + clocksource=hpet PASS (VBox-side); acpi_pm FAIL; idle=poll PASS (discriminator: HLT/idle wake-up is the cause; 395% host CPU); nohz=off PASS p95 1 ms max 3 ms, idle ~17% of a core = WINNER (guest-side, kernel option in /etc/update-extlinux.conf via provision/apk.sh clean branch). Snapshots clean (replaced) + clean-gnu rebuilt. ktests --repeat 6: BEFORE FAIL 4/6 (052 wdterm x2), AFTER PASS 6/6 3984/3984. tgrep 007 still ~14x fork ratio (expected PARTIAL). up median 16.6 s. Deviations: kb-debian booted twice; tmp-baseline snapshot created+deleted; one git add -N/reset on tools/vmlab/checks; create/alpine.sh comment only (step lives in apk.sh). Files: tools/vmlab/README.md, create/alpine.sh, provision/apk.sh, checks/timer.sh (new). Gate OUTs under C:/Users/1/AppData/Local/Temp/kb-vmlab/20261022-23{2350,3542,4559}-kb-alpine-*."
     },
     "L2.1": {
       "executor": "O",
@@ -597,8 +604,8 @@
       "dep": [
         "L6.2"
       ],
-      "card": "draft",
-      "status": "DONE by worker 2026-10-22 (Sonnet): README 71-381 -> docs/reference.md verbatim (1 link line changed), README line 64 + ## Reference bullets, 015 want 9->1 + reference.md 8, 3 inbound links; mdlinks 133 unchanged. UNCOMMITTED: waiting for the doctest gate (kkore -n 15, expect 19) which must not run while L1.7 measures VM timers"
+      "card": "done",
+      "status": "DONE 2026-10-26 (Sonnet worker, SV review): README lines 71-381 -> docs/reference.md verbatim (only the kcl/README.md link re-rooted), README keeps the entry part + \"## Reference\" bullets, line 64 link; kkore 015 checks README (1) + docs/reference.md (8); 3 inbound links re-pointed, SV relabelled them \"kbool reference\". Doctest gate kkore -n 15: PASS 19/19 on Git-bash 5.3.15 and MSYS2 5.3.9 (kt-gate/20261026-215531-1614). mdlinks 133 broken unchanged (127 files). Commits: kkore dba5c20, kcl 790b5f4, kklass 3448501 + kbool bump."
     },
     "L6.4": {
       "executor": "S",
@@ -790,6 +797,7 @@
     "L2.7-G-o3": "one unexplained CRASH in a full gate: 5.2 kcl/thttpserver runner got TERM (rc 143) after 11 s, empty log, no strays; not reproduced in 3 runs; hypothesis: thttpserver tests kill -TERM $(<pid file) with a reused cygwin pid - watch at L2.8",
     "L2.7-G-o4": "a wedged/suspended process slows every cygwin stray scan of its runtime by ~1 s per scan (per-process argv wait)",
     "L2.7-G-o5": "ktests cell time grew ~194 s -> ~359 s per runtime (057: nested gates, 18 s silentalive, deadstart grace) - shrink later",
-    "L2.7-G-o6": "056 busybox-timeout check (life=1.6 s) is load-sensitive; failed once in a direct combined run, passes in gates"
+    "L2.7-G-o6": "056 busybox-timeout check (life=1.6 s) is load-sensitive; failed once in a direct combined run, passes in gates",
+    "L1.7-o1": "nohz=off on kb-alpine is possibly a mitigation, not the root cause (tickless-idle wake-up stall on this host); kb-fedora stalled once and may need tools/vmlab/checks/timer.sh + the same option; kb-debian shows 200-900 ms jitter; guest/host clocks differ ~1 s (tar \"time stamp in the future\" on fetch)"
   }
 }
