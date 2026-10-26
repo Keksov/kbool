@@ -116,7 +116,7 @@ for script in "${test_scripts[@]}"; do
     kt_test_section "Running $script"
 
     echo $script
-    kt_suitejob_run "$script" bash "$script" "$@"
+    kt_suitejob_run "$script" "$BASH" "$script" "$@"   # the running bash, not the first one on PATH (PORTING H8)
     if (( KT_SUITEJOB_RC == 0 )); then
         passed_scripts+=("$script")
     else

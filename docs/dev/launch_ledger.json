@@ -413,7 +413,7 @@
         "L2.7"
       ],
       "card": null,
-      "status": "planned"
+      "status": "IN PROGRESS 2026-10-26 (SV): first Windows gate interrupted by a host reboot at cell 24/60 (kt-gate/20261026-215820-2027); it showed L2.8-o1 (thttpserver 005 under Git-bash 5.3.15/msys 3.6.10); gate re-run started. PORTING §2.7 walk done (scratchpad launch/L2.8/porting_walk.md): H1/H4/H7/H15/H27 closed; H8 left in kbool tests/tests.sh:119 (bare bash); H13/H14 -> L3.1 (+FreeBSD fdescfs note for user docs); H40-42 -> OG1/L3; root in CI -> L5 (kcl/tpath 012, ktests 017/022 rely on chmod 000). | 2026-10-26: L2.8-a committed; H8 fixed (tests/tests.sh:119 runs suites with \"$BASH\"); next L2.8-b (ktests 056), then the closing gates again."
     },
     "L3.1": {
       "executor": "S",
@@ -762,6 +762,15 @@
       ],
       "card": null,
       "status": "planned"
+    },
+    "L2.8-a": {
+      "executor": "S",
+      "title": "thttpserver listener stop under msys 3.6.10 (foreign-runtime nc)",
+      "dep": [
+        "L2.8"
+      ],
+      "card": "scratchpad launch/L2.8-a/card.md (v2 after lint: 3 blockers — 008 source-text contract, <> check, fd-count)",
+      "status": "DONE 2026-10-26 (Sonnet + SV review): ths._stopPid TERM->poll 300ms->KILL->poll 100ms->/usr/bin/kill -f -9 (cygwin/msys only), used by _closeSlot and Shutdown; 004 new deaf-listener case + busy-port blocker stop; 008 contracts updated. Red: 5.3.15 cell FAIL 532/533 256 s. Green: --repeat 1 PASS (5.3.15 28.5 s, 5.3.9 40 s), --repeat 3 PASS 6/6 no FLAKY (24-30 s), kb-debian 534/534 21.8 s."
     }
   },
   "open": {
@@ -798,6 +807,7 @@
     "L2.7-G-o4": "a wedged/suspended process slows every cygwin stray scan of its runtime by ~1 s per scan (per-process argv wait)",
     "L2.7-G-o5": "ktests cell time grew ~194 s -> ~359 s per runtime (057: nested gates, 18 s silentalive, deadstart grace) - shrink later",
     "L2.7-G-o6": "056 busybox-timeout check (life=1.6 s) is load-sensitive; failed once in a direct combined run, passes in gates",
-    "L1.7-o1": "nohz=off on kb-alpine is possibly a mitigation, not the root cause (tickless-idle wake-up stall on this host); kb-fedora stalled once and may need tools/vmlab/checks/timer.sh + the same option; kb-debian shows 200-900 ms jitter; guest/host clocks differ ~1 s (tar \"time stamp in the future\" on fetch)"
+    "L1.7-o1": "nohz=off on kb-alpine is possibly a mitigation, not the root cause (tickless-idle wake-up stall on this host); kb-fedora stalled once and may need tools/vmlab/checks/timer.sh + the same option; kb-debian shows 200-900 ms jitter; guest/host clocks differ ~1 s (tar \"time stamp in the future\" on fetch)",
+    "L2.8-o1": "Git for Windows msys runtime 3.6.10 (bash 5.3.15, after OG7 update): a Git-bash job running a FOREIGN-runtime exe (MSYS2 /c/bin/msys64/usr/bin/nc.exe — Git for Windows ships no nc) is a bash.exe stub with nc.exe as its Windows child; `kill -TERM` and `kill -KILL` to the job pid return 0 and do nothing (worked under msys 3.6.3); /proc/PID/winpid = the stub, so taskkill of it leaves nc alive; `/usr/bin/kill -f -9 PID` works; MSYS2 bash -> same nc: TERM 19 ms. Effect: kcl/thttpserver 005 section 4 (Shutdown of a listening-only slot < 1.5 s) takes 59 s (nc ends by itself), cell 504 s instead of 39 s; deterministic (rerun same). Probes: scratchpad launch/L2.8/killprobe*.sh, tree.sh. Fix candidate: thttpserver listener stop on cygwin = TERM, bounded poll, then KILL, then /usr/bin/kill -f -9 (as ktests L2.7-G); possibly report upstream (owner decision). — FIXED in thttpserver by L2.8-a; remaining: ths_reap in tests/_ths_socket.sh uses builtin kill -TERM (bash pid, fine today); thttpserver README lines 8/763 still say \"green on bash 5.2.37 and 5.3.9\" (refresh in the L6 docs pass); upstream bug report = owner decision."
   }
 }
