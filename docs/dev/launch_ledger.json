@@ -422,7 +422,7 @@
         "L2.8"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "IN PROGRESS 2026-10-27: split after card-lint into L3.1a (4 gates alpine/freebsd x clean/clean-gnu -> L3_runs.md + L3_failures.tsv, no repros; card scratchpad launch/L3.1/card.md v2) and L3.1b (repros + tool column, sized from L3.1a row counts). L3.1a dispatched (Sonnet)."
     },
     "L3.2": {
       "executor": "SV/OW",
