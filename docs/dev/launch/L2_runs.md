@@ -98,3 +98,28 @@ Notes on the runs:
 * `kcl/math` and `kcl` `202_math.sh` fail on ubuntu and debian (mawk) and pass on fedora (gawk).
 * Locale: `locale -a` on kb-debian lists `de_DE.utf8`; default `LANG=en_US.UTF-8`.
 * Repros were run alone, once per row, in a `vmlab up` + `sync` + `run` + `down` batch per VM (`repro_ok=yes`: the runner exited 1 and listed the file under "Failed test files"). Their output: scratch only.
+
+## L2.8 — closing gates (2026-10-27)
+
+Tree: kbool aa404b0 (ktests 5e78a6b, kcl ce157f1). Every run `--rerun-failed 1 all`, one at a time.
+
+| run | bash | `__GATE__` | tests | wall |
+|---|---|---|---|---|
+| Windows Git-bash + MSYS2 (`kt-gate/20261027-013813-1619`) | 5.3.15 / 5.3.9 | `PASS:60:60:0:0:0:0:0:18625:18625` | 9312 + 9313 | 11m28s / 11m38s |
+| kb-ubuntu | 5.2.21 | `PASS:30:30:0:0:0:0:0:9297:9297` | 9297 | 5m20s |
+| kb-debian | 5.2.37 | `PASS:30:30:0:0:0:0:0:9297:9297` | 9297 | 4m13s |
+| kb-fedora | 5.3.9 | `PASS:30:30:0:0:0:0:0:9297:9297` | 9297 | 4m53s |
+| kb-debian `LC_ALL=de_DE.UTF-8` | 5.2.37 | `PASS:30:30:0:0:0:0:0:9297:9297` | 9297 | 4m11s |
+
+No FAIL, FLAKY, STRAY or rerun in any run (L2.4: 111 non-PASS rows).
+
+**Rescan.** `tools/porting/scan.sh`: 2646 rows (L0 `inventory.tsv`: 2083). New
+core/wrapper/harness rows (key pattern + file + text, line numbers ignored):
+212, all reviewed by the supervisor — the platform branches L2 added
+(process-tree backends `/proc` → `ps` in `kcl/tpipe` and `ktests/ktest_proc.sh`,
+cygwin branches, nc/socat detection and the msys 3.6.10 stop in
+`kcl/thttpserver`, gate/strays session backends) and host-only dev tools
+(`tools/porting/numbers.sh`, `tools/vmlab/checks/timer.sh`,
+`docs/dev/launch/nc_twoslot_probe.sh`); each platform branch is guarded. The
+one P01 row (`#!/bin/bash`, `tools/porting/tests/mdlinks/run.sh:90`) is the
+content of a fixture heredoc. `inventory.tsv` stays the L0 baseline.
