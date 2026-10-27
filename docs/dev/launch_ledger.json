@@ -422,7 +422,7 @@
         "L2.8"
       ],
       "card": "draft",
-      "status": "IN PROGRESS 2026-10-27: split after card-lint into L3.1a (4 gates alpine/freebsd x clean/clean-gnu -> L3_runs.md + L3_failures.tsv, no repros; card scratchpad launch/L3.1/card.md v2) and L3.1b (repros + tool column, sized from L3.1a row counts). L3.1a dispatched (Sonnet)."
+      "status": "L3.1a DONE 2026-10-27 (Sonnet; docs/dev/launch/L3_runs.md + L3_failures.tsv, 240 rows): alpine clean 16 / clean-gnu 3 (tgrep 007 timing, tpipe 003 flaky, tregex 011); freebsd clean 94 (incl. 3 TIMEOUT cells kcl, kcl/math, kkore with empty logs) / clean-gnu 127 (2 TIMEOUT). 130 of the 240 rows carry kklass.sh:838 `printf: write error: Bad file descriptor` (L2.7-N3-o3) — a core kklass defect on FreeBSD, not a tool question; FreeBSD numbers are not usable for OG1 until it is fixed. Plan: L3.1b folded into the L3.5 triage (cluster-wise repros instead of per-row), kklass:838 first, then re-measure FreeBSD, then OG1. || IN PROGRESS 2026-10-27: split after card-lint into L3.1a (4 gates alpine/freebsd x clean/clean-gnu -> L3_runs.md + L3_failures.tsv, no repros; card scratchpad launch/L3.1/card.md v2) and L3.1b (repros + tool column, sized from L3.1a row counts). L3.1a dispatched (Sonnet)."
     },
     "L3.2": {
       "executor": "SV/OW",

@@ -1,0 +1,241 @@
+vm	snapshot	suite	file	verdict	first_fail_line	notes
+kb-freebsd	clean	kcl	-	TIMEOUT		log.txt empty
+kb-freebsd	clean-gnu	kcl	001_UnitFiles.sh	FAIL	[FAIL] out='r=0 kcl' want='r=0 kcl' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: declare: write error: Bad file d	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	101_tstopwatch.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	102_tpath.sh	FAIL	[FAIL] out='reg body=complete n=1 forget n=2' want='reg body=complete n=1 forget n=2' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kkl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	103_tarray.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	104_tregex.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	105_tqueuestack.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	106_thashset.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	107_tdictionary.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	201_dateutils.sh	FAIL	[FAIL] out='reg body=complete n=1 forget n=2' want='reg body=complete n=1 forget n=2' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kkl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	202_math.sh	FAIL	[FAIL] out='reg body=complete n=1 forget n=2' want='reg body=complete n=1 forget n=2' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kkl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	203_tinifile.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	204_tstringhelper.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	301_tfile.sh	FAIL	[FAIL] out='reg body=complete n=1 forget n=2' want='reg body=complete n=1 forget n=2' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kkl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	302_tdirectory.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	303_tlist.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	304_tobjectlist.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	305_tstringlist.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	401_tpipe.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	402_tutil.sh	FAIL	[FAIL] out='reg body=complete n=1 forget n=2' want='reg body=complete n=1 forget n=2' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kkl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	403_tgrep.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	404_thead.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	405_ttail.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	406_tfind.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	407_tsed.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	408_tawk.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	501_tcustomapplication.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	502_thttpmessage.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	503_thttprouter.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	504_thttpserver.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl	505_thttpapplication.sh	FAIL	[FAIL] out='reg body=complete n=1' want='reg body=complete n=1' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: decl	L2.7-N3-o3
+kb-freebsd	clean	kcl/dateutils	017_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/dateutils	017_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/dateutils	023_D3_ReturnContract.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/dateutils	023_D3_ReturnContract.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-alpine	clean	kcl/dateutils	024_IsoWeekSweep.sh	FAIL	[FAIL] perl failed: /home/kb/kbool/kcl/dateutils/tests/024_IsoWeekSweep.sh: line 39: perl: command not found (024_IsoWeekSweep.sh)	
+kb-freebsd	clean	kcl/math	-	TIMEOUT		log.txt empty; H27
+kb-freebsd	clean-gnu	kcl/math	-	TIMEOUT		log.txt empty; H27
+kb-alpine	clean	kcl/math	018_DE1_ProgfileSweep.sh	FAIL	[FAIL] left '.math_fe_6608.awk .math_fe_6654.awk .math_fe_6654.awk.keep .math_fe_6661.awk .math_fe_9.awk .math_fe_abc.awk ' want '.math_fe_6608.awk .math_fe_6654.awk.keep .math_fe_6661.awk .math_fe_9.	H27
+kb-freebsd	clean	kcl/tarray	008_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tarray	008_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tawk	005_Run.sh	FAIL	[FAIL] rc=1 got='0000000    a       1    	H41;H42
+kb-freebsd	clean-gnu	kcl/tawk	006_Contract.sh	FAIL	[FAIL] [the unit loads under set -eu] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tcustomapplication	008_PropertiesAndIntegration.sh	FAIL	[FAIL] Location from a foreign directory: '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tcustomapplication	008_PropertiesAndIntegration.sh	FAIL	[FAIL] Location from a foreign directory: '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tcustomapplication	017_CommandLineOptionsExternal.sh	FAIL	[FAIL] short option is at ParamStr index 1: local='1' external='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tcustomapplication	017_CommandLineOptionsExternal.sh	FAIL	[FAIL] short option is at ParamStr index 1: local='1' external='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tcustomapplication	019_CommandLineArgsRealParameters.sh	FAIL	[FAIL] -h -v accepted: got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tcustomapplication	019_CommandLineArgsRealParameters.sh	FAIL	[FAIL] -h -v accepted: got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tcustomapplication	021_CommandLineOptionsExternalScript.sh	FAIL	[FAIL] FindOptionIndex unexpected result: /home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tcustomapplication	021_CommandLineOptionsExternalScript.sh	FAIL	[FAIL] FindOptionIndex unexpected result: /home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tcustomapplication	030_KklassResultCompatibility.sh	FAIL	[FAIL] TCustomApplication silent helper mismatch: probe='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tcustomapplication	030_KklassResultCompatibility.sh	FAIL	[FAIL] TCustomApplication silent helper mismatch: probe='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tcustomapplication	031_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tcustomapplication	031_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tdictionary	009_KeysValues.sh	FAIL	[FAIL] a listed key did not resolve (009_KeysValues.sh)	
+kb-freebsd	clean-gnu	kcl/tdictionary	009_KeysValues.sh	FAIL	[FAIL] a listed key did not resolve (009_KeysValues.sh)	
+kb-freebsd	clean	kcl/tdictionary	014_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tdictionary	014_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tdirectory	016_GetAttributes.sh	FAIL	[FAIL] GetAttributes - existing directory returns attributes (expected: non-empty) (016_GetAttributes.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	016_GetAttributes.sh	FAIL	[FAIL] GetAttributes - existing directory returns attributes (expected: non-empty) (016_GetAttributes.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	017_SetAttributes.sh	FAIL	[FAIL] SetAttributes - set attributes on directory (expected attributes to be set) (017_SetAttributes.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	017_SetAttributes.sh	FAIL	[FAIL] SetAttributes - set attributes on directory (expected attributes to be set) (017_SetAttributes.sh)	H20-H23
+kb-alpine	clean	kcl/tdirectory	018_GetCreationTime.sh	FAIL	[FAIL] GetCreationTime - returns datetime value (expected: non-empty datetime) (018_GetCreationTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	018_GetCreationTime.sh	FAIL	[FAIL] GetCreationTime - returns datetime value (expected: non-empty datetime) (018_GetCreationTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	018_GetCreationTime.sh	FAIL	[FAIL] GetCreationTime - returns datetime value (expected: non-empty datetime) (018_GetCreationTime.sh)	H20-H23
+kb-alpine	clean	kcl/tdirectory	019_SetCreationTime.sh	FAIL	[FAIL] SetCreationTime - the getter answered '' (019_SetCreationTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	019_SetCreationTime.sh	FAIL	[FAIL] SetCreationTime - rc=1 out='' mtime= (the old body set the WRITE time here) (019_SetCreationTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	019_SetCreationTime.sh	FAIL	[FAIL] SetCreationTime - rc=1 out='' mtime= (the old body set the WRITE time here) (019_SetCreationTime.sh)	H20-H23
+kb-alpine	clean	kcl/tdirectory	020_GetCreationTimeUtc.sh	FAIL	[FAIL] GetCreationTimeUtc - returns datetime value (expected: non-empty datetime) (020_GetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	020_GetCreationTimeUtc.sh	FAIL	[FAIL] GetCreationTimeUtc - returns datetime value (expected: non-empty datetime) (020_GetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	020_GetCreationTimeUtc.sh	FAIL	[FAIL] GetCreationTimeUtc - returns datetime value (expected: non-empty datetime) (020_GetCreationTimeUtc.sh)	H20-H23
+kb-alpine	clean	kcl/tdirectory	021_SetCreationTimeUtc.sh	FAIL	[FAIL] SetCreationTimeUtc - the getter answered '' (021_SetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	021_SetCreationTimeUtc.sh	FAIL	[FAIL] SetCreationTimeUtc - rc=1 out='' mtime= (the old body set the WRITE time here) (021_SetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	021_SetCreationTimeUtc.sh	FAIL	[FAIL] SetCreationTimeUtc - rc=1 out='' mtime= (the old body set the WRITE time here) (021_SetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	022_GetLastAccessTime.sh	FAIL	[FAIL] GetLastAccessTime - returns datetime value (expected: non-empty datetime) (022_GetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	022_GetLastAccessTime.sh	FAIL	[FAIL] GetLastAccessTime - returns datetime value (expected: non-empty datetime) (022_GetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	023_SetLastAccessTime.sh	FAIL	[FAIL] SetLastAccessTime - changes last access time (expected: time to be set) (023_SetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	023_SetLastAccessTime.sh	FAIL	[FAIL] SetLastAccessTime - changes last access time (expected: time to be set) (023_SetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	024_GetLastAccessTimeUtc.sh	FAIL	[FAIL] GetLastAccessTimeUtc - returns datetime value (expected: non-empty datetime) (024_GetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	024_GetLastAccessTimeUtc.sh	FAIL	[FAIL] GetLastAccessTimeUtc - returns datetime value (expected: non-empty datetime) (024_GetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	025_SetLastAccessTimeUtc.sh	FAIL	[FAIL] SetLastAccessTimeUtc - changes UTC last access time (expected: UTC time to be set) (025_SetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	025_SetLastAccessTimeUtc.sh	FAIL	[FAIL] SetLastAccessTimeUtc - changes UTC last access time (expected: UTC time to be set) (025_SetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	026_GetLastWriteTime.sh	FAIL	[FAIL] GetLastWriteTime - returns datetime value (expected: non-empty datetime) (026_GetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	026_GetLastWriteTime.sh	FAIL	[FAIL] GetLastWriteTime - returns datetime value (expected: non-empty datetime) (026_GetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	027_SetLastWriteTime.sh	FAIL	[FAIL] SetLastWriteTime - changes the write time (rc=1 stored=, wanted 1700000000) (027_SetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	027_SetLastWriteTime.sh	FAIL	[FAIL] SetLastWriteTime - changes the write time (rc=1 stored=, wanted 1700000000) (027_SetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	028_GetLastWriteTimeUtc.sh	FAIL	[FAIL] GetLastWriteTimeUtc - utc='' () local='' (), wanted 1700000000 (028_GetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	028_GetLastWriteTimeUtc.sh	FAIL	[FAIL] GetLastWriteTimeUtc - utc='' () local='' (), wanted 1700000000 (028_GetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	029_SetLastWriteTimeUtc.sh	FAIL	[FAIL] SetLastWriteTimeUtc - changes the write time (rc=1 stored=, wanted 1700000000) (029_SetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	029_SetLastWriteTimeUtc.sh	FAIL	[FAIL] SetLastWriteTimeUtc - changes the write time (rc=1 stored=, wanted 1700000000) (029_SetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	031_TimeAndAttributeStatus.sh	FAIL	[FAIL] TDirectory time getter returned invalid timestamp:  (031_TimeAndAttributeStatus.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	031_TimeAndAttributeStatus.sh	FAIL	[FAIL] TDirectory time getter returned invalid timestamp:  (031_TimeAndAttributeStatus.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	032_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tdirectory	032_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-alpine	clean	kcl/tdirectory	035_G6_Times.sh	FAIL	[FAIL] got '' (035_G6_Times.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	035_G6_Times.sh	FAIL	[FAIL] stored , wanted 1700000000 (035_G6_Times.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tdirectory	035_G6_Times.sh	FAIL	[FAIL] stored , wanted 1700000000 (035_G6_Times.sh)	H20-H23
+kb-freebsd	clean	kcl/tdirectory	036_G6_ReturnContract.sh	FAIL	[FAIL] getAttributes: direct call is silent and sets RESULT [D3]: RESULT='', expected 'faDirectory' (036_G6_ReturnContract.sh)	
+kb-freebsd	clean-gnu	kcl/tdirectory	036_G6_ReturnContract.sh	FAIL	[FAIL] getAttributes: direct call is silent and sets RESULT [D3]: RESULT='', expected 'faDirectory' (036_G6_ReturnContract.sh)	
+kb-freebsd	clean	kcl/tfile	012_GetAttributes.sh	FAIL	[FAIL] Get attributes of existing file (012_GetAttributes.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	012_GetAttributes.sh	FAIL	[FAIL] Get attributes of existing file (012_GetAttributes.sh)	H20-H23
+kb-alpine	clean	kcl/tfile	013_GetCreationTime.sh	FAIL	[FAIL] Get creation time of existing file (invalid timestamp: ) (013_GetCreationTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	013_GetCreationTime.sh	FAIL	[FAIL] Get creation time of existing file (invalid timestamp: ) (013_GetCreationTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	013_GetCreationTime.sh	FAIL	[FAIL] Get creation time of existing file (invalid timestamp: ) (013_GetCreationTime.sh)	H20-H23
+kb-alpine	clean	kcl/tfile	014_GetCreationTimeUtc.sh	FAIL	[FAIL] Get creation time UTC of existing file (invalid timestamp: ) (014_GetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	014_GetCreationTimeUtc.sh	FAIL	[FAIL] Get creation time UTC of existing file (invalid timestamp: ) (014_GetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	014_GetCreationTimeUtc.sh	FAIL	[FAIL] Get creation time UTC of existing file (invalid timestamp: ) (014_GetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	015_GetLastAccessTime.sh	FAIL	[FAIL] Get last access time of existing file (invalid timestamp: ) (015_GetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	015_GetLastAccessTime.sh	FAIL	[FAIL] Get last access time of existing file (invalid timestamp: ) (015_GetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	016_GetLastAccessTimeUtc.sh	FAIL	[FAIL] Get last access time UTC of existing file (invalid timestamp: ) (016_GetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	016_GetLastAccessTimeUtc.sh	FAIL	[FAIL] Get last access time UTC of existing file (invalid timestamp: ) (016_GetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	017_GetLastWriteTime.sh	FAIL	[FAIL] Get last write time of existing file (invalid timestamp: ) (017_GetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	017_GetLastWriteTime.sh	FAIL	[FAIL] Get last write time of existing file (invalid timestamp: ) (017_GetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	018_GetLastWriteTimeUtc.sh	FAIL	[FAIL] Get last write time UTC of existing file (invalid timestamp: ) (018_GetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	018_GetLastWriteTimeUtc.sh	FAIL	[FAIL] Get last write time UTC of existing file (invalid timestamp: ) (018_GetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	030_SetAttributes.sh	FAIL	[FAIL] Set attributes on existing file (rc=1 mode=) (030_SetAttributes.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	030_SetAttributes.sh	FAIL	[FAIL] Set attributes on existing file (rc=1 mode=) (030_SetAttributes.sh)	H20-H23
+kb-alpine	clean	kcl/tfile	031_SetCreationTime.sh	FAIL	[FAIL] Get creation time still answers (got '') (031_SetCreationTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	031_SetCreationTime.sh	FAIL	[FAIL] Set creation time (rc=1 out='' atime= mtime=) (031_SetCreationTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	031_SetCreationTime.sh	FAIL	[FAIL] Set creation time (rc=1 out='' atime= mtime=) (031_SetCreationTime.sh)	H20-H23
+kb-alpine	clean	kcl/tfile	032_SetCreationTimeUtc.sh	FAIL	[FAIL] Get creation time still answers (got '') (032_SetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	032_SetCreationTimeUtc.sh	FAIL	[FAIL] Set creation time (rc=1 out='' atime= mtime=) (032_SetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	032_SetCreationTimeUtc.sh	FAIL	[FAIL] Set creation time (rc=1 out='' atime= mtime=) (032_SetCreationTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	033_SetLastAccessTime.sh	FAIL	[FAIL] SetLastAccessTime stores an epoch argument (rc=1 stored=, wanted 1700000000) (033_SetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	033_SetLastAccessTime.sh	FAIL	[FAIL] SetLastAccessTime stores an epoch argument (rc=1 stored=, wanted 1700000000) (033_SetLastAccessTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	034_SetLastAccessTimeUtc.sh	FAIL	[FAIL] SetLastAccessTimeUtc stores an epoch argument (rc=1 stored=, wanted 1700000000) (034_SetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	034_SetLastAccessTimeUtc.sh	FAIL	[FAIL] SetLastAccessTimeUtc stores an epoch argument (rc=1 stored=, wanted 1700000000) (034_SetLastAccessTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	035_SetLastWriteTime.sh	FAIL	[FAIL] SetLastWriteTime stores an epoch argument (rc=1 stored=, wanted 1700000000) (035_SetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	035_SetLastWriteTime.sh	FAIL	[FAIL] SetLastWriteTime stores an epoch argument (rc=1 stored=, wanted 1700000000) (035_SetLastWriteTime.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	036_SetLastWriteTimeUtc.sh	FAIL	[FAIL] SetLastWriteTimeUtc stores an epoch argument (rc=1 stored=, wanted 1700000000) (036_SetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	036_SetLastWriteTimeUtc.sh	FAIL	[FAIL] SetLastWriteTimeUtc stores an epoch argument (rc=1 stored=, wanted 1700000000) (036_SetLastWriteTimeUtc.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	039_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tfile	039_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-alpine	clean	kcl/tfile	041_G6_Setters.sh	FAIL	[FAIL] got '' (041_G6_Setters.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	041_G6_Setters.sh	FAIL	[FAIL] mtime stayed  (wanted 1700000000) (041_G6_Setters.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tfile	041_G6_Setters.sh	FAIL	[FAIL] mtime stayed  (wanted 1700000000) (041_G6_Setters.sh)	H20-H23
+kb-freebsd	clean	kcl/tfile	042_G6_IO.sh	FAIL	[FAIL]        4 bytes (042_G6_IO.sh)	
+kb-freebsd	clean-gnu	kcl/tfile	042_G6_IO.sh	FAIL	[FAIL]        4 bytes (042_G6_IO.sh)	
+kb-freebsd	clean	kcl/tfile	043_G6_ReturnContract.sh	FAIL	[FAIL] getAttributes: direct call is silent and sets RESULT [D3]: RESULT='', expected 'faNormal' (043_G6_ReturnContract.sh)	
+kb-freebsd	clean-gnu	kcl/tfile	043_G6_ReturnContract.sh	FAIL	[FAIL] getAttributes: direct call is silent and sets RESULT [D3]: RESULT='', expected 'faNormal' (043_G6_ReturnContract.sh)	
+kb-alpine	clean-gnu	kcl/tgrep	007_Bench.sh	FAIL	[FAIL] grep hits='21' search hits='21' (want 21); grep=1873us search=20031us (1069%) ceiling=18730us (007_Bench.sh)	L2.7-P-o2
+kb-freebsd	clean	kcl/thashset	003_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thashset	003_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/thashset	005_SetAlgebra.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thashset	005_SetAlgebra.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/thashset	006_Events.sh	FAIL	[FAIL] rc=0 out='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thashset	006_Events.sh	FAIL	[FAIL] rc=0 out='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/thttpserver	002_Response.sh	FAIL	[FAIL] date='Date: Tue, 27 Oct 2026 00:19:06 GMT' utc='Tue, 27 Oct 2026 00:19'/'Tue, 27 Oct 2026 00:19' env='ru_RU.UTF-8|JST-9|09' err='/home/kb/kbool/kklass/kklass.sh: строка 838: printf: write	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thttpserver	002_Response.sh	FAIL	[FAIL] date='Date: Tue, 27 Oct 2026 00:55:41 GMT' utc='Tue, 27 Oct 2026 00:55'/'Tue, 27 Oct 2026 00:55' env='ru_RU.UTF-8|JST-9|09' err='/home/kb/kbool/kklass/kklass.sh: строка 838: printf: write	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thttpserver	004_Server.sh	FAIL	[FAIL] exit=0 rc=0 le='' n=39 log=39 children=0 stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thttpserver	005_Lifecycle.sh	FAIL	[FAIL] '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/thttpserver	006_Application.sh	FAIL	[FAIL] child rc=0 out='rc=0 n=1 body=sig same=1 during=trap -- '' SIGPIPE|trap -- '__THS_SIGNAL=TERM' SIGTERM' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thttpserver	006_Application.sh	FAIL	[FAIL] child rc=0 out='rc=0 n=1 body=sig same=1 during=trap -- '' SIGPIPE|trap -- '__THS_SIGNAL=TERM' SIGTERM' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thttpserver	007_Hostile.sh	FAIL	[FAIL] ok=200 exit=0 rc=0 le='' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/thttpserver	008_Contract.sh	FAIL	[FAIL] out='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thttpserver	008_Contract.sh	FAIL	[FAIL] out='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/thttpserver	009_Demo.sh	FAIL	[FAIL] exit=2 stderr=(/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor /home/kb/kbool/kklass/kklass.sh: line 838: declare: write error: Bad file descriptor /home/kb/	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/thttpserver	009_Demo.sh	FAIL	[FAIL] exit=2 stderr=(/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor /home/kb/kbool/kklass/kklass.sh: line 838: declare: write error: Bad file descriptor /home/kb/	L2.7-N3-o3
+kb-freebsd	clean	kcl/tinifile	006_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tinifile	006_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tinifile	010_T13_OutArrays.sh	FAIL	[FAIL] out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor | /home/kb/kbool/kklass/kklass.sh: line 838: declare: write error: Bad file descriptor | /ho	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tinifile	010_T13_OutArrays.sh	FAIL	[FAIL] out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor | /home/kb/kbool/kklass/kklass.sh: line 838: declare: write error: Bad file descriptor | /ho	L2.7-N3-o3
+kb-freebsd	clean	kcl/tinifile	012_D6_Locale.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tinifile	012_D6_Locale.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tlist	020_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tlist	020_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tobjectlist	004_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tobjectlist	004_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-alpine	clean	kcl/tpath	009_GetFullPath.sh	FAIL	[FAIL] getFullPath with current directory (expected: '/home/kb/kbool/kcl/tpath/tests/.tmp/GetFullPath.009_GetFullPath.17965', got: '/home/kb/kbool/kcl/tpath/tests/.tmp/GetFullPath.009_GetFullPath.1796	H24
+kb-freebsd	clean	kcl/tpath	009_GetFullPath.sh	FAIL	[FAIL] getFullPath with current directory (expected: '/home/kb/kbool/kcl/tpath/tests/.tmp/GetFullPath.009_GetFullPath.59710', got: '/home/kb/kbool/kcl/tpath/tests/.tmp/GetFullPath.009_GetFullPath.5971	H24
+kb-freebsd	clean-gnu	kcl/tpath	009_GetFullPath.sh	FAIL	[FAIL] getFullPath with current directory (expected: '/home/kb/kbool/kcl/tpath/tests/.tmp/GetFullPath.009_GetFullPath.78334', got: '/home/kb/kbool/kcl/tpath/tests/.tmp/GetFullPath.009_GetFullPath.7833	H24
+kb-freebsd	clean	kcl/tpath	012_GetAttributes.sh	FAIL	[FAIL] GetAttributes for regular file (expected: 'faNormal', got: '') (012_GetAttributes.sh)	H20-H23
+kb-freebsd	clean-gnu	kcl/tpath	012_GetAttributes.sh	FAIL	[FAIL] GetAttributes for regular file (expected: 'faNormal', got: '') (012_GetAttributes.sh)	H20-H23
+kb-freebsd	clean	kcl/tpath	016_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tpath	016_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-alpine	clean	kcl/tpath	018_G6_PathParsing.sh	FAIL	[FAIL] expected '/nosuch_g613/b', got '/nosuch_g613/a/../b' (018_G6_PathParsing.sh)	H24
+kb-freebsd	clean	kcl/tpath	018_G6_PathParsing.sh	FAIL	[FAIL] expected '/nosuch_g613/b', got '/nosuch_g613/a/../b' (018_G6_PathParsing.sh)	H24
+kb-freebsd	clean-gnu	kcl/tpath	018_G6_PathParsing.sh	FAIL	[FAIL] expected '/nosuch_g613/b', got '/nosuch_g613/a/../b' (018_G6_PathParsing.sh)	H24
+kb-freebsd	clean	kcl/tpath	019_G6_Platform.sh	FAIL	[FAIL] true='' false='' target='' (019_G6_Platform.sh)	
+kb-freebsd	clean-gnu	kcl/tpath	019_G6_Platform.sh	FAIL	[FAIL] true='' false='' target='' (019_G6_Platform.sh)	
+kb-freebsd	clean	kcl/tpath	020_G6_ReturnContract.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tpath	020_G6_ReturnContract.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tpipe	001_Each.sh	FAIL	[FAIL] rc=0 out='ix=0;ix=1;ix=2;n=2' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tpipe	001_Each.sh	FAIL	[FAIL] rc=0 out='ix=0;ix=1;ix=2;n=2' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-alpine	clean-gnu	kcl/tpipe	003_Sinks.sh	FLAKY	[FAIL] RESULT='2' rc=1 lastRc='127' (003_Sinks.sh)	
+kb-freebsd	clean	kcl/tpipe	003_Sinks.sh	FAIL	[FAIL] rc=0 out='offered=5 stored=3' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tpipe	003_Sinks.sh	FAIL	[FAIL] rc=0 out='offered=5 stored=3' err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tpipe	004_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tpipe	004_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tpipe	006_TreeStop.sh	FAIL	[FAIL] timeout rc=0 out='rc=0 res=a lastrc=143 alive=0/6 us=186591' recorded=6 (want >= 6): bg=62357 mid=62360 sub-sleep=62364 sub=62359 deep-sleep=62367 deep=62363  stderr='/home/kb/kbool/kklass/kkla	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tpipe	006_TreeStop.sh	FAIL	[FAIL] timeout rc=0 out='rc=0 res=a lastrc=143 alive=0/6 us=156124' recorded=6 (want >= 6): bg=80990 mid=80993 sub-sleep=80996 sub=80992 deep-sleep=80998 deep=80997  stderr='/home/kb/kbool/kklass/kkla	L2.7-N3-o3
+kb-freebsd	clean	kcl/tqueuestack	008_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tqueuestack	008_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tregex	002_IsMatch.sh	FAIL	[FAIL] expected match (rc0) for text='the cat sat' re='cat' flags='' (002_IsMatch.sh)	
+kb-freebsd	clean-gnu	kcl/tregex	002_IsMatch.sh	FAIL	[FAIL] expected match (rc0) for text='the cat sat' re='cat' flags='' (002_IsMatch.sh)	
+kb-freebsd	clean	kcl/tregex	010_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tregex	010_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-alpine	clean	kcl/tregex	011_T3_T4_LocaleAndAnchors.sh	FAIL	[FAIL] n=6 offs='0 1 2 3 4 5' want n=5 offs='0 1 2 3 4' (011_T3_T4_LocaleAndAnchors.sh)	ALL4
+kb-alpine	clean-gnu	kcl/tregex	011_T3_T4_LocaleAndAnchors.sh	FAIL	[FAIL] n=6 offs='0 1 2 3 4 5' want n=5 offs='0 1 2 3 4' (011_T3_T4_LocaleAndAnchors.sh)	ALL4
+kb-freebsd	clean	kcl/tregex	011_T3_T4_LocaleAndAnchors.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	ALL4;L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tregex	011_T3_T4_LocaleAndAnchors.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	ALL4;L2.7-N3-o3
+kb-freebsd	clean	kcl/tstopwatch	005_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tstopwatch	005_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tstopwatch	006_G3_BooleansAndLocale.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tstopwatch	006_G3_BooleansAndLocale.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tstringhelper	060_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tstringhelper	060_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tstringhelper	061_TSH17_ReturnContract.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tstringhelper	061_TSH17_ReturnContract.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tstringhelper	063_TSH04_Locale.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tstringhelper	063_TSH04_Locale.sh	FAIL	[FAIL] got '/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tstringlist	017_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tstringlist	017_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tutil	001_Core.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tutil	001_Core.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tutil	002_Sinks.sh	FAIL	[FAIL] rc=0 out='SAME:-n a b back\slash café' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tutil	002_Sinks.sh	FAIL	[FAIL] rc=0 out='SAME:-n a b back\slash café' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kcl/tutil	003_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kcl/tutil	003_Contract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kklass	119_DuplicateClassGuard.sh	FAIL	[FAIL] message did not locate the collision: 'kklass: Duplicate identifier: class 'TDupGuard' is already declared at /home/kb/gate-out/cells/028/tmp/kk119_86107/orig.sh:1; refusing to redeclare it at 	L2.7-N3-o3
+kb-freebsd	clean-gnu	kklass	119_DuplicateClassGuard.sh	FAIL	[FAIL] message did not locate the collision: 'kklass: Duplicate identifier: class 'TDupGuard' is already declared at /home/kb/gate-out/cells/028/tmp/kk119_4905/orig.sh:1; refusing to redeclare it at /	L2.7-N3-o3
+kb-freebsd	clean	kklass	128_SetUContract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kklass	128_SetUContract.sh	FAIL	[FAIL] rc=0 out='OK' stderr='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kklass	139_ClassDeclarationSites.sh	FAIL	[FAIL] out='imposter-build=1|who1=ORIGINAL|who2=ORIGINAL|tag=orig-tag|tail=tail|open=[] static=[]|rebuild=1|endimpl=1|who3=ORIGINAL tag=orig-tag' lines=4 err2='kklass: Duplicate identifier: class 'TSp	L2.7-N3-o3
+kb-freebsd	clean-gnu	kklass	139_ClassDeclarationSites.sh	FAIL	[FAIL] out='imposter-build=1|who1=ORIGINAL|who2=ORIGINAL|tag=orig-tag|tail=tail|open=[] static=[]|rebuild=1|endimpl=1|who3=ORIGINAL tag=orig-tag' lines=4 err2='kklass: Duplicate identifier: class 'TSp	L2.7-N3-o3
+kb-freebsd	clean	kklass	140_TakenNames.sh	FAIL	[FAIL] out='own=0|undeclared=0|declared=1|kept=lib|w=own' lines=7 err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean-gnu	kklass	140_TakenNames.sh	FAIL	[FAIL] out='own=0|undeclared=0|declared=1|kept=lib|w=own' lines=7 err='/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor	L2.7-N3-o3
+kb-freebsd	clean	kklass	141_UnitHeaders.sh	FAIL	[FAIL] out='kkp-usage=1|compiler-usage=1|compile=0 err=       0|1|hi-5|kklass=registered|kkp sourced, kbool=' want='kkp-usage=1|compiler-usage=1|compile=0 err=0|1|hi-5|kklass=registered|kkp sourced, k	
+kb-freebsd	clean-gnu	kklass	141_UnitHeaders.sh	FAIL	[FAIL] out='kkp-usage=1|compiler-usage=1|compile=0 err=       0|1|hi-5|kklass=registered|kkp sourced, kbool=' want='kkp-usage=1|compiler-usage=1|compile=0 err=0|1|hi-5|kklass=registered|kkp sourced, k	
+kb-freebsd	clean	kklass	142_DocExamples.sh	FAIL	[FAIL] kklass_book.md:1142: unexpected stderr: [/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: declare: write error: Bad	L2.7-N3-o3
+kb-freebsd	clean-gnu	kklass	142_DocExamples.sh	FAIL	[FAIL] kklass_book.md:1142: unexpected stderr: [/home/kb/kbool/kklass/kklass.sh: line 838: printf: write error: Bad file descriptor|/home/kb/kbool/kklass/kklass.sh: line 838: declare: write error: Bad	L2.7-N3-o3
+kb-alpine	clean	kklass	143_CompilerTempCleanup.sh	FAIL	[FAIL] rc=1 left='' (143_CompilerTempCleanup.sh)	
+kb-freebsd	clean	kklass	143_CompilerTempCleanup.sh	FAIL	[FAIL] dropped='kklass_compiler.94221.vdFq98' left='kklass_compiler.89712.keep kklass_compiler.94221.vdFq98 kklass_compiler.94377.fresh kklass_compiler.abc.keep other ' want='kklass_compiler.89712.kee	
+kb-freebsd	clean-gnu	kklass	143_CompilerTempCleanup.sh	FAIL	[FAIL] dropped='kklass_compiler.12644.bOVcVx' left='kklass_compiler.12644.bOVcVx kklass_compiler.12865.fresh kklass_compiler.8044.keep kklass_compiler.abc.keep other ' want='kklass_compiler.12865.fres	
+kb-freebsd	clean	kklass	145_ForkFreeBuild.sh	FAIL	[FAIL] rc=0 forks(lines)=5 out=[pas	L2.7-N3-o3
+kb-freebsd	clean-gnu	kklass	145_ForkFreeBuild.sh	FAIL	[FAIL] rc=0 forks(lines)=5 out=[pas	L2.7-N3-o3
+kb-freebsd	clean	kkore	-	TIMEOUT		log.txt empty
+kb-freebsd	clean-gnu	kkore	-	TIMEOUT		log.txt empty
+kb-freebsd	clean	ktests	042_KilledRunCleanup.sh	FAIL	[FAIL] rc=143 left=[kt_nap.5816.2992712882] (042_KilledRunCleanup.sh)	
