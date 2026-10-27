@@ -38,7 +38,8 @@
     "OG7": {
       "was": "Git for Windows msys runtime 3.6.3 has a FIFO owner-handoff wedge (L2.7-G); MSYS2 3.6.9 showed 0/2000 — recommend updating Git for Windows (owner's environment); not blocking",
       "status": "RESOLVED 2026-10-26: owner updated Git for Windows -> git 2.56.0.windows.3, bash 5.3.15(2), msys runtime 3.6.10 (was bash 5.2.37 / msys 3.6.3). Consequence: Windows gate pair is now 5.3.15 + 5.3.9; bash 5.2 is covered only by kb-ubuntu 5.2.21 and kb-debian 5.2.37. Git-bash has no nc/socat of its own (thttpserver tests fall back to /c/bin/msys64/usr/bin/nc.exe, as before)."
-    }
+    },
+    "OG8": "uutils coreutils (Ubuntu 25.10+ default; 26.04 LTS likely): `head (uutils coreutils) 0.x` is refused by ktool (GNU only) → THead/TTail unusable on a default modern Ubuntu. Options: accept uutils head/tail if the THead/TTail suites pass against it (to be measured), or refuse with a hint to install GNU coreutils (coreutils-from-gnu). SV measures first, then asks the owner with examples."
   },
   "baseline": {
     "platforms_tested": [
@@ -446,7 +447,7 @@
         "L3.2"
       ],
       "card": null,
-      "status": "planned"
+      "status": "IN PROGRESS 2026-10-27: kkore/ktool.sh (on-demand unit; ktool.gnu FAMILY → path; KCL_GNU_<F> override, g-name, plain name with GNU banner) + tests/017; gates PASS round 1 (Windows both, freebsd clean/clean-gnu, alpine clean, debian: kkore 728). Critic: no blocker; round 2 (cwd entries skipped, stdout-first banner, sed 4.2, uutils hint, tests) running without gates."
     },
     "L3.4": {
       "executor": "S",
