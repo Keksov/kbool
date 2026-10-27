@@ -20,7 +20,8 @@
     "DL11": "owner 2026-10-21 (L2.5 D1): wrappers TGrep/TSed/TAwk strip a trailing CR in text mode on every platform; binary=1 keeps bytes everywhere",
     "DL12": "owner 2026-10-21 (L2.5 D2): thttpserver second network backend = socat (Windows stays GNU netcat 0.7.1)",
     "DL13": "owner 2026-10-21 (L2.5 D5): TPipe.stop stops the producer whole tree, fixed now",
-    "DL9a": "owner 2026-10-22: delegation rules from experience (LAUNCH_PLAN.md §3): critic after every O task on a core layer or > ~300 lines; O tasks cut to one subsystem x one concern (~300 lines); default to S when a card can be written; Sonnet card-lint before dispatching non-trivial cards; test uniform-behaviour decisions against the owner motivating examples"
+    "DL9a": "owner 2026-10-22: delegation rules from experience (LAUNCH_PLAN.md §3): critic after every O task on a core layer or > ~300 lines; O tasks cut to one subsystem x one concern (~300 lines); default to S when a card can be written; Sonnet card-lint before dispatching non-trivial cards; test uniform-behaviour decisions against the owner motivating examples",
+    "L3.5-b-SV": "2026-10-27 SV: D5a, D6 (absolute floor), D7 fix, D8 investigate, D9 watch, D10 socat in apk.sh"
   },
   "pending_owner_decisions": {
     "OG1": "L3: GNU-tool policy (recommended: core tool-free; wrappers require GNU tool, resolved by name gsed/gawk/gfind/ggrep; missing tool -> clear error, tests SKIP)",
@@ -458,7 +459,7 @@
         "L3.1"
       ],
       "card": null,
-      "status": "IN PROGRESS 2026-10-27: L3.5-a DONE (Opus + critic; kklass b245f66, kcl 4e53fd5, kkore e01a00c): FreeBSD kklass:838 write error gone (capture OFF on /dev/fd platforms after critic B1: writable R2 = in-place forgery; FreeBSD class build 28-33 ms vs 16 with a working capture), math FIFO procsub hang fixed (BWK awk), kkore 014 bash -i SIGTTIN fixed in the test. FreeBSD after: clean 52 failing files (1 FLAKY tinifile 011 timing), clean-gnu 54, 0 TIMEOUT, 0 write-error rows. Next: triage of the remaining L3 rows (tool policy vs BWK awk vs other) -> OG1 numbers."
+      "status": "IN PROGRESS 2026-10-27: L3.5-a DONE (Opus + critic; kklass b245f66, kcl 4e53fd5, kkore e01a00c): FreeBSD kklass:838 write error gone (capture OFF on /dev/fd platforms after critic B1: writable R2 = in-place forgery; FreeBSD class build 28-33 ms vs 16 with a working capture), math FIFO procsub hang fixed (BWK awk), kkore 014 bash -i SIGTTIN fixed in the test. FreeBSD after: clean 52 failing files (1 FLAKY tinifile 011 timing), clean-gnu 54, 0 TIMEOUT, 0 write-error rows. Next: triage of the remaining L3 rows (tool policy vs BWK awk vs other) -> OG1 numbers. | 2026-10-27: L3.5-b triage DONE (docs/dev/launch/L3_triage.md): 127 rows on HEAD (Ac17 Ag4 Fc52 Fg54) in 14 clusters: T-core 86 (tpath stat/date/touch/realpath), T-test 25, PLAT 8, AWK 3, T-wrap 2, FLAKE 3; hidden: 763 wrapper cases SKIP non-GNU (577 even on FreeBSD clean-gnu: g-names unused). 9 fix batches L3.5-1..9. SV decisions: D5 (a) document subnormal-on-BWK + engine-aware 014 row; D6 bench floor bare+30 ms; D7 fix FIFO procsub leak (L3.5-7); D8 C13 = O investigation; D9 C14 watch at L3.6; D10 add socat to apk.sh GNU list + retake kb-alpine clean-gnu (provisioning card). Owner: OG1, D3 (date strings in setters), D4 (getFullPath symlink semantics)."
     },
     "L3.6": {
       "executor": "SV",
