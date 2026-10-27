@@ -447,7 +447,7 @@
         "L3.2"
       ],
       "card": null,
-      "status": "IN PROGRESS 2026-10-27: kkore/ktool.sh (on-demand unit; ktool.gnu FAMILY → path; KCL_GNU_<F> override, g-name, plain name with GNU banner) + tests/017; gates PASS round 1 (Windows both, freebsd clean/clean-gnu, alpine clean, debian: kkore 728). Critic: no blocker; round 2 (cwd entries skipped, stdout-first banner, sed 4.2, uutils hint, tests) running without gates."
+      "status": "DONE 2026-10-28 (Opus, 3 rounds + 2 critics): kkore/ktool.sh resolver + tests/017 (50); kkore 749 PASS on Windows both, freebsd clean/clean-gnu, alpine clean, debian. Probe: freebsd clean-gnu resolves /usr/local/bin/g*; clean/busybox refuse with package hints. Open: coreutils-from-gnu package name unverified; OG8 uutils."
     },
     "L3.4": {
       "executor": "S",
@@ -828,6 +828,7 @@
     "L3.5-8-o1": "tpipe status recovery leftovers: +0.4 ms/call on Linux for function/builtin producers; 5.2.37 `wait -n` after a loss not measured; stale queue entry possible after an interrupted wait (harmless unless pid reuse + no report); status fd inherited by all producers' descendants (no CLOEXEC in bash); another pipe reusing the same fd number is not detected. Upstream bash report possible (owner decision).",
     "L3.5-7-o2": "FIFO unlink uses `command rm`: with no rm on PATH the sh-np.* FIFO is left as before.",
     "L3.5-7o1-o1": "thttpserver 007 case 9 (injection) on FreeBSD clean-gnu: the raw response sometimes lacks its status line (wire starts at `Date: …`; access log says 200), 2/36 runs — suspected transport/unit defect (first write lost or sent to another fd). Needs its own O card before L3.6. Evidence: scratchpad launch/L3.5-7o1/repro3.out, kb-vmlab/20261027-235733-kb-freebsd-clean-gnu cell 8.",
-    "L3.5-7o1-o2": "thttpserver hostile tests: follower clients behind a one-accept GNU nc can get a backlog reset (004 case 11 code=000 1/36; 006 S1 early-close and 007 case 8 no-bytes client pass vacuously when refused, 19/20 on FreeBSD). Decide whether these clients retry rc 55/56/7 like the 8-client case (SV, thttpserver)."
+    "L3.5-7o1-o2": "thttpserver hostile tests: follower clients behind a one-accept GNU nc can get a backlog reset (004 case 11 code=000 1/36; 006 S1 early-close and 007 case 8 no-bytes client pass vacuously when refused, 19/20 on FreeBSD). Decide whether these clients retry rc 55/56/7 like the 8-client case (SV, thttpserver).",
+    "L3.3-o1": "For L3.4: wrapper Argv tests assert cmd == sed etc. (tsed 004:180/213…); decide the constructor behaviour without a GNU tool (keep bare name vs fail creation); wrapper test oracles must use the resolved path; the draft README requirements paragraph is in the L3.3 report (for L6.5)."
   }
 }
