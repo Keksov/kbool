@@ -33,7 +33,10 @@
       "status": "RESOLVED 2026-10-27: owner chose A — core tool-free (tpath rewritten portable, L3.5-1/-2); wrapper units require the GNU tool, resolved by name (gsed/gawk/ggrep/gfind/ghead/gtail, then the plain name only with a GNU identity), clear error naming the package, tests SKIP with that reason (L3.3 resolver in kkore, L3.4 wrapper move; L3.5-9 TAwk inplace.awk folds into L3.4). Budget an L3.4 triage: the 577 FreeBSD clean-gnu wrapper cases will start running."
     },
     "OG2": "L4: minimum bash 5.1 or 5.2, from the cost report",
-    "OG3": "L5.0b: allow pushing branch launch-ci for CI iteration (first for the minimal Linux CI after L3.6, later for the full matrix L5.1)",
+    "OG3": {
+      "was": "L5.0b: allow pushing branch launch-ci for CI iteration (first for the minimal Linux CI after L3.6, later for the full matrix L5.1)",
+      "status": "GRANTED 2026-10-28 (owner): push of branch launch-ci allowed (L5.0b and later L5.2). Not used yet: L5.0 waits for L3.6. Note for the push: all five repos are PUBLIC; on 2026-10-28 unpushed: kbool 88, kcl 35, kklass 8, kkore 11, ktests 9 commits — checkout with submodules needs the submodule SHAs on GitHub, so the push of launch-ci also pushes the submodule commits (as branch launch-ci in each repo); main stays untouched"
+    },
     "OG4": "L6: GitHub descriptions + topics text",
     "OG5": "L8: version number (v1.0.0 vs 0.9.0)",
     "OG6": "L8: announcement texts, venues, timing (owner posts)",
