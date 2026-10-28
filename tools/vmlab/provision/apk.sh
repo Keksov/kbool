@@ -18,7 +18,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 LABUSER=${LABUSER:-kb}
 CORE="bash git"
-GNU="coreutils sed grep findutils diffutils gawk procps-ng util-linux perl curl openssl netcat-openbsd tzdata"
+GNU="coreutils sed grep findutils diffutils gawk procps-ng util-linux perl curl openssl netcat-openbsd socat tzdata"
 MODE=clean
 if [ $# -gt 0 ]; then
   if [ "$1" = --gnu ]; then MODE=gnu; else MODE=list; fi

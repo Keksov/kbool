@@ -693,7 +693,7 @@ The script (refuses with rc 13 if `kb-alpine` exists):
    ACPI power-button fix below, the `nohz=off` kernel option ("Timer stalls" below);
    `vmlab snapshot kb-alpine clean`;
 6. `provision/apk.sh --gnu`: `coreutils sed grep findutils diffutils gawk procps-ng util-linux
-   perl curl openssl netcat-openbsd tzdata` (a name missing from the index prints `apk.sh:
+   perl curl openssl netcat-openbsd socat tzdata` (a name missing from the index prints `apk.sh:
    MISSING <pkg>`; `procps-ng` would fall back to `procps`, reported; neither happened);
    `vmlab snapshot kb-alpine clean-gnu`.
 
@@ -805,16 +805,19 @@ option), then `clean-gnu` from it. Effect: `vmlab up kb-alpine` after `reset cle
 `cat /etc/alpine-release`: `3.24.2`; kernel `6.18.57-0-virt`. `bash --version | head -1`:
 `GNU bash, version 5.3.9(1)-release (x86_64-alpine-linux-musl)`. `clean` has `bash-5.3.9-r1
 git-2.54.0-r0` on top of the base system (73 packages, busybox `sed grep awk find`, no
-python, no perl); `clean-gnu` adds (129 packages in all):
+python, no perl); `clean-gnu` adds (130 packages in all):
 
 ```
 coreutils-9.11-r0   sed-4.9-r2          grep-3.12-r0       findutils-4.10.0-r1
 diffutils-3.12-r0   gawk-5.3.2-r2       procps-ng-4.0.6-r0 util-linux-2.42.3-r1
 perl-5.42.2-r1      curl-8.22.0-r0      openssl-3.5.9-r0   netcat-openbsd-1.234.1-r0
-tzdata-2026e-r0
+socat-1.8.1.3-r0    tzdata-2026e-r0
 ```
 
 Binary names in `clean-gnu`: GNU tools take the plain names, **there is no `g` prefix**:
 `command -v gsed gawk gfind sed awk find` -> `/usr/bin/gawk /bin/sed /usr/bin/awk /usr/bin/find`
 (`awk -> gawk`; `/bin/sed` and `/bin/grep` are the GNU ones, the packages replace the busybox
 links; `date --version` says `GNU coreutils 9.11`). In `clean` they are busybox.
+`socat` joined the list on 2026-10-29 (launch D10): `clean-gnu` was retaken from the previous
+`clean-gnu` with `apk add socat` (the DL12 second backend), so thttpserver's socket tests run
+here instead of SKIPping; the `vmlab up` DNS answer `transient error` needed a retry loop.
