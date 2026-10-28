@@ -458,7 +458,7 @@
         "L3.3"
       ],
       "card": "docs/dev/launch/L3_4_design.md (L3.4-0 design, Opus): cards L34-A..F, decisions D-L34-1..10",
-      "status": "IN PROGRESS 2026-10-28: design DONE (e225b32); all D-L34 decided (decisions.D-L34); L34-A next."
+      "status": "IN PROGRESS 2026-10-28: design DONE (e225b32); all D-L34 decided (decisions.D-L34); L34-A next. | 2026-10-28: L34-A DONE (Opus, 2 rounds + critic; kcl see bump): tutil._gnu, _toolErr, tests/gnu_helper.sh (kt_gnu_gate, kt_gnu_stub: absolute DIR without ':'; KCL_GNU_<F> not exported). Gates: Windows both 4456/4456 (tutil + 6 wrappers + kcl) then 828/828; kb-freebsd clean-gnu/clean, kb-alpine clean, kb-debian PASS. BSD chmod: `chmod +x -- P` treats -- as a file (mode word ends options)."
     },
     "L3.5": {
       "executor": "O->S",
