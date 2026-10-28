@@ -24,7 +24,8 @@
     "L3.5-b-SV": "2026-10-27 SV: D5a, D6 (absolute floor), D7 fix, D8 investigate, D9 watch, D10 socat in apk.sh",
     "L3.5-b-D3": "2026-10-27 owner: tpath time setters accept 'YYYY-MM-DD HH:MM:SS' everywhere, other forms only where date -d parses them (GNU, busybox); no change on Windows/Linux.",
     "L3.5-b-D4": "2026-10-27 owner: getFullPath keeps realpath -m first where it exists (GNU: Linux, Windows; unchanged), lexical normalisation as the fallback on busybox/BSD; with a symlink in the path the answer differs by platform (documented).",
-    "OG8": "2026-10-28 owner: ktool accepts uutils head/tail from 0.2.2 (both measured versions pass THead/TTail; older refused with a version hint). Other families GNU only. Implementation card OG8-b. | IMPLEMENTED 2026-10-28 (OG8-b, Opus + critic; kkore 83e750b): banner `[path]FAMILY (uutils coreutils) X.Y.Z` (family must match), floor __KTOOL_UU_MIN=0.2.2, ASCII digits, broken floor refuses; 017 60 cases. | CORRECTION 2026-10-28 (found by L3.4-0, verified by SV in thead/tests/005_Run.sh:63): the THead/TTail suite numbers under uutils (182/182, 200/200) were SKIPs — 005/006/007 gate on the banner `head (GNU coreutils) `, so every behavioural case passed as `SKIP: non-GNU head` (run 1.1 s vs 4.5 s with GNU). Real evidence for uutils head/tail = the round-2 direct diff (0.2.2 only: 922 arg sets, 866 identical, 56 stderr wording/20-digit counts) + 004. Owner told; re-run planned in L34-E (D-L34-9)."
+    "OG8": "2026-10-28 owner: ktool accepts uutils head/tail from 0.2.2 (both measured versions pass THead/TTail; older refused with a version hint). Other families GNU only. Implementation card OG8-b. | IMPLEMENTED 2026-10-28 (OG8-b, Opus + critic; kkore 83e750b): banner `[path]FAMILY (uutils coreutils) X.Y.Z` (family must match), floor __KTOOL_UU_MIN=0.2.2, ASCII digits, broken floor refuses; 017 60 cases. | CORRECTION 2026-10-28 (found by L3.4-0, verified by SV in thead/tests/005_Run.sh:63): the THead/TTail suite numbers under uutils (182/182, 200/200) were SKIPs — 005/006/007 gate on the banner `head (GNU coreutils) `, so every behavioural case passed as `SKIP: non-GNU head` (run 1.1 s vs 4.5 s with GNU). Real evidence for uutils head/tail = the round-2 direct diff (0.2.2 only: 922 arg sets, 866 identical, 56 stderr wording/20-digit counts) + 004. Owner told; re-run planned in L34-E (D-L34-9).",
+    "D-L34": "2026-10-28: D-L34-3 (owner): no GNU tool → .new succeeds silently, first run/sink/argv/static rc 2 with ktool's message. D-L34-9 (owner): re-run THead/TTail suites under uutils 0.2.2 + 0.12.0 (GitHub release binaries, sha256 = release digests 482c5ced…/e08bd526…) in kb-ubuntu inside L34-E — approved. SV: D-L34-1,2,4,5,6,7,8,10 = the design's recommended options (docs/dev/launch/L3_4_design.md §4)."
   },
   "pending_owner_decisions": {
     "OG1": {
@@ -457,7 +458,7 @@
         "L3.3"
       ],
       "card": "docs/dev/launch/L3_4_design.md (L3.4-0 design, Opus): cards L34-A..F, decisions D-L34-1..10",
-      "status": "IN PROGRESS 2026-10-28: L3.4-0 design DONE; SV decisions D-L34-1,2,4,5,6,7,8,10 = the recommended options; D-L34-3 (no-tool behaviour) and D-L34-9 (uutils re-run) asked of the owner."
+      "status": "IN PROGRESS 2026-10-28: design DONE (e225b32); all D-L34 decided (decisions.D-L34); L34-A next."
     },
     "L3.5": {
       "executor": "O->S",
