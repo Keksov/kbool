@@ -843,7 +843,15 @@ These depend on earlier outcomes; SV completes each before dispatch.
   for each `/opt/bash-*`, `bash -c 'source ~/kbool/kbool.sh; echo rc=$?'` and
   a unit file sourced directly — expected the two guard lines + rc=2 below
   the floor.
-- **L5.1 [S] draft** — `.github/workflows/ci.yml`; matrix fixed by SV from L2–L4:
+- **L5.0 [S] draft** (DL11) — minimal `.github/workflows/ci.yml` in kbool:
+  `on: push` (branch `launch-ci`) + `pull_request` (never `pull_request_target`);
+  `permissions: contents: read`; `actions/checkout` with `submodules: recursive`;
+  jobs `ubuntu-latest` (system bash) and containers `bash:5.2`, `bash:5.3`
+  (Alpine-based: `apk add` the GNU list from `tools/vmlab` apk.sh); each job
+  runs gate.sh and uploads `summary.json`; FLAKY/ENV rows do not fail the job;
+  actions pinned to a version ≥ 2 weeks old. Write scope: `.github/` only, no
+  fixes in library code; validate YAML as in L5.1.
+- **L5.1 [S] draft** — extends the L5.0 `ci.yml`; matrix fixed by SV from L2–L4:
   `ubuntu-latest` (system bash) · containers `debian:13`, `fedora:latest`,
   `alpine:latest` (+GNU packages), `ubuntu:26.04` · `macos-latest` (`brew install
   bash coreutils gnu-sed gawk findutils grep` + the netcat choice; plus one step
@@ -852,6 +860,11 @@ These depend on earlier outcomes; SV completes each before dispatch.
   `msys2/setup-msys2`; `actions/checkout` with `submodules: recursive`; each
   job runs gate and uploads `summary.json`; all actions pinned to a version
   ≥ 2 weeks old. Validate: `python -c 'import yaml,sys; yaml.safe_load(open(sys.argv[1]))' .github/workflows/ci.yml` (install PyYAML into `$SCRATCH` venv if absent).
+- **L5.6 [S] draft** — `.github/workflows/suite.yml` in kbool with
+  `on: workflow_call` (input: submodule name) holding the L5.1 jobs; in each
+  submodule repo a thin `ci.yml` (`pull_request` + `push`) that calls it:
+  checkout kbool `main` recursive, then that submodule at the PR commit;
+  same permissions and pinning rules as L5.0.
 - **L5.3 [S] draft** — `gh run list --branch launch-ci`, `gh run view <id> --log-failed`
   → `L5_failures.tsv` (job, step, test file, first fail line); read-only `gh` only.
 - **L6.1 [S] draft** — `tools/porting/mdlinks.sh`: every `[..](relative)` and

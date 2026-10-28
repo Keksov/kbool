@@ -52,6 +52,7 @@ The code is ready; the first five minutes of a stranger are not:
 | DL8 | lab tooling lives in **`kbool/tools/vmlab/`**, the portability scanner in **`kbool/tools/porting/`**; host side is plain bash under Git-bash + `VBoxManage.exe` + Windows OpenSSH | default |
 | DL9 | **delegation**: well-specified technical tasks go to **Sonnet 5.5, effort high**; design, core-layer changes, triage judgment and public prose go to an Opus worker; every task is reviewed by the supervisor (§3) | owner 2026-10-20 |
 
+| DL11 | **CI early, without scattering focus**: a minimal Linux CI (L5.0) right after L3.6 — one S task, no fixes inside it. A red CI row goes to the L5 triage list (L5.3/L5.4), never into the running phase, unless the pushed commit itself caused it. CI also runs in the four submodule repos (L5.6), since outside PRs will mostly target kcl/kklass. FLAKY/ENV gate classes do not block a merge | owner 2026-10-28 |
 | DL10 | the host runs VBS / Memory integrity, so VirtualBox fell back to the Hyper-V (NEM) backend and the Ubuntu installer hung in 2 of 5 runs (L1.2, 2026-10-20) → the owner **turns off Memory integrity and the Windows hypervisor** (`bcdedit /set hypervisorlaunchtype off`, reboot) so VirtualBox gets AMD-V. Rollback after the lab work: Memory integrity on + `bcdedit /set hypervisorlaunchtype auto` | owner 2026-10-20 |
 
 Pending owner decisions (asked when the data is in): **OG1** GNU-tool policy
@@ -183,11 +184,15 @@ tzdata, perl, curl, openssl, the nc flavours for the L2.5 probes; FreeBSD:
 
 | id | ex | task | dep |
 |---|---|---|---|
-| L5.1 | S | `.github/workflows/ci.yml` per the matrix in the card (Linux containers, macOS, FreeBSD VM action, Windows Git-bash + MSYS2); YAML validated locally | L3.6 |
-| L5.2 | OW | **OG3**: allow pushing branch `launch-ci` (and later merging) | L5.1 |
+| L5.0 | S | DL11: minimal `.github/workflows/ci.yml` — `ubuntu-latest` + containers `bash:5.2`, `bash:5.3` (+GNU packages), gate.sh, `summary.json` artifact; runs between L3.6 and L4 | L3.6 |
+| L5.0b | OW | **OG3**: allow pushing branch `launch-ci`; first CI run | L5.0 |
+| L5.1 | S | extend `ci.yml` to the matrix in the card (Linux containers, macOS, FreeBSD VM action, Windows Git-bash + MSYS2, the OG2 bash floor); YAML validated locally | L5.0b, L4.5 |
+| L5.2 | OW | push the full matrix to `launch-ci` (and later merging) | L5.1 |
 | L5.3 | S | CI round-trips: read failed jobs (`gh run view --log-failed`), write `L5_failures.tsv`; no fixes | L5.2 |
 | L5.4 | O → S | macOS / CI-only triage → fix batches; repeat L5.3 until green | L5.3 |
 | L5.5 | SV | badge; owner merges | L5.4 |
+| L5.6 | S | CI in kcl/kklass/kkore/ktests: a reusable workflow (`workflow_call`) in kbool + a thin `ci.yml` per submodule repo that checks out kbool `main` with submodules and puts the PR commit in place of its own submodule | L5.5 |
+| L5.7 | O + OW | `CONTRIBUTING.md` (one command to run the tests locally, what CI checks, what FLAKY/ENV mean); owner: required checks + approval for first-time contributors in the five repos | L5.6 |
 
 ### L6 — repository hygiene + documentation
 
@@ -228,7 +233,8 @@ tzdata, perl, curl, openssl, the nc flavours for the L2.5 probes; FreeBSD:
 ## 5. Order and risk
 
 L0 → L1 → L2 → L3 → L4 → L5 → L6 → L7 → L8; inside a phase the `dep`
-column rules. L6.1–L6.3 may run beside L2–L4 (no gate contention: docs only,
+column rules. Exception (DL11): L5.0/L5.0b run at the L3.6 → L4 boundary, so
+CI watches L4 onward; the rest of L5 keeps its place. L6.1–L6.3 may run beside L2–L4 (no gate contention: docs only,
 but their commit waits for a free gate). Main risks: VM automation for
 Alpine/FreeBSD (fallback: owner checklist, L1.5); the ktests harness on
 Linux (L2.1, before any triage); thttpserver's GNU-netcat dependency (L2.5);

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
-  "updated": "2026-10-26",
+  "updated": "2026-10-28",
   "status": "in progress — L6.2/L6.2b DONE (docs/dev everywhere); L1.7 running (alpine timers); then L2.8 closing gates",
   "plan": "docs/dev/LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
@@ -17,7 +17,7 @@
     "DL8": "default: lab tooling in kbool/tools/vmlab/, portability scanner in kbool/tools/porting/; host side plain bash (Git-bash) + VBoxManage.exe + OpenSSH",
     "DL9": "owner 2026-10-20: well-specified technical tasks -> Sonnet 5.5 effort high (Agent model sonnet, effort high), brief = LAUNCH_TASKS.md §0 + one card; design/core layers/triage/public prose -> Opus worker; SV reviews every task",
     "DL10": "owner 2026-10-20: turn off Memory integrity + hypervisorlaunchtype off (reboot) so VirtualBox gets AMD-V instead of the NEM/Hyper-V backend; rollback after lab work — APPLIED 2026-10-20 by SV on owner order (UAC): HVCI Enabled 1->0, bcd {current} hypervisorlaunchtype (default auto)->off; reboot pending; rollback: HVCI Enabled=1 + bcdedit /set {current} hypervisorlaunchtype auto | after reboot 2026-10-20: HVCI off (services_running 0) but HypervisorPresent=True, VBS status 2: registry DeviceGuard EnableVirtualizationBasedSecurity=1 keeps the hypervisor up despite hypervisorlaunchtype Off (bcd also has isolatedcontext Yes). Next step EnableVirtualizationBasedSecurity 1->0 was DENIED by the auto-mode classifier (Security Weaken) - owner runs scratchpad launch/dl10_vbs.ps1 himself or allows it; then reboot | owner ran dl10_vbs.ps1 (EnableVirtualizationBasedSecurity 1->0) + rebooted: HypervisorPresent=False, VBS 0; dism: Hyper-V/VMP/HypervisorPlatform/WSL/Containers all Disabled. Rollback = HVCI Enabled=1 + EnableVirtualizationBasedSecurity=1 + hypervisorlaunchtype auto + reboot",
-    "DL11": "owner 2026-10-21 (L2.5 D1): wrappers TGrep/TSed/TAwk strip a trailing CR in text mode on every platform; binary=1 keeps bytes everywhere",
+    "DL11": "owner 2026-10-28: CI early but without scattering focus — a minimal Linux CI (L5.0) right after L3.6, one S task, no fixes inside it; red CI rows go to the L5 triage list (L5.3/L5.4), never into the running phase, unless the pushed commit itself caused the regression; CI also in the four submodule repos (L5.6, reusable workflow) so a PR to kcl/kklass/kkore/ktests gets checked; FLAKY/ENV gate classes do not block a merge",
     "DL12": "owner 2026-10-21 (L2.5 D2): thttpserver second network backend = socat (Windows stays GNU netcat 0.7.1)",
     "DL13": "owner 2026-10-21 (L2.5 D5): TPipe.stop stops the producer whole tree, fixed now",
     "DL9a": "owner 2026-10-22: delegation rules from experience (LAUNCH_PLAN.md §3): critic after every O task on a core layer or > ~300 lines; O tasks cut to one subsystem x one concern (~300 lines); default to S when a card can be written; Sonnet card-lint before dispatching non-trivial cards; test uniform-behaviour decisions against the owner motivating examples",
@@ -33,7 +33,7 @@
       "status": "RESOLVED 2026-10-27: owner chose A — core tool-free (tpath rewritten portable, L3.5-1/-2); wrapper units require the GNU tool, resolved by name (gsed/gawk/ggrep/gfind/ghead/gtail, then the plain name only with a GNU identity), clear error naming the package, tests SKIP with that reason (L3.3 resolver in kkore, L3.4 wrapper move; L3.5-9 TAwk inplace.awk folds into L3.4). Budget an L3.4 triage: the 577 FreeBSD clean-gnu wrapper cases will start running."
     },
     "OG2": "L4: minimum bash 5.1 or 5.2, from the cost report",
-    "OG3": "L5: allow pushing branch launch-ci for CI iteration",
+    "OG3": "L5.0b: allow pushing branch launch-ci for CI iteration (first for the minimal Linux CI after L3.6, later for the full matrix L5.1)",
     "OG4": "L6: GitHub descriptions + topics text",
     "OG5": "L8: version number (v1.0.0 vs 0.9.0)",
     "OG6": "L8: announcement texts, venues, timing (owner posts)",
@@ -525,11 +525,30 @@
       "card": null,
       "status": "planned"
     },
-    "L5.1": {
+    "L5.0": {
       "executor": "S",
-      "title": "ci.yml matrix",
+      "title": "minimal Linux CI: ci.yml with ubuntu-latest + containers bash:5.2/bash:5.3 (+GNU packages), gate.sh, summary.json artifact",
       "dep": [
         "L3.6"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L5.0b": {
+      "executor": "OW",
+      "title": "OG3 allow push of launch-ci for L5.0; first CI run",
+      "dep": [
+        "L5.0"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L5.1": {
+      "executor": "S",
+      "title": "ci.yml full matrix (extends L5.0)",
+      "dep": [
+        "L5.0b",
+        "L4.5"
       ],
       "card": "draft",
       "status": "planned"
@@ -566,6 +585,24 @@
       "title": "badge; owner merges",
       "dep": [
         "L5.4"
+      ],
+      "card": null,
+      "status": "planned"
+    },
+    "L5.6": {
+      "executor": "S",
+      "title": "CI in kcl/kklass/kkore/ktests: reusable workflow (workflow_call) in kbool + thin ci.yml per submodule repo (kbool main + the PR commit in place of that submodule)",
+      "dep": [
+        "L5.5"
+      ],
+      "card": "draft",
+      "status": "planned"
+    },
+    "L5.7": {
+      "executor": "O",
+      "title": "CONTRIBUTING.md (one command to run the tests locally, what CI checks, FLAKY/ENV meaning) + OW: required checks and first-time-contributor approval in the five repos",
+      "dep": [
+        "L5.6"
       ],
       "card": null,
       "status": "planned"
