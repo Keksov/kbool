@@ -208,3 +208,137 @@ Rows per suite per run (non-PASS rows of `L3_failures.tsv`):
 | kkore | 0 | 0 | 1 | 1 |
 | ktests | 0 | 0 | 1 | 0 |
 | **total** | **16** | **3** | **94** | **127** |
+
+# L34-F — the L3.4 gates (after the wrapper move onto ktool)
+
+Date 2026-10-28. Seven full VM gates (one VM at a time) and one Windows gate, card L34-F of
+[`L3_4_design.md`](L3_4_design.md); triage of the non-PASS rows: [`L3_4_triage.md`](L3_4_triage.md).
+Host tree: kcl `609747a`, kklass `0626d32`, kkore `83e750b`, ktests `9c8cc3c`; kbool `7f2d8cf` (run 5) and
+`f7c4ef3` (runs 6-12; the commits between touch only `docs/dev/launch_ledger.json`); no `-dirty` in any `vm.txt`.
+VM command: `bash tools/vmlab/vmlab.sh gate VM --snapshot S --out "$SCRATCH/<vm>-<snap>" -- --rerun-failed 1 --timeout 900 all`.
+OUT dirs: `C:/Users/1/AppData/Local/Temp/claude/c--projects-kkbot-kbool/1a013733-d305-4d7e-868c-ab115a4fc7da/scratchpad/launch/L34-F/<vm>-<snap>` and `…/L34-F/win` (scratch).
+Wall time = the whole `vmlab gate` (reset, boot, sync, gate, fetch, poweroff), host clock.
+
+## Run 5 — kb-freebsd, snapshot `clean-gnu`
+
+* OUT: `…/L34-F/kb-freebsd-clean-gnu`; vmlab rc 0; wall time 329 s
+* VM: FreeBSD 15.1-RELEASE releng/15.1-n283562-96841ea08dcf GENERIC amd64; GNU bash, version 5.3.20(0)-release (amd64-portbld-freebsd15.1)
+
+```
+gate 2026-10-28T12:37:06 root=/home/kb/kbool out=/home/kb/gate-out
+gate options: --rerun-failed 1
+gate 5.3.20: 30 cells  30 PASS  0 FAIL  0 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9477/9477  4m42s
+__GATE__:PASS:30:30:0:0:0:0:0:9477:9477
+```
+
+## Run 6 — kb-freebsd, snapshot `clean`
+
+* OUT: `…/L34-F/kb-freebsd-clean`; vmlab rc 0; wall time 286 s
+* VM: as run 5
+
+```
+gate 2026-10-28T12:46:50 root=/home/kb/kbool out=/home/kb/gate-out
+gate options: --rerun-failed 1
+gate 5.3.20: 30 cells  30 PASS  0 FAIL  0 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9477/9477  3m56s
+__GATE__:PASS:30:30:0:0:0:0:0:9477:9477
+```
+
+## Run 7 — kb-alpine, snapshot `clean-gnu`
+
+* OUT: `…/L34-F/kb-alpine-clean-gnu`; vmlab rc 4 (the gate's FLAKY); wall time 384 s
+* VM: Linux kb-alpine 6.18.57-0-virt / Alpine Linux v3.24; GNU bash, version 5.3.9(1)-release (x86_64-alpine-linux-musl)
+
+```
+gate 2026-10-28T12:54:02 root=/home/kb/kbool out=/home/kb/gate-out
+gate options: --rerun-failed 1
+[11/30] 5.3.9 threaded neutral kcl/tgrep               FLAKY         202/203             8.3s  log=cells/011/log.txt  (rerun 1 passed: 005_Search.sh)
+        [FAIL] rc=1 lastRc='127' ourLines=1 toolLines=2 first='Error: TGrep.mapRc: command not found (raw rc 127)' recs=0 (005_Search.sh)
+gate 5.3.9: 30 cells  29 PASS  0 FAIL  1 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9477/9478  5m55s
+gate FLAKY  out=/home/kb/gate-out
+__GATE__:FLAKY:30:29:0:1:0:0:0:9477:9478
+```
+
+## Run 8 — kb-alpine, snapshot `clean`
+
+* OUT: `…/L34-F/kb-alpine-clean`; vmlab rc 0; wall time 369 s
+* VM: as run 7
+
+```
+gate 2026-10-28T13:09:15 root=/home/kb/kbool out=/home/kb/gate-out
+gate options: --rerun-failed 1
+gate 5.3.9: 30 cells  30 PASS  0 FAIL  0 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9478/9478  5m42s
+__GATE__:PASS:30:30:0:0:0:0:0:9478:9478
+```
+
+## Run 9 — kb-debian, snapshot `clean`
+
+* OUT: `…/L34-F/kb-debian-clean`; vmlab rc 4 (the gate's FLAKY); wall time 317 s
+* VM: Linux 6.12.107+deb13-amd64 / Debian GNU/Linux 13 (trixie); GNU bash, version 5.2.37(1)-release (x86_64-pc-linux-gnu)
+
+```
+gate 2026-10-28T13:18:04 root=/home/kb/kbool out=/home/kb/gate-out
+gate options: --rerun-failed 1
+[ 5/30] 5.2.37 threaded neutral kcl/tawk                FLAKY         621/622             9.6s  log=cells/005/log.txt  (rerun 1 passed: 005_Run.sh)
+        [FAIL] run rc=0 od='0000000   a   \   t   b|0000004' want='0000000   a   \   t   b|0000004' stderr=''; toArray rc=1 got=a\tb  (005_Run.sh)
+[ 9/30] 5.2.37 threaded neutral kcl/tfile               FLAKY         249/250             5.8s  log=cells/009/log.txt  (rerun 1 passed: 007_Decrypt.sh)
+        [FAIL] Decrypt with wrong password (should have failed) (007_Decrypt.sh)
+gate 5.2.37: 30 cells  28 PASS  0 FAIL  2 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9498/9500  4m38s
+gate FLAKY  out=/home/kb/gate-out
+__GATE__:FLAKY:30:28:0:2:0:0:0:9498:9500
+```
+
+## Run 10 — kb-ubuntu, snapshot `clean`
+
+* OUT: `…/L34-F/kb-ubuntu-clean`; vmlab rc 0; wall time 361 s
+* VM: Linux kb-ubuntu 6.8.0-147-generic / Ubuntu 24.04.5 LTS; GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)
+
+```
+gate 2026-10-28T13:29:25 root=/home/kb/kbool out=/home/kb/gate-out
+gate options: --rerun-failed 1
+gate 5.2.21: 30 cells  30 PASS  0 FAIL  0 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9500/9500  5m33s
+__GATE__:PASS:30:30:0:0:0:0:0:9500:9500
+```
+
+## Run 11 — kb-fedora, snapshot `clean`
+
+* OUT: `…/L34-F/kb-fedora-clean`; vmlab rc 0; wall time 349 s
+* VM: Linux kb-fedora 6.19.10-300.fc44.x86_64 / Fedora Linux 44 (Cloud Edition); GNU bash, version 5.3.9(1)-release (x86_64-redhat-linux-gnu)
+
+```
+gate 2026-10-28T13:37:07 root=/home/kb/kbool out=/home/kb/gate-out
+gate options: --rerun-failed 1
+gate 5.3.9: 30 cells  30 PASS  0 FAIL  0 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9500/9500  5m16s
+__GATE__:PASS:30:30:0:0:0:0:0:9500:9500
+```
+
+## Run 12 — Windows, Git-bash 5.3.15 and MSYS2 5.3.9 (no VM running)
+
+* command: `KT_GATE_BASHES="C:/bin/Git/usr/bin/bash.exe;C:/bin/msys64/usr/bin/bash.exe" bash ktests/tools/gate.sh --out "$SCRATCH/win" --rerun-failed 1 all` (rc 0; no `--compare`, per the card)
+* OUT: `…/L34-F/win`; wall time 1365 s
+
+```
+gate 2026-10-28T16:44:23 root=/c/projects/kkbot/kbool out=C:/Users/1/AppData/Local/Temp/claude/c--projects-kkbot-kbool/1a013733-d305-4d7e-868c-ab115a4fc7da/scratchpad/launch/L34-F/win
+gate repos: kbool f7c4ef3 ktests 9c8cc3c kcl 609747a kklass 0626d32 kkore 83e750b
+gate bashes: 5.3.15 C:/bin/Git/usr/bin/bash.exe  5.3.9 C:/bin/msys64/usr/bin/bash.exe
+gate options: --rerun-failed 1
+gate 5.3.15: 30 cells  30 PASS  0 FAIL  0 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9515/9515  11m14s
+gate 5.3.9 : 30 cells  30 PASS  0 FAIL  0 FLAKY  0 ENV  0 TIMEOUT  0 STRAY  0 CRASH  0 NOTRUN  tests 9516/9516  11m27s
+gate PASS  out=C:/Users/1/AppData/Local/Temp/claude/c--projects-kkbot-kbool/1a013733-d305-4d7e-868c-ab115a4fc7da/scratchpad/launch/L34-F/win
+__GATE__:PASS:60:60:0:0:0:0:0:19031:19031
+```
+
+## Totals (L34-F)
+
+| run | verdict | FAIL | FLAKY | TIMEOUT | STRAY | ENV | rows |
+|---|---|---|---|---|---|---|---|
+| kb-freebsd `clean-gnu` | PASS | 0 | 0 | 0 | 0 | 0 | 0 |
+| kb-freebsd `clean` | PASS | 0 | 0 | 0 | 0 | 0 | 0 |
+| kb-alpine `clean-gnu` | FLAKY | 0 | 1 (tgrep 005) | 0 | 0 | 0 | 1 |
+| kb-alpine `clean` | PASS | 0 | 0 | 0 | 0 | 0 | 0 |
+| kb-debian `clean` | FLAKY | 0 | 2 (tawk 005, tfile 007) | 0 | 0 | 0 | 2 |
+| kb-ubuntu `clean` | PASS | 0 | 0 | 0 | 0 | 0 | 0 |
+| kb-fedora `clean` | PASS | 0 | 0 | 0 | 0 | 0 | 0 |
+| Windows (both runtimes) | PASS | 0 | 0 | 0 | 0 | 0 | 0 |
+
+3 rows, all FLAKY; clusters and cards in [`L3_4_triage.md`](L3_4_triage.md). Wrapper `SKIP:` lines per
+(VM, snapshot): [`L3_4_triage.md`](L3_4_triage.md) §2.
