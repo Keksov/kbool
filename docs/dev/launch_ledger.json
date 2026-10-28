@@ -24,7 +24,7 @@
     "L3.5-b-SV": "2026-10-27 SV: D5a, D6 (absolute floor), D7 fix, D8 investigate, D9 watch, D10 socat in apk.sh",
     "L3.5-b-D3": "2026-10-27 owner: tpath time setters accept 'YYYY-MM-DD HH:MM:SS' everywhere, other forms only where date -d parses them (GNU, busybox); no change on Windows/Linux.",
     "L3.5-b-D4": "2026-10-27 owner: getFullPath keeps realpath -m first where it exists (GNU: Linux, Windows; unchanged), lexical normalisation as the fallback on busybox/BSD; with a symlink in the path the answer differs by platform (documented).",
-    "OG8": "2026-10-28 owner: ktool accepts uutils head/tail from 0.2.2 (both measured versions pass THead/TTail; older refused with a version hint). Other families GNU only. Implementation card OG8-b."
+    "OG8": "2026-10-28 owner: ktool accepts uutils head/tail from 0.2.2 (both measured versions pass THead/TTail; older refused with a version hint). Other families GNU only. Implementation card OG8-b. | IMPLEMENTED 2026-10-28 (OG8-b, Opus + critic; kkore 83e750b): banner `[path]FAMILY (uutils coreutils) X.Y.Z` (family must match), floor __KTOOL_UU_MIN=0.2.2, ASCII digits, broken floor refuses; 017 60 cases."
   },
   "pending_owner_decisions": {
     "OG1": {
@@ -834,6 +834,6 @@
     "L3.5-10-o1": "thttpserver: the FIFO batch (mkfifo + rm of dropped ones) runs inside _spawn of the other slot on the request path — on msys every 16th request waits ~50-80 ms; move it to CloseConnection or an idle tick (critic N3). Low priority.",
     "L3.5-10-o2": "kb-freebsd clean-gnu: 006_Application `/count` curl after an early-close client returned 000 once (gate 20261028-012503 cell 2, rerun passed); not seen in 36 later runs; 006 now logs curl rc/stderr — read it on the next hit. Also one ssh 'banner exchange' timeout to the idle VM, self-recovered.",
     "OG8-o1": "ktests 055 case 6 assumes GNU timeout's TERM forwarding status (with -k); uutils 0.12.0 answers 124. Decide: make the test tolerant or document GNU timeout as a harness requirement. Upstream report to uutils = owner decision. Round 2: uutils 0.2.2 `timeout -k` returns 125 also on a real expiry — timing_check.sh:412 tests 124.",
-    "OG8-o2": "kcl/tpath._touchTime UTC setter: `date -u -d STRING` is wrong under uutils 0.2.2 (Ubuntu 25.10) for zone-less strings (parsed as local time). Fix candidate: parse the canonical `YYYY-MM-DD HH:MM:SS` to an epoch in pure bash (days-from-civil, no fork, no tool), date -d only for other forms. Small O/S card."
+    "OG8-o2": "kcl/tpath._touchTime UTC setter: `date -u -d STRING` is wrong under uutils 0.2.2 (Ubuntu 25.10) for zone-less strings (parsed as local time). Fix candidate: parse the canonical `YYYY-MM-DD HH:MM:SS` to an epoch in pure bash (days-from-civil, no fork, no tool), date -d only for other forms. Small O/S card. | DONE 2026-10-28 (Sonnet + SV; kcl b1f2553): tpath._utcEpoch (days-from-civil), test oracle under TZ=UTC0. Gates: Windows both 3268/3268 (kkore + tpath/tfile/tdirectory), kb-freebsd clean, kb-alpine clean, kb-debian 1633/1633 each."
   }
 }
