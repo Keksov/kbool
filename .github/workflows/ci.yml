@@ -1,0 +1,87 @@
+# kbool CI (launch L5.0, DL11): the phase gate (ktests/tools/gate.sh, every
+# suite) on Linux. Verdicts: PASS = green; FLAKY (exit 4) and ENV (exit 3) do
+# not fail the job (DL11) but are named in the job summary; FAIL, TIMEOUT,
+# STRAY, CRASH and usage errors are red. OUT dir of each run: artifact gate-*.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: gate (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu system bash
+            image: ""
+          - name: bash 5.2 alpine
+            image: bash:5.2.37-alpine3.22
+          - name: bash 5.3 alpine
+            image: bash:5.3.20-alpine3.24
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: tools (ubuntu)
+        if: matrix.image == ''
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gawk netcat-openbsd socat locales
+          sudo locale-gen en_US.UTF-8 de_DE.UTF-8 ru_RU.UTF-8
+          bash --version | head -1
+
+      - name: gate
+        id: gate
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          out="$RUNNER_TEMP/gate-out"
+          mkdir -p "$out"
+          set +e
+          if [ -z "$IMAGE" ]; then
+            bash ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 all
+          else
+            chmod 0777 "$out"
+            docker run --rm -v "$PWD:/src:ro" -v "$out:/out" "$IMAGE" sh /src/.github/ci/alpine.sh
+          fi
+          rc=$?
+          set -e
+          echo "out=$out" >> "$GITHUB_OUTPUT"
+          line=$(grep -h '^__GATE__' "$out/progress.txt" 2>/dev/null | tail -1)
+          {
+            echo "### gate (${{ matrix.name }}): exit $rc"
+            echo '```'
+            grep -hE '^gate [0-9]|^\[FAIL\]|FLAKY|^__GATE__' "$out/progress.txt" 2>/dev/null | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "gate exit $rc ${line:-no __GATE__ line}"
+          case $rc in
+            0) ;;
+            3|4) echo "::warning::gate verdict ${line:-exit $rc} (ENV/FLAKY do not fail CI, DL11)" ;;
+            *) exit "$rc" ;;
+          esac
+
+      - name: OUT dir
+        if: always() && steps.gate.outputs.out != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gate-${{ strategy.job-index }}
+          path: ${{ steps.gate.outputs.out }}
+          retention-days: 14
+          if-no-files-found: warn
