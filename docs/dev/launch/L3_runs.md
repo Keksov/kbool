@@ -342,3 +342,40 @@ __GATE__:PASS:60:60:0:0:0:0:0:19031:19031
 
 3 rows, all FLAKY; clusters and cards in [`L3_4_triage.md`](L3_4_triage.md). Wrapper `SKIP:` lines per
 (VM, snapshot): [`L3_4_triage.md`](L3_4_triage.md) §2.
+
+# L3.6 — closing gates (after L3.4 and D10)
+
+Date 2026-10-29. Same commands as L34-F (`vmlab.sh gate VM --snapshot SNAP --out … -- --rerun-failed 1 --timeout 900 all`,
+one VM at a time, then the Windows gate with no VM running). Host tree: kbool `a4b865e`; kcl `a606d45`, kklass `0626d32`,
+kkore `83e750b`, ktests `9c8cc3c`. OUT dirs: `…/scratchpad/launch/L3.6/<vm>-<snapshot>` and `…/L3.6/win` (scratch).
+Every cell passed on the first run: no rerun was needed anywhere.
+
+| run | system / bash | verdict | cells | tests | gate time | wall (s) |
+|---|---|---|---|---|---|---|
+| kb-freebsd `clean-gnu` | FreeBSD 15.1-RELEASE / 5.3.20 | PASS | 30/30 | 9513/9513 | 4m29s | 316 |
+| kb-freebsd `clean` | FreeBSD 15.1-RELEASE / 5.3.20 | PASS | 30/30 | 9513/9513 | 3m55s | 278 |
+| kb-alpine `clean-gnu` | Alpine 3.24.2 (musl) / 5.3.9 | PASS | 30/30 | 9514/9514 | 5m49s | 372 |
+| kb-alpine `clean` | Alpine 3.24.2 (musl) / 5.3.9 | PASS | 30/30 | 9514/9514 | 5m24s | 349 |
+| kb-debian `clean` | Debian 13.7 / 5.2.37 | PASS | 30/30 | 9536/9536 | 4m36s | 314 |
+| kb-ubuntu `clean` | Ubuntu 24.04.5 / 5.2.21 | PASS | 30/30 | 9536/9536 | 6m04s | 393 |
+| kb-fedora `clean` | Fedora 44 / 5.3.9 | PASS | 30/30 | 9536/9536 | 5m35s | 368 |
+| Windows | Git-bash 5.3.15 + MSYS2 5.3.9 | PASS | 60/60 | 19103/19103 (9551 + 9552) | 12m24s / 10m58s | 1407 |
+
+`__GATE__` lines, in the order above:
+
+```
+__GATE__:PASS:30:30:0:0:0:0:0:9513:9513
+__GATE__:PASS:30:30:0:0:0:0:0:9513:9513
+__GATE__:PASS:30:30:0:0:0:0:0:9514:9514
+__GATE__:PASS:30:30:0:0:0:0:0:9514:9514
+__GATE__:PASS:30:30:0:0:0:0:0:9536:9536
+__GATE__:PASS:30:30:0:0:0:0:0:9536:9536
+__GATE__:PASS:30:30:0:0:0:0:0:9536:9536
+__GATE__:PASS:60:60:0:0:0:0:0:19103:19103
+```
+
+* Against L34-F: +36 tests everywhere (tfile 250 → 278, L34-F2; tpipe 229 → 237, L34-F1). The three L34-F FLAKY rows
+  (tgrep 005 on Alpine `clean-gnu`, tawk 005 and tfile 007 on Debian) did not recur.
+* kb-alpine `clean-gnu` now carries socat (D10): thttpserver runs its socket cases there, 536/536.
+* Not seen in this round, still open in the ledger: kcl/math 018/019 timing flakes and the kb-fedora gate watchdog
+  interrupt (L34-F1-o1, L34-F1-o2).
