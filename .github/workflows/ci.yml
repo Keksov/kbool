@@ -276,6 +276,7 @@ jobs:
               p=$(command -v "$t" 2>/dev/null) && echo "$t: $p" || echo "$t: -"
             done
           run: |
+            set +e   # the action runs the script under `sh -e`: the gate's rc must not end it
             ws=$(pwd)
             rc=5
             if rm -rf /home/kb/kbool && cp -a "$ws" /home/kb/kbool && chown -R kb:kb /home/kb/kbool; then
