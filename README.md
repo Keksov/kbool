@@ -27,8 +27,8 @@ git clone --recurse-submodules https://github.com/Keksov/kbool.git
 ```
 
 Nothing is built or installed: scripts `source` `kbool.sh` from wherever the
-tree lives. Prerequisites: bash ≥ 5.2 (tested: 5.2.37 under Git-bash and 5.3.9 under
-MSYS2, on Windows); for some kcl units the GNU tools they wrap or call —
+tree lives. Prerequisites: bash ≥ 5.1 (tested: 5.1.16 and 5.2.37 on Debian, 5.3.15
+under Git-bash and 5.3.9 under MSYS2, on Windows); for some kcl units the GNU tools they wrap or call —
 coreutils (`head`, `tail`, `stat`, `mktemp`), `grep`, `sed`, `gawk`,
 findutils `find` — and GNU netcat (`nc`) for `thttpserver`.
 

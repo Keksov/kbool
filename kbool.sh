@@ -53,7 +53,7 @@ case :${SHELLOPTS-}: in
         echo "kbool: bash in POSIX mode (sh, --posix, POSIXLY_CORRECT) is not supported; run it as bash" >&2
         return 2 2>/dev/null || exit 2 ;;
 esac
-__KK_BASH_MIN=5.2
+__KK_BASH_MIN=5.1
 if [ "${BASH_VERSINFO[0]}" -lt "${__KK_BASH_MIN%.*}" ] || {
        [ "${BASH_VERSINFO[0]}" -eq "${__KK_BASH_MIN%.*}" ] &&
        [ "${BASH_VERSINFO[1]}" -lt "${__KK_BASH_MIN#*.}" ]; }; then
