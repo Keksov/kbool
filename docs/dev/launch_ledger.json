@@ -28,14 +28,14 @@
     "D-L34": "2026-10-28: D-L34-3 (owner): no GNU tool → .new succeeds silently, first run/sink/argv/static rc 2 with ktool's message. D-L34-9 (owner): re-run THead/TTail suites under uutils 0.2.2 + 0.12.0 (GitHub release binaries, sha256 = release digests 482c5ced…/e08bd526…) in kb-ubuntu inside L34-E — approved. SV: D-L34-1,2,4,5,6,7,8,10 = the design's recommended options (docs/dev/launch/L3_4_design.md §4).",
     "OG9": "2026-10-28 owner: tfile.decrypt wrong-password fix (L34-F2) = encrypt-then-MAC (HMAC-SHA256 over the ciphertext, MAC key derived from the password, checked before decrypting; detects a wrong password AND tampering). Files written by the old tfile.encrypt (no MAC) are REFUSED with a clear error (no legacy path) — the library is unpublished, only its own tests used the old format.",
     "OG10": "2026-10-28 owner: L34-F1 = option (a) everywhere — on __TPIPE_ST (Linux with /proc) every external <( ) producer runs in the reporting form, correct rc by default. Measured cost (L34-F1 step 1, unloaded, median 5x1000): TPipe.count -- /bin/true +39.8 % kb-alpine (2.93->4.10 ms), +60.3 % kb-debian (2.47->3.96 ms); wrapper sink (TGrep count) +20.5 % / +20.8 %; FreeBSD and cygwin unchanged. The extra fork is the cost (a trap-free form costs the same).",
-    "OG3": "2026-10-29 owner: push straight to main (no launch-ci branch) and set up CI."
+    "OG3": "2026-10-29 owner: push straight to main (no launch-ci branch) and set up CI.",
+    "OG2": "2026-10-29 owner: minimum bash = 5.1 (L4_cost.md recommendation): fix causes A-C per the prototype, floor __KK_BASH_MIN=5.1, 5.1 stays in CI and the lab-VM gate permanently."
   },
   "pending_owner_decisions": {
     "OG1": {
       "was": "L3: GNU-tool policy (recommended: core tool-free; wrappers require GNU tool, resolved by name gsed/gawk/gfind/ggrep; missing tool -> clear error, tests SKIP)",
       "status": "RESOLVED 2026-10-27: owner chose A — core tool-free (tpath rewritten portable, L3.5-1/-2); wrapper units require the GNU tool, resolved by name (gsed/gawk/ggrep/gfind/ghead/gtail, then the plain name only with a GNU identity), clear error naming the package, tests SKIP with that reason (L3.3 resolver in kkore, L3.4 wrapper move; L3.5-9 TAwk inplace.awk folds into L3.4). Budget an L3.4 triage: the 577 FreeBSD clean-gnu wrapper cases will start running."
     },
-    "OG2": "L4: minimum bash 5.1 or 5.2, from the cost report",
     "OG3": {
       "was": "L5.0b: allow pushing branch launch-ci for CI iteration (first for the minimal Linux CI after L3.6, later for the full matrix L5.1)",
       "status": "GRANTED 2026-10-28 (owner): push of branch launch-ci allowed (L5.0b and later L5.2). Not used yet: L5.0 waits for L3.6. Note for the push: all five repos are PUBLIC; on 2026-10-28 unpushed: kbool 88, kcl 35, kklass 8, kkore 11, ktests 9 commits — checkout with submodules needs the submodule SHAs on GitHub, so the push of launch-ci also pushes the submodule commits (as branch launch-ci in each repo); main stays untouched. Owner 2026-10-28: publishing these commits on launch-ci is fine (no users yet) — no private fork needed"
@@ -522,7 +522,7 @@
         "L4.3"
       ],
       "card": null,
-      "status": "WAITING owner OG2 (asked 2026-10-29)"
+      "status": "DONE 2026-10-29: OG2 = 5.1 (owner)"
     },
     "L4.5": {
       "executor": "O->S",
