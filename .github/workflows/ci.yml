@@ -1,7 +1,19 @@
-# kbool CI (launch L5.0, DL11): the phase gate (ktests/tools/gate.sh, every
-# suite) on Linux. Verdicts: PASS = green; FLAKY (exit 4) and ENV (exit 3) do
-# not fail the job (DL11) but are named in the job summary; FAIL, TIMEOUT,
-# STRAY, CRASH and usage errors are red. OUT dir of each run: artifact gate-*.
+# kbool CI (launch L5.0/L5.1, DL11): the phase gate (ktests/tools/gate.sh, every
+# suite, --rerun-failed 1) on a matrix of platforms. One job per platform, one
+# artifact per row (gate-<job>-<slug>, the gate's OUT dir):
+#   linux   ubuntu-latest host (system bash) and docker rows: bash 5.1.16 / 5.2.37 /
+#           5.3.20 on Alpine (official bash images), debian:13, ubuntu:24.04, fedora:44
+#           (system bash). Container rows run .github/ci/linux.sh as root, the gate as user kb.
+#   macos   macos-latest with Homebrew bash: `bsd` (bash only, Apple's BSD tools) and
+#           `gnu` (+ coreutils gnu-sed gawk findutils grep diffutils netcat socat).
+#   freebsd FreeBSD 15.1 VM (vmactions/freebsd-vm on ubuntu-latest) with pkg bash: `clean`
+#           (bash git curl perl5) and `gnu` (+ the GNU tool set of provision/pkg.sh).
+#   windows windows-latest: `git-bash` (Git for Windows' bash; GNU netcat from MSYS2 only
+#           through KCL_NC) and `msys2` (msys2/setup-msys2, MSYSTEM=MSYS).
+# Verdicts (.github/ci/verdict.sh): PASS = green; FLAKY (exit 4) and ENV (exit 3) are
+# green with a warning when the gate printed its __GATE__ line (DL11); FAIL, TIMEOUT,
+# STRAY, CRASH, usage errors, a platform setup failure (exit 5) and ENV/FLAKY without a
+# __GATE__ line are red.
 name: ci
 
 on:
@@ -18,29 +30,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  gate:
-    name: gate (${{ matrix.name }})
+  linux:
+    name: linux (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: ubuntu system bash
+          - name: ubuntu host, system bash
+            slug: ubuntu-host
             image: ""
-          - name: bash 5.1 alpine
+          - name: alpine, bash 5.1
+            slug: alpine-51
             image: bash:5.1.16-alpine3.22
-          - name: bash 5.2 alpine
+          - name: alpine, bash 5.2
+            slug: alpine-52
             image: bash:5.2.37-alpine3.22
-          - name: bash 5.3 alpine
+          - name: alpine, bash 5.3
+            slug: alpine-53
             image: bash:5.3.20-alpine3.24
+          - name: debian 13
+            slug: debian-13
+            image: debian:13
+          - name: ubuntu 24.04
+            slug: ubuntu-2404
+            image: ubuntu:24.04
+          - name: fedora 44
+            slug: fedora-44
+            image: fedora:44
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           persist-credentials: false
 
-      - name: tools (ubuntu)
+      - name: tools (ubuntu host)
         if: matrix.image == ''
         run: |
           sudo apt-get update
@@ -55,38 +80,340 @@ jobs:
         id: gate
         env:
           IMAGE: ${{ matrix.image }}
+          NAME: ${{ matrix.name }}
         run: |
           out="$RUNNER_TEMP/gate-out"
           mkdir -p "$out"
+          echo "out=$out" >> "$GITHUB_OUTPUT"
           set +e
           if [ -z "$IMAGE" ]; then
             bash ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 all
+            rc=$?
           else
             chmod 0777 "$out"
-            docker run --rm -v "$PWD:/src:ro" -v "$out:/out" "$IMAGE" sh /src/.github/ci/alpine.sh
+            rc=5
+            n=1
+            while :; do
+              if docker pull "$IMAGE"; then rc=0; break; fi
+              [ "$n" -lt 3 ] || break
+              n=$((n + 1)); echo "docker pull $IMAGE: retry $n/3"; sleep 5
+            done
+            if [ "$rc" -eq 0 ]; then
+              docker run --rm -v "$PWD:/src:ro" -v "$out:/out" "$IMAGE" sh /src/.github/ci/linux.sh
+              rc=$?
+            fi
           fi
-          rc=$?
-          set -e
-          echo "out=$out" >> "$GITHUB_OUTPUT"
-          line=$(grep -h '^__GATE__' "$out/progress.txt" 2>/dev/null | tail -1)
-          {
-            echo "### gate (${{ matrix.name }}): exit $rc"
-            echo '```'
-            grep -hE '^gate [0-9]|^\[FAIL\]|FLAKY|^__GATE__' "$out/progress.txt" 2>/dev/null | tail -40
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "gate exit $rc ${line:-no __GATE__ line}"
-          case $rc in
-            0) ;;
-            3|4) echo "::warning::gate verdict ${line:-exit $rc} (ENV/FLAKY do not fail CI, DL11)" ;;
-            *) exit "$rc" ;;
-          esac
+          sh .github/ci/verdict.sh "$out" "$rc" "$NAME"
 
       - name: OUT dir
         if: always() && steps.gate.outputs.out != ''
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: gate-${{ strategy.job-index }}
+          name: gate-linux-${{ matrix.slug }}
           path: ${{ steps.gate.outputs.out }}
+          retention-days: 14
+          if-no-files-found: warn
+
+  macos:
+    name: macos (${{ matrix.name }})
+    runs-on: macos-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: bsd tools, brew bash
+            slug: bsd
+            brew: bash
+            gnubin: "no"
+          - name: gnu tools, brew bash
+            slug: gnu
+            brew: bash coreutils gnu-sed gawk findutils grep diffutils netcat socat
+            gnubin: "yes"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: brew install
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+          BREW_PKGS: ${{ matrix.brew }}
+        run: |
+          n=1
+          # shellcheck disable=SC2086
+          until brew install $BREW_PKGS; do
+            if [ "$n" -ge 3 ]; then echo "::error::brew install $BREW_PKGS failed 3 times"; exit 5; fi
+            n=$((n + 1)); echo "brew install: retry $n/3"; sleep 10
+          done
+          "$(brew --prefix)/bin/bash" --version | sed -n 1p
+          /bin/bash --version | sed -n 1p
+
+      - name: preinstalled GNU tools (bsd row)
+        if: matrix.slug == 'bsd'
+        run: |
+          {
+            echo '### GNU tools on PATH (bsd row; runner images carry preinstalled formulas)'
+            echo '```'
+            for t in gsed gawk ggrep gfind ghead gtail gtimeout nc socat; do
+              p=$(command -v "$t" 2>/dev/null) && echo "$t: $p" || echo "$t: -"
+            done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: gate
+        id: gate
+        env:
+          NAME: ${{ matrix.name }}
+          GNUBIN: ${{ matrix.gnubin }}
+        run: |
+          out="$RUNNER_TEMP/gate-out"
+          mkdir -p "$out"
+          echo "out=$out" >> "$GITHUB_OUTPUT"
+          brewbash="$(brew --prefix)/bin/bash"
+          export KT_GATE_BASHES="$brewbash"
+          # appended at the END, never via GITHUB_PATH (that prepends): only the names missing
+          # from /usr/bin (timeout, ...) resolve there; ktool finds the g-names in brew's bin
+          if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
+          set +e
+          "$brewbash" ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 all
+          rc=$?
+          sh .github/ci/verdict.sh "$out" "$rc" "$NAME"
+
+      - name: bash 3.2 guard (bsd row)
+        if: always() && matrix.slug == 'bsd'
+        run: |
+          # the system bash is 3.2: kbool.sh must refuse with rc 2 and its message
+          set +e
+          /bin/bash -c 'source ./kbool.sh' 2> "$RUNNER_TEMP/guard-err"
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/guard-err"
+          {
+            echo '### bash 3.2 guard (/bin/bash -c "source ./kbool.sh")'
+            echo '```'
+            echo "exit $rc"
+            cat "$RUNNER_TEMP/guard-err"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$rc" -eq 2 ] && grep -q 'kbool: bash >= 5.1' "$RUNNER_TEMP/guard-err"; then
+            echo "guard ok"
+          else
+            echo "::error::/bin/bash -c 'source ./kbool.sh' gave exit $rc, expected 2 and 'kbool: bash >= 5.1'"
+            exit 1
+          fi
+
+      - name: OUT dir
+        if: always() && steps.gate.outputs.out != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gate-macos-${{ matrix.slug }}
+          path: ${{ steps.gate.outputs.out }}
+          retention-days: 14
+          if-no-files-found: warn
+
+  freebsd:
+    name: freebsd (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: clean, pkg bash
+            slug: clean
+            pkgs: bash git curl perl5
+          # clean + the GNU list of provision/pkg.sh (coreutils gsed gawk findutils gnugrep
+          # diffutils netcat curl perl5 socat; curl and perl5 are in `clean` already)
+          - name: gnu, pkg bash
+            slug: gnu
+            pkgs: bash git curl perl5 coreutils gsed gawk findutils gnugrep diffutils netcat socat
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      # The VM runs `prepare` and `run` as root with sh, in the synced workspace (usesh is
+      # deprecated in v1.5.9 and ignored). `run` never fails: it leaves the gate's OUT dir and
+      # its exit code in ./gate-out (gate-out/rc); the host step "verdict" maps it.
+      - name: gate in FreeBSD 15.1
+        uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
+        with:
+          release: "15.1"
+          usesh: true
+          sync: rsync
+          copyback: true
+          envs: ""
+          prepare: |
+            retry() {
+              n=1
+              while :; do
+                if "$@"; then return 0; fi
+                [ "$n" -lt 4 ] || return 1
+                n=$((n + 1)); echo "retry $n/4: $*"; sleep 5
+              done
+            }
+            # pkgbase (FreeBSD-base) may be unreachable: only ports are installed (pkg.sh)
+            pkg update > /tmp/pkg-update.log 2>&1
+            upd=$?
+            cat /tmp/pkg-update.log
+            if [ "$upd" -ne 0 ] && grep -q 'FreeBSD-base' /tmp/pkg-update.log; then
+              mkdir -p /usr/local/etc/pkg/repos
+              echo 'FreeBSD-base: { enabled: no }' > /usr/local/etc/pkg/repos/FreeBSD.conf
+              echo "prepare: FreeBSD-base disabled"
+            fi
+            retry env ASSUME_ALWAYS_YES=yes pkg install -y ${{ matrix.pkgs }} || { echo "prepare: pkg install failed"; exit 5; }
+            # process substitution needs /dev/fd
+            mount | grep -q '^fdescfs on /dev/fd ' || mount -t fdescfs fdesc /dev/fd || { echo "prepare: fdescfs mount failed"; exit 5; }
+            pw useradd kb -m -s /usr/local/bin/bash || { echo "prepare: pw useradd failed"; exit 5; }
+            [ -x /usr/local/bin/bash ] || { echo "prepare: no /usr/local/bin/bash"; exit 5; }
+            /usr/local/bin/bash --version | sed -n 1p
+            freebsd-version
+            for t in perl curl openssl timeout nc netcat socat; do
+              p=$(command -v "$t" 2>/dev/null) && echo "$t: $p" || echo "$t: -"
+            done
+          run: |
+            ws=$(pwd)
+            rc=5
+            if rm -rf /home/kb/kbool && cp -a "$ws" /home/kb/kbool && chown -R kb:kb /home/kb/kbool; then
+              su -m kb -c 'export HOME=/home/kb USER=kb LOGNAME=kb; cd /home/kb/kbool && /usr/local/bin/bash ktests/tools/gate.sh --out /home/kb/gate-out --rerun-failed 1 --timeout 900 all'
+              rc=$?
+            else
+              echo "run: cannot copy the workspace to /home/kb/kbool"
+            fi
+            mkdir -p "$ws/gate-out"
+            cp -R /home/kb/gate-out/. "$ws/gate-out/" 2>/dev/null
+            echo "$rc" > "$ws/gate-out/rc"
+            exit 0
+
+      - name: verdict
+        if: always()
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          out="$PWD/gate-out"
+          mkdir -p "$out"
+          rc=$(cat "$out/rc" 2>/dev/null || true)
+          if [ -z "$rc" ]; then echo "no gate-out/rc: the VM step did not reach its run script"; rc=5; fi
+          sh .github/ci/verdict.sh "$out" "$rc" "$NAME"
+
+      - name: OUT dir
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gate-freebsd-${{ matrix.slug }}
+          path: gate-out
+          retention-days: 14
+          if-no-files-found: warn
+
+  windows:
+    name: windows (${{ matrix.name }})
+    runs-on: windows-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: git-bash
+            slug: git-bash
+          - name: msys2
+            slug: msys2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      # Git for Windows' bash for both rows (the msys2 row has no git inside its shell).
+      # core.autocrlf is not touched: every repo has `* text=auto eol=lf`.
+      - name: line endings, OUT dir
+        id: out
+        shell: bash
+        run: |
+          eol() { git ls-files --eol | awk '{print $1,$2}' | sort | uniq -c; }
+          {
+            echo '### line endings (git ls-files --eol: index worktree, count)'
+            echo '```'
+            echo "kbool:"; eol
+            for d in $(git submodule --quiet foreach --recursive 'echo "$displaypath"'); do
+              echo "$d:"; (cd "$d" && eol)
+            done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          OUT="$(cygpath -u "$RUNNER_TEMP")/gate-out"
+          mkdir -p "$OUT"
+          echo "out=$(cygpath -m "$OUT")" >> "$GITHUB_OUTPUT"
+          bash --version | sed -n 1p
+
+      # git-bash row: GNU netcat (nc.exe) from a private MSYS2, used through KCL_NC only.
+      # The action leaves just its shell wrapper on PATH (no msys64 folder: mixed runtimes
+      # break Git-bash, L2.8-o1/L3.5-10). Default `release: true`: a fresh MSYS2 in
+      # RUNNER_TEMP, its location in the step output.
+      - name: MSYS2 for nc (git-bash row)
+        if: matrix.slug == 'git-bash'
+        id: nc
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MSYS
+          update: false
+          path-type: minimal
+          install: gnu-netcat
+
+      - name: gate (git-bash)
+        if: matrix.slug == 'git-bash'
+        shell: bash
+        env:
+          NAME: ${{ matrix.name }}
+          M2LOC: ${{ steps.nc.outputs.msys2-location }}
+        run: |
+          # the setup action exported MSYSTEM=MSYS for later steps: not for Git's bash
+          unset MSYSTEM
+          OUT="$(cygpath -u "$RUNNER_TEMP")/gate-out"
+          mkdir -p "$OUT"
+          GBASH="$(cygpath -u 'C:\Program Files\Git\usr\bin\bash.exe')"
+          export KT_GATE_BASHES="$GBASH"
+          KCL_NC="$(cygpath -u "$M2LOC")/usr/bin/nc.exe"
+          if [ ! -x "$KCL_NC" ]; then echo "::error::no nc.exe at $KCL_NC"; exit 5; fi
+          export KCL_NC
+          "$GBASH" --version | sed -n 1p
+          set +e
+          "$KCL_NC" -h 2>&1 | sed -n 1p
+          "$GBASH" ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 all
+          rc=$?
+          sh .github/ci/verdict.sh "$OUT" "$rc" "$NAME"
+
+      - name: MSYS2 (msys2 row)
+        if: matrix.slug == 'msys2'
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MSYS
+          update: false
+          path-type: minimal
+          install: gnu-netcat gawk diffutils findutils grep sed curl openssl perl util-linux
+
+      - name: gate (msys2)
+        if: matrix.slug == 'msys2'
+        shell: msys2 {0}
+        env:
+          NAME: ${{ matrix.name }}
+        run: |
+          OUT="$(cygpath -u "$RUNNER_TEMP")/gate-out"
+          mkdir -p "$OUT"
+          export KT_GATE_BASHES=/usr/bin/bash
+          /usr/bin/bash --version | sed -n 1p
+          set +e
+          /usr/bin/bash ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 all
+          rc=$?
+          sh .github/ci/verdict.sh "$OUT" "$rc" "$NAME"
+
+      - name: OUT dir
+        if: always() && steps.out.outputs.out != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gate-windows-${{ matrix.slug }}
+          path: ${{ steps.out.outputs.out }}
           retention-days: 14
           if-no-files-found: warn
