@@ -44,7 +44,10 @@ jobs:
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gawk netcat-openbsd socat locales
           sudo locale-gen en_US.UTF-8 de_DE.UTF-8 ru_RU.UTF-8
-          bash --version | head -1
+          . /etc/os-release; echo "$PRETTY_NAME"
+          for t in bash ls od head tail sed awk grep find nc; do
+            printf '%-5s %s: %s\n' "$t" "$(readlink -f "$(command -v "$t")")" "$("$t" --version 2>&1 | head -1)"
+          done
 
       - name: gate
         id: gate
