@@ -504,7 +504,7 @@
         "L2.3"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "DONE 2026-10-29 (Sonnet + card-lint, SV review vs OUT dirs): docs/dev/launch/L4_runs.md + L4_failures.tsv (77 rows) + tools/vmlab/checks/guard.sh. guard: 3.2/4.4/5.0/5.1 refused rc=2 with the guard lines (kbool.sh and a unit file directly), 5.2 loads. Floor lowered in the VM copy only: R1 5.1.16 all = FAIL 9412/9536, 14 files: thttpserver x10 (one cause: 5.1 declare -f deparses >&\"$fd\" as &> \"$fd\", thttpmessage.sh:865), kcl 202_math, kklass 147_Round6, ktests 051/053 (not isolated); kkore PASS. R2 5.0.18 kkore+kklass 24 files (nameref to array element in $(( )) = 0, SRANDOM, ${!x@a}); R3 4.4.23 39 files (+ no localvar_unset/EPOCH*); gate itself runs on 4.4 (timers 0.0s). No 5.2-only syntax used. kklass is 5.1+ by design."
     },
     "L4.3": {
       "executor": "O",
