@@ -513,7 +513,7 @@
         "L4.2"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-10-29 (Opus, SV review vs probes + prototype gate): docs/dev/launch/L4_cost.md. 3 causes on 5.1: A deparse >&\"WORD\" -> &> WORD in declare -f/export -f (thttpserver build path, math set -a child; 6 lines unquote), B EXIT trap after set -e runs in function scope (test-only, 147), C [[ -v a[\"$k\"] ]] / unset a[\"$k\"] re-expand key (4 lines, kkore kcfg/kvar + ktests runner). Prototype: all 9536/9536 on 5.1.16 and 5.2.37 (60/60 cells), no speed change. 051 not reproduced (slow hang-cell stop unexplained). Recommendation 5.1 if kept in CI + lab gate permanently; gain Ubuntu 22.04 (to 2027) and RHEL/Alma/Rocky 9 (to 2032). Side note: 5.2.37 printed `pop_var_context: head of shell_variables not a function context` in an EXIT-trap probe (probes/exittrap.out)."
     },
     "L4.4": {
       "executor": "OW",
@@ -522,7 +522,7 @@
         "L4.3"
       ],
       "card": null,
-      "status": "planned"
+      "status": "WAITING owner OG2 (asked 2026-10-29)"
     },
     "L4.5": {
       "executor": "O->S",
