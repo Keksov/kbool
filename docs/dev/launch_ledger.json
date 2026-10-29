@@ -494,7 +494,7 @@
         "L2.8"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "DONE 2026-10-29 (Sonnet, 2 rounds; SV decision on gcc 14 flags): kb-debian snapshot clean-bashes = clean + /opt/bash-{5.1.16,5.0.18,4.4.23,3.2.57}, 27/27 files Good signature (Chet Ramey, gnu-keyring.gpg); 5.x and 3.2 need CFLAGS -std=gnu89 + -Wno-error=implicit-function-declaration/implicit-int/incompatible-pointer-types/int-conversion (3.2 also CFLAGS_FOR_BUILD), 4.4 -std=gnu89; no source edits; recipe in tools/vmlab/README.md kb-debian."
     },
     "L4.2": {
       "executor": "S",

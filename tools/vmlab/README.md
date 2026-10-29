@@ -319,6 +319,21 @@ bash tools/vmlab/create/debian.sh                  # whole recipe, ~12 min; leav
 bash tools/vmlab/vmlab.sh snapshot kb-debian clean
 ```
 
+Snapshot `clean-bashes` (2026-10-29, launch L4.1): `clean` plus `build-essential bison
+gnupg wget` and four old bashes built from the GNU sources (every tarball and patch
+checked with `gpg --verify` against `gnu-keyring.gpg`, Chet Ramey's key), for the
+bash-floor measurement; `/usr/bin/bash` stays 5.2.37. Debian 13's gcc 14 refuses the
+old code by default, hence the flags (`F2` = `-O2 -std=gnu89
+-Wno-error=implicit-function-declaration -Wno-error=implicit-int
+-Wno-error=incompatible-pointer-types -Wno-error=int-conversion`); no source edits:
+
+| `/opt/bash-X/bin/bash` | source | build |
+|---|---|---|
+| 5.1.16 | `bash-5.1.16.tar.gz` | `CFLAGS=F2` |
+| 5.0.18 | `bash-5.0.tar.gz` + `bash50-001`…`018` | `CFLAGS=F2` |
+| 4.4.23 | `bash-4.4.18.tar.gz` + `bash44-019`…`023` | `CFLAGS='-O2 -std=gnu89'` |
+| 3.2.57 | `bash-3.2.57.tar.gz` | `CFLAGS=F2`, `make CFLAGS_FOR_BUILD=F2` (the `bashversion` build tool) |
+
 Same structure as `create/ubuntu.sh` (refuses with rc 13 if the VM exists,
 random one-shot password file, `--finish PWFILE`, port forward
 `ssh,tcp,127.0.0.1,2222,,22`, 4096 MB / 4 CPUs / 20 GB). Differences, all verified
