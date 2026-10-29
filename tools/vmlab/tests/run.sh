@@ -211,6 +211,15 @@ VMLAB_ROOT=$R run_v gate kb-debian --out "$T/oe" --env 'A_1=a b$x' --env B= -- k
 t_eq "gate --env x2 rc" 0 "$RC"
 t_has "gate --env %q value + empty value + repeat" "$OUT" 'cd ~/kbool && A_1=a\ b\$x B='"''"' KT_GATE_BASHES='
 t_has "gate --env %q value in vm.txt" "$OUT" 'env:\ A_1=a\ b\$x env:\ B=;'
+VMLAB_ROOT=$R run_v gate kb-debian --out "$T/oe" --env 'KT_GATE_BASHES=/opt/bash-5.1.16/bin/bash;/usr/bin/bash' --env LC_ALL=C -- kkore
+t_eq "gate --env KT_GATE_BASHES rc" 0 "$RC"
+t_has "gate --env KT_GATE_BASHES replaces the bash column" "$OUT" 'cd ~/kbool && LC_ALL=C KT_GATE_BASHES=/opt/bash-5.1.16/bin/bash\;/usr/bin/bash timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out kkore'
+t_no "gate --env KT_GATE_BASHES: the bash column is not appended" "$OUT" 'KT_GATE_BASHES=/usr/bin/bash timeout'
+t_has "gate --env KT_GATE_BASHES: vm.txt has each bash's version" "$OUT" 'freebsd-version; fi; /opt/bash-5.1.16/bin/bash --version | head -n 1; /usr/bin/bash --version | head -n 1; printf'
+t_has "gate --env KT_GATE_BASHES in vm.txt (env line)" "$OUT" 'env:\ KT_GATE_BASHES=/opt/bash-5.1.16/bin/bash\;/usr/bin/bash env:\ LC_ALL=C;'
+VMLAB_ROOT=$R run_v gate $U --env KT_GATE_BASHES= -- kkore
+t_eq "gate --env KT_GATE_BASHES= (empty) rc" 2 "$RC"
+t_no "gate --env KT_GATE_BASHES= (empty): nothing called" "$OUT" "DRY:"
 for bad in 'a-b=1' '1A=x' '=x' 'NOEQUALS' ''; do
   VMLAB_ROOT=$R run_v gate $U --env "$bad" -- kkore
   t_eq "gate --env [$bad] rc" 2 "$RC"

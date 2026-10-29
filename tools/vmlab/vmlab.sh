@@ -434,6 +434,7 @@ cmd_gate() {
       --env)
         shift; e=${1-}
         [[ $e == *=* && ${e%%=*} =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || usage_err "gate: --env needs NAME=VALUE (NAME = ^[A-Za-z_][A-Za-z0-9_]*\$), got '$e'"
+        [[ $e != KT_GATE_BASHES=* || -n ${e#*=} ]] || usage_err "gate: --env KT_GATE_BASHES needs a value"
         envs+=("$e") ;;
       --from-github) gh=1 ;;
       --out) shift; out=${1-}; [[ -n $out ]] || usage_err "gate: --out needs a directory" ;;
@@ -450,14 +451,18 @@ cmd_gate() {
   cmd_up "$n" || return $?
   if (( gh )); then cmd_sync "$n" --from-github || return $?; else cmd_sync "$n" || return $?; fi
 
-  local bashp=${C_BASH[$n]} shas=() l vmtxt gcmd
+  local bashp=${C_BASH[$n]} shas=() l vmtxt gcmd b bl=()
   while IFS= read -r l; do shas+=("$l"); done < <(host_shas "$ROOT")
   vmtxt='{ uname -a; if [ -r /etc/os-release ]; then cat /etc/os-release; else freebsd-version; fi; '
   for e in "${envs[@]}"; do
-    envq+="${e%%=*}=$(printf '%q' "${e#*=}") "   # NAME=<%q VALUE> prefix of the gate command
     envt+=" $(printf '%q' "env: $e")"            # extra line of vm.txt
+    # KT_GATE_BASHES replaces the bash column of vms.conf (';'-separated list, launch L4.5-6)
+    if [[ ${e%%=*} == KT_GATE_BASHES ]]; then bashp=${e#*=}; continue; fi
+    envq+="${e%%=*}=$(printf '%q' "${e#*=}") "   # NAME=<%q VALUE> prefix of the gate command
   done
-  vmtxt+="$(printf '%q' "$bashp") --version | head -n 1; printf '%s\\n' $(printf '%q ' "${shas[@]}")$envt; } > ~/vm.txt"
+  IFS=';' read -ra bl <<< "$bashp"
+  for b in "${bl[@]}"; do vmtxt+="$(printf '%q' "$b") --version | head -n 1; "; done
+  vmtxt+="printf '%s\\n' $(printf '%q ' "${shas[@]}")$envt; } > ~/vm.txt"
   rssh "$n" "$RUN_TIMEOUT" "$vmtxt" </dev/null || return $?
 
   gcmd="rm -rf ~/gate-out; cd ~/kbool && ${envq}KT_GATE_BASHES=$(printf '%q' "$bashp") timeout -k 120 9000 bash ktests/tools/gate.sh --out ~/gate-out $(printf '%q ' "${gargs[@]}")"

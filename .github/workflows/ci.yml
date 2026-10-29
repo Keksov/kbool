@@ -28,6 +28,8 @@ jobs:
         include:
           - name: ubuntu system bash
             image: ""
+          - name: bash 5.1 alpine
+            image: bash:5.1.16-alpine3.22
           - name: bash 5.2 alpine
             image: bash:5.2.37-alpine3.22
           - name: bash 5.3 alpine

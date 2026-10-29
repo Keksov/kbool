@@ -78,7 +78,10 @@ is printed first: `vmlab out=OUT`.
 `--env NAME=VALUE` (repeatable, before `--`; NAME matches `^[A-Za-z_][A-Za-z0-9_]*$`, else rc 2)
 runs the gate under that environment, e.g. `--env LC_ALL=de_DE.UTF-8` for a comma-locale
 run: the pairs are put before `KT_GATE_BASHES=` as `NAME=<printf %q of VALUE>`, and each
-is recorded as a line `env: NAME=VALUE` in `OUT/vm.txt`.
+is recorded as a line `env: NAME=VALUE` in `OUT/vm.txt`. `--env KT_GATE_BASHES=B1;B2`
+replaces the bash column instead (an empty value is rc 2), and `vm.txt` then has the
+version line of each listed bash. The 5.1 floor gate (`clean-bashes`, below) is
+`--snapshot clean-bashes --env 'KT_GATE_BASHES=/opt/bash-5.1.16/bin/bash;/usr/bin/bash'`.
 
 ### The cleanup trap
 
