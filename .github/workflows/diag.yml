@@ -1,10 +1,18 @@
 # Read-only diagnostics of launch L5.4 (docs/dev/launch/L5_triage.md §6: D1 macOS,
-# D2 ubuntu host, D3 windows). Manual only (workflow_dispatch); no checkout, no
-# third-party action; every step is `set +e` and bounded by timeout-minutes.
+# D2 ubuntu host, D3 windows; D4 windows = SV-1: ktests 057's suspend in each
+# runtime, and 057 itself). Manual only (workflow_dispatch; input `only` names
+# the jobs to run, e.g. `gh workflow run diag.yml --ref main -f only=D4`); D1-D3
+# use no checkout and no third-party action, D4 the pinned actions of ci.yml
+# (checkout, setup-msys2); every step is `set +e` and bounded by timeout-minutes.
 name: diag
 
 on:
   workflow_dispatch:
+    inputs:
+      only:
+        description: "jobs to run (space separated: D1 D2 D3 D4)"
+        required: false
+        default: "D1 D2 D3"
 
 permissions:
   contents: read
@@ -12,6 +20,7 @@ permissions:
 jobs:
   macos:
     name: D1 macos (${{ matrix.slug }})
+    if: contains(inputs.only, 'D1')
     runs-on: macos-latest
     timeout-minutes: 15
     strategy:
@@ -56,6 +65,7 @@ jobs:
 
   ubuntu:
     name: D2 ubuntu host
+    if: contains(inputs.only, 'D2')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -72,6 +82,7 @@ jobs:
 
   windows:
     name: D3 windows
+    if: contains(inputs.only, 'D3')
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -89,3 +100,99 @@ jobs:
           kill -KILL "$p"; sleep 1
           kill -0 "$p" 2>/dev/null && echo "deaf=yes" || echo "deaf=no"
           /usr/bin/kill -f -9 "$p" 2>/dev/null; wait "$p" 2>/dev/null; true
+
+  windows057:
+    name: D4 windows 057 (${{ matrix.slug }})
+    if: contains(inputs.only, 'D4')
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: git-bash
+          - slug: msys2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: MSYS2 (msys2 row)
+        if: matrix.slug == 'msys2'
+        id: m2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MSYS
+          update: false
+          path-type: minimal
+          install: git gnu-netcat gawk diffutils findutils grep sed curl openssl perl util-linux
+
+      # the suspend of 057's drv_deaf in every runtime on the runner, every output visible
+      - name: D4a suspend probe per runtime
+        timeout-minutes: 8
+        shell: bash
+        env:
+          M2LOC: ${{ steps.m2.outputs.msys2-location }}
+        run: |
+          set +e
+          unset MSYSTEM
+          T="$(cygpath -u "$RUNNER_TEMP")/d4"; mkdir -p "$T"
+          cat > "$T/sus.sh" <<'SUS'
+          # sus.sh DIR MODE — MODE plain (sleep), copy (a sleep copy kt057probe.exe in DIR),
+          # copyws (copy + the Start-Process watchdog of drv_deaf)
+          d="$1" mode="$2"
+          echo "-- mode=$mode bash=$BASH_VERSION uname=$(uname -r) BASH=$BASH"
+          echo "   PATH=$PATH"
+          echo "   SYSTEMROOT=${SYSTEMROOT:-<unset>} WINDIR=${WINDIR:-<unset>} TEMP=${TEMP:-<unset>} TMP=${TMP:-<unset>}"
+          x=sleep
+          if [[ "$mode" != plain ]]; then rm -f "$d/kt057probe.exe"; cp /usr/bin/sleep.exe "$d/kt057probe.exe"; x="$d/kt057probe.exe"; fi
+          bash -c '("$1" 60) </dev/null >/dev/null 2>&1 & echo "$!" > "$2"' _ "$x" "$d/cpid"
+          read -r p < "$d/cpid"; sleep 1.5
+          w=""; read -r w < "/proc/$p/winpid"
+          c="$(tr '\0' ' ' < "/proc/$p/cmdline" 2>&1)"
+          echo "   pid=$p winpid=$w cmdline=[$c] exename=[$(cat /proc/$p/exename 2>&1)]"
+          ps="$(cygpath -u "${SYSTEMROOT:-C:\Windows}")/System32/WindowsPowerShell/v1.0/powershell.exe"
+          [[ -x "$ps" ]] || ps=powershell.exe
+          cw="$(cygpath -w "$d")"
+          ws=""
+          [[ "$mode" == copyws ]] && ws="Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile','-NonInteractive','-Command',('\$q=Get-Process -Id $w -EA 0; if(\$q -and -not \$q.WaitForExit(120000)){ \$q.Kill() }'); 'watchdog started';"
+          t0=$SECONDS
+          MSYS2_ARG_CONV_EXCL='*' TEMP="$cw" TMP="$cw" timeout -k 5 90 "$ps" -NoProfile -NonInteractive -Command "Add-Type -Name N -Namespace W -MemberDefinition '[DllImport(\"ntdll.dll\")] public static extern int NtSuspendProcess(IntPtr h);'; \$q=Get-Process -Id $w; 'proc=' + \$q.Path; 'NtSuspendProcess=' + [W.N]::NtSuspendProcess(\$q.Handle); 'threads=' + (((Get-Process -Id $w).Threads | ForEach-Object { \$_.ThreadState.ToString() + '/' + \$_.WaitReason }) -join ' '); $ws 'ps-done'" 2>&1 | sed 's/^/   ps| /'
+          echo "   powershell rc=${PIPESTATUS[0]} took=$(( SECONDS - t0 ))s"
+          kill -KILL "$p"; echo "   kill -KILL rc=$?"; sleep 1
+          kill -0 "$p" 2>/dev/null && echo "   deaf=yes" || echo "   deaf=no"
+          w2=""; { read -r w2 < "/proc/$p/winpid"; } 2>/dev/null; echo "   /proc/$p/winpid now=[$w2]"
+          MSYS2_ARG_CONV_EXCL='*' timeout -k 5 60 "$ps" -NoProfile -NonInteractive -Command "if(Get-Process -Id $w -EA 0){'   winproc=alive ' + (((Get-Process -Id $w).Threads | ForEach-Object { \$_.ThreadState.ToString() + '/' + \$_.WaitReason }) -join ' ')}else{'   winproc=gone'}; if(\$q=Get-Process -Id $w -EA 0){ \$q.Kill(); '   killed from powershell' }" 2>&1
+          "${BASH%/*}/kill" -f -9 "$p" 2>/dev/null; true
+          SUS
+          G="/c/Program Files/Git/usr/bin/bash.exe"
+          bashes=( "$G" /c/msys64/usr/bin/bash.exe )
+          [[ -n "$M2LOC" ]] && bashes+=( "$(cygpath -u "$M2LOC")/usr/bin/bash.exe" )
+          for b in "${bashes[@]}"; do
+            echo "==== $b"
+            [[ -x "$b" ]] || { echo "   (absent)"; continue; }
+            ls -l "${b%/*}/msys-2.0.dll"; md5sum "${b%/*}/msys-2.0.dll" "${b%/*}/sleep.exe"
+            for m in plain copy copyws; do
+              PATH="${b%/*}:$PATH" timeout -k 5 150 "$b" "$T/sus.sh" "$T" "$m"
+            done
+            echo "== env -i (gate cell like: PATH, SYSTEMROOT, WINDIR, own TEMP/TMP/HOME), mode copyws"
+            mkdir -p "$T/cell/tmp" "$T/cell/home"
+            timeout -k 5 150 env -i "PATH=${b%/*}:$PATH" "SYSTEMROOT=$SYSTEMROOT" "WINDIR=$WINDIR" "TEMP=$T/cell/tmp" "TMP=$T/cell/tmp" "TMPDIR=$T/cell/tmp" "HOME=$T/cell/home" "$b" "$T/sus.sh" "$T/cell/tmp" copyws
+          done
+          true
+
+      # 057 itself, run directly (no gate) by the row's bash
+      - name: D4b 057 directly
+        timeout-minutes: 10
+        shell: bash
+        env:
+          M2LOC: ${{ steps.m2.outputs.msys2-location }}
+        run: |
+          set +e
+          unset MSYSTEM
+          if [[ -n "$M2LOC" ]]; then b="$(cygpath -u "$M2LOC")/usr/bin/bash.exe"; else b="/c/Program Files/Git/usr/bin/bash.exe"; fi
+          echo "row bash: $b"
+          PATH="${b%/*}:$PATH" timeout -k 10 500 "$b" ktests/tests/057_GateDeafStop.sh 2>&1
+          echo "057 rc=$?"
+          true
