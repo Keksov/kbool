@@ -1,10 +1,12 @@
 # Read-only diagnostics of launch L5.4 (docs/dev/launch/L5_triage.md §6: D1 macOS,
 # D2 ubuntu host, D3 windows; D4 windows = SV-1: ktests 057's suspend in each
 # runtime, and 057 itself; D5 = the time of its powershell call per env;
-# D6 = 057 and the ktests gate with SV-1's uncommitted fix applied).
+# D6 = 057 and the ktests gate with SV-1's uncommitted fix applied;
+# D7 = L5.4-13 macOS: lsof output of a pipe's two ends and of a cwd, the 052
+# sampler's pace, ktests 045 and 052 run directly, optionally with a patch).
 # Manual only (workflow_dispatch; input `only` names the jobs to run, e.g.
 # `gh workflow run diag.yml --ref main -f only=D4`); D1-D3 and D5 use no
-# checkout and no third-party action, D4/D6 the pinned actions of ci.yml
+# checkout and no third-party action, D4/D6/D7 the pinned actions of ci.yml
 # (checkout, setup-msys2); every step is `set +e` and bounded by timeout-minutes.
 name: diag
 
@@ -12,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6)"
+        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6 D7)"
         required: false
         default: "D1 D2 D3"
 
@@ -388,4 +390,114 @@ jobs:
           timeout -k 30 1300 /usr/bin/bash ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 ktests 2>&1 | tail -n 15
           echo "gate rc=${PIPESTATUS[0]}"
           for f in "$OUT"/cells/*/log.txt "$OUT"/cells/*/rerun-*/log.txt; do [[ -f "$f" ]] && { echo "== $f"; grep -a 'FAIL' "$f" | cut -c1-600; }; done
+          true
+
+  macosproc:
+    name: D7 macos proc (${{ matrix.slug }})
+    if: contains(inputs.only, 'D7')
+    runs-on: macos-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: bsd
+            brew: bash
+            gnubin: "no"
+          - slug: gnu
+            brew: bash coreutils gnu-sed gawk findutils grep diffutils netcat socat
+            gnubin: "yes"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: brew install
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+          BREW_PKGS: ${{ matrix.brew }}
+        run: |
+          # shellcheck disable=SC2086
+          brew install $BREW_PKGS || brew install $BREW_PKGS
+
+      # L5.4-13's uncommitted ktests change (empty: none), applied to the checkout only
+      - name: D7a apply the L5.4-13 patch to ktests
+        shell: bash
+        run: |
+          base64 -d > "$RUNNER_TEMP/p.patch.gz" <<'B64'
+          B64
+          if [ -s "$RUNNER_TEMP/p.patch.gz" ]; then gzip -dc "$RUNNER_TEMP/p.patch.gz" | git -C ktests apply -v; fi
+          git -C ktests status --short
+
+      # lsof: a pipe's two ends (a pipeline of two bash children) and a cwd
+      - name: D7b lsof of a pipe and a cwd (read-only)
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set +e
+          b="$(brew --prefix)/bin/bash"
+          T="$RUNNER_TEMP/d7"; mkdir -p "$T/a b"
+          command -v lsof; ls -l /usr/sbin/lsof; lsof -v 2>&1 | head -5
+          "$b" -c 'bash -c "echo \$\$ > $1/w; exec sleep 20" | bash -c "echo \$\$ > $1/r; exec sleep 20" & sleep 1; read -r w < $1/w; read -r r < $1/r; echo "writer=$w reader=$r"
+            echo "== table"; lsof -a -p "$w,$r" -d 0-2
+            echo "== -F (default fields)"; lsof -a -p "$w,$r" -d 0-2 -F
+            echo "== -F ftdn, one call per process, fd 1 of the writer, fd 0 of the reader"
+            t0=$EPOCHREALTIME; lsof -a -p "$w" -d 1 -F ftdn; echo "rc=$? ms=$(( (${EPOCHREALTIME/./} - ${t0/./}) / 1000 ))"
+            t0=$EPOCHREALTIME; lsof -a -p "$r" -d 0 -F ftdn; echo "rc=$? ms=$(( (${EPOCHREALTIME/./} - ${t0/./}) / 1000 ))"
+            echo "== -F ftdn, all fds of the writer"; lsof -a -p "$w" -F ftdn
+            echo "== a gone pid"; lsof -a -p 999999 -d 0 -F ftdn; echo "rc=$?"
+            kill "$w" "$r"; wait' _ "$T"
+          echo "== cwd"
+          ( cd "$T/a b" && exec sleep 20 ) & p=$!; sleep 1
+          lsof -a -p "$p" -d cwd; lsof -a -p "$p" -d cwd -Fn; echo "rc=$?"
+          t0=$(date +%s); for i in 1 2 3 4 5 6 7 8 9 10; do lsof -a -p "$p" -d cwd -Fn >/dev/null; done; echo "10 cwd calls: $(( $(date +%s) - t0 )) s"
+          kill "$p"; wait
+          echo "== this shell, -d cwd,0-2 -F"; lsof -a -p $$ -d cwd,0-2 -F
+          true
+
+      # 052's sampler: what one kt_proc_snapshot costs (ps, python3 sids) in the env 052 gives it
+      - name: D7c 052 sampler pace (read-only)
+        timeout-minutes: 3
+        shell: bash
+        env:
+          GNUBIN: ${{ matrix.gnubin }}
+        run: |
+          set +e
+          b="$(brew --prefix)/bin/bash"
+          if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
+          cat > "$RUNNER_TEMP/pace.sh" <<'PACE'
+          source "$1"
+          ms() { local t=${EPOCHREALTIME/[.,]/}; REPLY=$(( t / 1000 )); }
+          kt_proc_init; echo "backend=$KT_PROC_BACKEND sidsrc=$KT_PROC_SIDSRC py=[${_KTP_PY[*]}] python3=$(type -P python3) psargs=[${_KTP_PSARGS[*]}]"
+          "${_KTP_PY[0]:-python3}" --version 2>&1
+          kt_proc_snapshot; echo "processes=${#KT_PROC_PP[@]}"
+          ms; t0=$REPLY; for i in 1 2 3 4 5 6 7 8 9 10; do kt_proc_snapshot; done; ms; echo "10 snapshots: $(( REPLY - t0 )) ms"
+          ms; t0=$REPLY; for i in 1 2 3 4 5 6 7 8 9 10; do o="$(TZ=UTC0 LC_ALL=C exec ps "${_KTP_PSARGS[@]}" 2>/dev/null)"; done; ms; echo "10 ps: $(( REPLY - t0 )) ms"
+          ms; t0=$REPLY; for i in 1 2 3 4 5 6 7 8 9 10; do _kt_proc_pysid "${!KT_PROC_PP[@]}"; done; ms; echo "10 pysid: $(( REPLY - t0 )) ms"
+          ms; t0=$REPLY; for i in 1 2 3 4 5 6 7 8 9 10; do o="$("${_KTP_PY[@]}" -c 'pass' </dev/null)"; done; ms; echo "10 bare python3 ${_KTP_PY[*]}: $(( REPLY - t0 )) ms"
+          ms; t0=$REPLY; for i in 1 2 3 4 5 6 7 8 9 10; do o="$(exec /usr/bin/python3 -I -S -c 'pass' </dev/null)"; done; ms; echo "10 bare /usr/bin/python3 -I -S: $(( REPLY - t0 )) ms"
+          PACE
+          echo "== as 052 runs it (env -i PATH=brew-bin:PATH)"
+          env -i PATH="${b%/*}:$PATH" "$b" "$RUNNER_TEMP/pace.sh" "$PWD/ktests/ktest_proc.sh"
+          echo "== PATH=$PATH"
+          ls -l "$(brew --prefix)/bin/python3" /usr/local/bin/python3 /usr/bin/python3 2>&1
+          true
+
+      - name: D7d 045 and 052 directly (brew bash, verbose)
+        timeout-minutes: 30
+        shell: bash
+        env:
+          GNUBIN: ${{ matrix.gnubin }}
+        run: |
+          set +e
+          b="$(brew --prefix)/bin/bash"
+          if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
+          for t in 045_StrayGuard 052_GateSignals 056_PlatformHarness; do
+            t0=$SECONDS
+            "$b" -c 'command -v timeout >/dev/null && exec timeout -k 10 800 "$@"; exec "$@"' _ "$b" "ktests/tests/$t.sh" -v info > "$RUNNER_TEMP/$t.log" 2>&1
+            echo "== $t rc=$? dt=$(( SECONDS - t0 ))s"
+            grep -aE 'FAIL|samples=|Total|Passed|Failed' "$RUNNER_TEMP/$t.log" | cut -c1-900
+          done
           true
