@@ -447,5 +447,6 @@ Implemented since this document was written (details: `docs/dev/launch/L2_triage
   when present, `MATH_FE_ERROR` on a failed start, the 4095-character request limit only for
   mawk dated before 20250131 (L2.7-M, M2).
 - **TPipe.stop** stops the producer's whole tree (DL13, L2.7-P).
+- **Caveat — SIGPIPE ignored by the caller** (CI runners; L5.4-10, owner OG12 a): a signal ignored when bash starts cannot be trapped or reset by it or its children; the gate resets PIPE (with INT/QUIT) for its cells, but a library caller under such a parent sees e.g. `sed: stdout: Broken pipe` and rc 2 from `tutil._crStdin` where a terminal gives 0.
 - Linux after L2.6/L2.7: Ubuntu/Debian/Fedora full gates are expected clean except
   the flakes listed in the ledger's `open`; the closing measurement is L2.8.
