@@ -359,6 +359,7 @@ jobs:
           true
 
       - name: D6c gate ktests (as ci.yml, ktests only)
+        if: matrix.slug == 'git-bash'
         timeout-minutes: 25
         shell: bash
         env:
@@ -370,6 +371,21 @@ jobs:
           OUT="$(cygpath -u "$RUNNER_TEMP")/gate-out"; mkdir -p "$OUT"
           export KT_GATE_BASHES="$(cygpath -m "$b")"
           PATH="${b%/*}:$PATH" timeout -k 30 1300 "$b" ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 ktests 2>&1 | tail -n 15
+          echo "gate rc=${PIPESTATUS[0]}"
+          for f in "$OUT"/cells/*/log.txt "$OUT"/cells/*/rerun-*/log.txt; do [[ -f "$f" ]] && { echo "== $f"; grep -a 'FAIL' "$f" | cut -c1-600; }; done
+          true
+
+      # the msys2 row's gate from the msys2 shell, as ci.yml (D6 run 41036267295 started it
+      # from Git's bash: a mixed-runtime launch, the cell hung with no test started)
+      - name: D6d gate ktests (msys2 shell, as ci.yml, ktests only)
+        if: matrix.slug == 'msys2'
+        timeout-minutes: 25
+        shell: msys2 {0}
+        run: |
+          set +e
+          OUT="$(cygpath -u "$RUNNER_TEMP")/gate-out"; mkdir -p "$OUT"
+          export KT_GATE_BASHES=/usr/bin/bash
+          timeout -k 30 1300 /usr/bin/bash ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 ktests 2>&1 | tail -n 15
           echo "gate rc=${PIPESTATUS[0]}"
           for f in "$OUT"/cells/*/log.txt "$OUT"/cells/*/rerun-*/log.txt; do [[ -f "$f" ]] && { echo "== $f"; grep -a 'FAIL' "$f" | cut -c1-600; }; done
           true
