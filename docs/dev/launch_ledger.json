@@ -577,7 +577,7 @@
         "L5.2"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "DONE 2026-10-30 (Sonnet, SV checked counts vs the TSV): docs/dev/launch/L5_failures.tsv (72 rows of R2 run 40974474908: macOS bsd 40, macOS gnu 17, ubuntu host 6, Windows 6 incl. git-bash ktests STRAY cell (900 s limit, 2 `yes` orphans, counts lost: 8890+681=9571), 4 FLAKY singles on green rows) + L5_runs.md (R0/R1/R2 __GATE__ tables, 9 clusters). 16 known (L5.0-o1 x10, L34-F1-o1 x5, L3_failures:241), 56 new. Clusters: macOS bsd lacks `timeout` (36 files); Ubuntu 26 + macOS gnu share thttpserver 002/005/006, tutil 005, ktests 051; tregex 002/011 both macOS; gate self-tests macOS (9/15 files); math 018 flaky on 4 Linux rows + macOS Broken pipe; kkore 011 both Windows rows (D: drive paths); msys2 ktests 054 (no git) + 057; L45-4-o1 (051 on 5.1) did not recur."
     },
     "L5.4": {
       "executor": "O->S",
