@@ -692,8 +692,8 @@
       "dep": [
         "L6.2"
       ],
-      "card": "draft",
-      "status": "planned"
+      "card": "scratchpad launch/L6.6/card.md",
+      "status": "DONE 2026-10-31 (Sonnet worker, SV review + fixes; kklass 18a5bc5 kcl aee0c59 kkore 147e55f ktests 812eeef): kklass/README.md created (kklass had NO README, GitHub front page empty; example run verbatim on both runtimes and by SV: Hello, World!); front-door line 'Part of kbool' under the H1 of kcl/kkore/ktests docs/kklass READMEs; 22 cross-repo relative links (404 on the standalone GitHub repos) -> absolute github.com/Keksov/<repo>/blob|tree/main URLs (escape.js: 0 left); kklass/examples 'cd lib/kklass' -> 'cd kklass' (verified), false 'demo.sh --help' sentence removed (SV); maintainer path /c/projects/kkbot/kbool -> $KBOOL_HOME in TPipe.md/TUtil.md (11 lines); kcl/README.md §3 paragraph: unit READMEs record their phase's runtimes, current matrix = CI; thttpserver/ktests tools advice tied to Git-bash 5.2 annotated. SV fixed 7 pre-existing broken links (TUtil.md anchor; ktests/docs/README.md links to MIGRATION_GUIDE/QUICK_REFERENCE, deleted in ktests b8a15cb). mdlinks on the 14 touched files 0 broken. Gate (worker) kcl kklass kkore ktests __GATE__:PASS:8:8:0:0:0:0:0:5003:5003."
     },
     "L6.7": {
       "executor": "S",
@@ -918,6 +918,7 @@
     "L58-o2": "050_GateCli failed once locally on 5.3.9 without --rerun-failed: rc=137 [kt-gate 2 94491 ...] (L5.8 --repeat 5 run grep5).",
     "L58-o3": "Critic risks of L5.8 step 5: (a) kt_proc_winkill runs up to timeout -k 2 20 per survivor serially inside TERM traps - an outer timeout/second signal can cut the stop short; (b) the '>= end + 3 s' give-up branch can reach step 5 with 0 KILL rounds after a clock jump/scan stall (cygwin only; still the run's own members); (c) winkill=[...] records an attempt, not a confirmed kill; (d) KT_GATE_S_NOWINKILL does not reach nested ktests.sh.",
     "L60-o1": "kcl READMEs/docs still say 'bash 5.2.37 / 5.3.9' in many places (stale since the 2026-10-26 runtime change to Git-bash 5.3.15 / MSYS2 5.3.9); L6.0 fixed only the lines it touched -> L6.6 stale-paths sweep.",
-    "L60-o2": "ktests 042_KilledRunCleanup failed on the kcl CI msys2 row (run 41122457081, after its rerun): 'results seen rc=1; after kill [kt_iso.46102] (want kt_iso.<pid> only), after next run [kt_iso.46102]' - intermittent harness flake, unrelated to L6.0; watch for recurrence."
+    "L60-o2": "ktests 042_KilledRunCleanup failed on the kcl CI msys2 row (run 41122457081, after its rerun): 'results seen rc=1; after kill [kt_iso.46102] (want kt_iso.<pid> only), after next run [kt_iso.46102]' - intermittent harness flake, unrelated to L6.0; watch for recurrence.",
+    "L66-o1": "ktests/docs/README.md still carries legacy 'Migration' / 'Benefits' prose from an older era (copy-template migration, '130+ existing tests'); not wrong links any more, but stale for a fresh reader -> L6.8 fresh-reader critic to judge."
   }
 }
