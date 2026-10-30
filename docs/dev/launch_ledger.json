@@ -628,8 +628,8 @@
         "L2.7-H",
         "L5.5"
       ],
-      "card": "kcl/tutil/HELPERS_PLAN.md s3",
-      "status": "planned"
+      "card": "scratchpad launch/L6.0/card.md",
+      "status": "DONE 2026-10-30 (Sonnet worker, SV review; kcl 59574f3): TGrep var quiet (-q, last flag before -e), static contains TEXT PATH... (rc only: -F -r -q; tool error = rc 1 + mapRc line, D4), static countMatching TEXT PATH... (RESULT via the count sink, -F -r -h; a matching binary file = one record, pinned), TFind static quoteGlob TEXT (escapes backslash, *, ?, [). Measured: GNU grep -q exits 0 on a match even when another operand failed (both orders); miss + failed operand = raw 2 -> rc 1. Tests: tgrep 253, tfind 261, tutil 235 on both runtimes; quoteGlob backslash names SKIP on NTFS (2 cases, Linux/macOS/FreeBSD CI covers). Gates: worker __GATE__:PASS:8:8:0:0:0:0:0:1862:1862 (tgrep tfind tutil kcl); SV after the kcl/README.md row edits __GATE__:PASS:2:2:0:0:0:0:0:364:364 (kcl). SV smoke: $(countMatching) prints once. No critic (small Sonnet task, my review + live smoke)."
     },
     "L6.1": {
       "executor": "S",
@@ -701,8 +701,8 @@
       "dep": [
         "L6.2"
       ],
-      "card": "draft",
-      "status": "planned"
+      "card": "scratchpad launch/L6.7/card.md",
+      "status": "DONE 2026-10-30 (Sonnet worker, SV review): CHANGELOG.md drafts in all five repos, one 'Unreleased - first public release (draft)' section grouped by phase, newest first; root links the four component changelogs; marked 'Draft (launch L6.7): reviewed before the first release (L8)'. Root 8772353 (submodule CHANGELOGs in the same bump). Final review at L8."
     },
     "L6.8": {
       "executor": "O",
@@ -916,6 +916,7 @@
     "L57-o1": "SECURITY.md names no private reporting channel (owner: add e.g. GitHub private vulnerability reporting); ktests/docs/START_HERE.md stale for outside readers (emoji, missing lib/, QUICK_REFERENCE.md, MIGRATION_GUIDE.md); root README links into submodule folders may 404 on github.com (gitlinks) - check in L6.5.",
     "L58-o1": "The Git-runtime wedge itself: under load the threaded runner's FIFO opens (kt_runner_group_open exec {fd}<>fifo; kt_runner_group_watchdog exec {r}<fifo) hang spinning; nested runs then time out (048 rc=124, 053/054 rc=124/137 in D10, 044 'cleanups done 0 of 0') and the gate's own cell wedges (C14). Avoiding FIFO opens on cygwin = design decision (SV/owner).",
     "L58-o2": "050_GateCli failed once locally on 5.3.9 without --rerun-failed: rc=137 [kt-gate 2 94491 ...] (L5.8 --repeat 5 run grep5).",
-    "L58-o3": "Critic risks of L5.8 step 5: (a) kt_proc_winkill runs up to timeout -k 2 20 per survivor serially inside TERM traps - an outer timeout/second signal can cut the stop short; (b) the '>= end + 3 s' give-up branch can reach step 5 with 0 KILL rounds after a clock jump/scan stall (cygwin only; still the run's own members); (c) winkill=[...] records an attempt, not a confirmed kill; (d) KT_GATE_S_NOWINKILL does not reach nested ktests.sh."
+    "L58-o3": "Critic risks of L5.8 step 5: (a) kt_proc_winkill runs up to timeout -k 2 20 per survivor serially inside TERM traps - an outer timeout/second signal can cut the stop short; (b) the '>= end + 3 s' give-up branch can reach step 5 with 0 KILL rounds after a clock jump/scan stall (cygwin only; still the run's own members); (c) winkill=[...] records an attempt, not a confirmed kill; (d) KT_GATE_S_NOWINKILL does not reach nested ktests.sh.",
+    "L60-o1": "kcl READMEs/docs still say 'bash 5.2.37 / 5.3.9' in many places (stale since the 2026-10-26 runtime change to Git-bash 5.3.15 / MSYS2 5.3.9); L6.0 fixed only the lines it touched -> L6.6 stale-paths sweep."
   }
 }
