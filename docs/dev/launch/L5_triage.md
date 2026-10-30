@@ -800,3 +800,24 @@ variables, ERE word boundaries, `timeout` names.
 
 D1 answers OG13's precondition and confirms C2/C3/C5/C6 on macOS; D2 confirms C2/C3 on Ubuntu 26 and
 the `env` of OG12 (a); D3 decides SV-1. No other mechanism needs a CI run.
+
+## 7. Diagnostic results (SV, 2026-10-30, `diag.yml` run 40982440264)
+
+* **D2 ubuntu host** (Ubuntu 26.04.1, image ubuntu26/20261025.179): step shell `SigIgn:
+  0000000000001004` (SIGPIPE + SIGQUIT ignored), a child bash prints `trap -- '' SIGPIPE`; inherited
+  fds `142`, `145` (pipes) besides 0-2 and 255 — **C2 and C3 confirmed**. `env` is uutils 0.10.0
+  (`/usr/lib/cargo/bin/coreutils/env`); `env --default-signal=INT,QUIT,PIPE bash -c …` → child
+  `SigIgn: 0000000000000004`, `trap -- ': x' SIGPIPE`, rc 0 — OG12 (a) works there.
+* **D1 macOS** (macOS 26.6.2 arm64, both rows): SIGPIPE ignored in a child (`trap -- '' SIGPIPE`
+  survives `trap ": x" PIPE`) — **C2 confirmed**; a child bash's fds `0 1 2 131 142/140 143 146` —
+  **C3 confirmed**. `ps -o sid` → `keyword not found`; `ps -o sess`/`tsess` → `0` for every process
+  (also after `POSIX::setsid`) — useless; `python3 os.getsid` works (`getsid self 1 parent 1 pid1 1`:
+  the runner's processes sit in launchd's session) — a real session id source for OG13 (a), one
+  python3 fork per snapshot. Locale: `LANG`, `LC_ALL`, `LC_CTYPE` all `en_US.UTF-8`. ERE in
+  `[[ =~ ]]`: `\<foo\>` rc 1 (no match, not an error), `\bfoo\b` rc 1, `[[:<:]]foo[[:>:]]` rc 0.
+  `timeout`: gnu row `/opt/homebrew/bin/timeout` and `/opt/homebrew/bin/gtimeout` (brew coreutils
+  9.12 installs `timeout` unprefixed: macOS has no `timeout`); bsd row neither (no preinstalled
+  gtimeout) — under OG11 (c) the bsd row SKIPs the `timeout` cases.
+* **D3 windows** (Windows Server 2025): `NtSuspendProcess=0`, threads `Wait/Suspended`, `kill -KILL`
+  → `deaf=yes`: the suspend works on windows-latest, so 057's `deaf=no` in CI is a harness finding
+  (SV-1 → O card), not a missing API.
