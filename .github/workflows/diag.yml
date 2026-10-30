@@ -1,9 +1,10 @@
 # Read-only diagnostics of launch L5.4 (docs/dev/launch/L5_triage.md §6: D1 macOS,
 # D2 ubuntu host, D3 windows; D4 windows = SV-1: ktests 057's suspend in each
-# runtime, and 057 itself; D5 = the time of its powershell call per env).
+# runtime, and 057 itself; D5 = the time of its powershell call per env;
+# D6 = 057 and the ktests gate with SV-1's uncommitted fix applied).
 # Manual only (workflow_dispatch; input `only` names the jobs to run, e.g.
 # `gh workflow run diag.yml --ref main -f only=D4`); D1-D3 and D5 use no
-# checkout and no third-party action, D4 the pinned actions of ci.yml
+# checkout and no third-party action, D4/D6 the pinned actions of ci.yml
 # (checkout, setup-msys2); every step is `set +e` and bounded by timeout-minutes.
 name: diag
 
@@ -11,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "jobs to run (space separated: D1 D2 D3 D4 D5)"
+        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6)"
         required: false
         default: "D1 D2 D3"
 
@@ -245,4 +246,130 @@ jobs:
           done
           echo "==== m64 full env vs git full env (names only, sorted diff)"
           diff <(PATH="${G%/*}:$PATH" "$G" -c 'env | cut -d= -f1 | sort') <(PATH="${M%/*}:$PATH" "$M" -c 'env | cut -d= -f1 | sort')
+          true
+
+  windows057fix:
+    name: D6 windows 057 fixed (${{ matrix.slug }})
+    if: contains(inputs.only, 'D6')
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: git-bash
+          - slug: msys2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: MSYS2 (msys2 row)
+        if: matrix.slug == 'msys2'
+        id: m2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MSYS
+          update: false
+          path-type: minimal
+          install: git gnu-netcat gawk diffutils findutils grep sed curl openssl perl util-linux
+
+      # SV-1's uncommitted fix (057 + its fixtures deaf/deafjob: .NET calls instead of
+      # cmdlets; 051 budget; 042/044 failure detail), applied to the checkout only
+      - name: D6a apply the SV-1 patch to ktests
+        shell: bash
+        run: |
+          base64 -d > "$RUNNER_TEMP/sv1.patch.gz" <<'B64'
+          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
+          B64
+          gzip -dc "$RUNNER_TEMP/sv1.patch.gz" | git -C ktests apply -v
+          git -C ktests status --short
+
+      - name: D6b 057 directly (row bash, verbose)
+        timeout-minutes: 12
+        shell: bash
+        env:
+          M2LOC: ${{ steps.m2.outputs.msys2-location }}
+        run: |
+          set +e
+          unset MSYSTEM
+          if [[ -n "$M2LOC" ]]; then b="$(cygpath -u "$M2LOC")/usr/bin/bash.exe"; else b="/c/Program Files/Git/usr/bin/bash.exe"; fi
+          echo "row bash: $b"
+          t0=$SECONDS
+          PATH="${b%/*}:$PATH" timeout -k 10 600 "$b" ktests/tests/057_GateDeafStop.sh -v info 2>&1 | grep -aE 'PASS|FAIL|Total|Passed|Failed'
+          echo "057 rc=${PIPESTATUS[0]} dt=$(( SECONDS - t0 ))s"
+          true
+
+      - name: D6c gate ktests (as ci.yml, ktests only)
+        timeout-minutes: 25
+        shell: bash
+        env:
+          M2LOC: ${{ steps.m2.outputs.msys2-location }}
+        run: |
+          set +e
+          unset MSYSTEM
+          if [[ -n "$M2LOC" ]]; then b="$(cygpath -u "$M2LOC")/usr/bin/bash.exe"; else b="/c/Program Files/Git/usr/bin/bash.exe"; fi
+          OUT="$(cygpath -u "$RUNNER_TEMP")/gate-out"; mkdir -p "$OUT"
+          export KT_GATE_BASHES="$(cygpath -m "$b")"
+          PATH="${b%/*}:$PATH" timeout -k 30 1300 "$b" ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 ktests 2>&1 | tail -n 15
+          echo "gate rc=${PIPESTATUS[0]}"
+          for f in "$OUT"/cells/*/log.txt "$OUT"/cells/*/rerun-*/log.txt; do [[ -f "$f" ]] && { echo "== $f"; grep -a 'FAIL' "$f" | cut -c1-600; }; done
           true
