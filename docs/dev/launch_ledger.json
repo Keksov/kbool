@@ -599,7 +599,7 @@
         "L5.4"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-10-30 (SV): CI badge in README.md (ff1811d) + tested-versions sentence (bash 5.1/5.2/5.3 on Linux, FreeBSD, macOS, Windows); repos are public, push to main per owner."
     },
     "L5.6": {
       "executor": "S",
@@ -608,7 +608,7 @@
         "L5.5"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "IN PROGRESS 2026-10-30 (Opus worker, then SV): kbool ci.yml reusable via workflow_call (component, component_ref; checkout Keksov/kbool main + the component at the caller's ref; concurrency per repository) 9e894d7 - kbool run 41061878884 all 13 green; kcl thin ci.yml 6306e33 - run 41064473960: component replacement works on all 13 rows, 4 rows red on kkore 015 (sample checked `$KBOOL_HOME | grep -c kbool`: the workspace is .../kcl/kcl) -> kkore 015 fixed (path-independent). kklass/kkore/ktests thin workflows next."
     },
     "L5.7": {
       "executor": "O",
