@@ -33,7 +33,8 @@
     "OG11": "2026-10-30 owner: (c) tests resolve timeout, else gtimeout, else SKIP with a reason (KT_TIMEOUT / kt_need_timeout); harness name checks accept gtimeout (L5_triage.md §2)",
     "OG12": "2026-10-30 owner: (a) the gate starts every cell with SIGPIPE at its default (env --default-signal / perl), like INT/QUIT; PORTING caveat for callers that ignore SIGPIPE (L5_triage.md §3)",
     "OG14": "2026-10-30 owner: (b) TRegEx translates < > \b to the spelling the C library accepts, probed once per process (not the recommended N/A option) (L5_triage.md §3)",
-    "OG13": "2026-10-30 owner: (a) on Darwin ktests takes the session id from python3 os.getsid (one python3 fork per snapshot; diag D1: ps has no sid, sess is 0); without python3 the current weaker no-sid rules stay (L5_triage.md §3, §7)"
+    "OG13": "2026-10-30 owner: (a) on Darwin ktests takes the session id from python3 os.getsid (one python3 fork per snapshot; diag D1: ps has no sid, sess is 0); without python3 the current weaker no-sid rules stay (L5_triage.md §3, §7)",
+    "OG15": "2026-10-30 owner: default branch of kcl/kklass/ktests switched to main by SV via gh api; GitHub protection settings applied by the owner from an English checklist."
   },
   "pending_owner_decisions": {
     "OG1": {
@@ -617,7 +618,7 @@
         "L5.6"
       ],
       "card": null,
-      "status": "DONE 2026-10-30 (Opus, SV review): CONTRIBUTING.md canonical in kbool (149 lines: one test command, suites, CI 13 rows + submodule PRs, verdict table from gate/verdict.sh, house rules, DL4 sentence) + short ones in kcl/kklass/kkore/ktests; README link; kklass book requirements -> bash 5.1 floor. OWNER PART pending: scratchpad launch/L5.7/owner_settings.md (step 0: default branch master->main in kcl/kklass/ktests; step 1: ruleset on main with required checks + admin bypass; step 2: approval for first-time contributors)."
+      "status": "DONE 2026-10-30 (Opus, SV review): CONTRIBUTING.md canonical in kbool (149 lines: one test command, suites, CI 13 rows + submodule PRs, verdict table from gate/verdict.sh, house rules, DL4 sentence) + short ones in kcl/kklass/kkore/ktests; README link; kklass book requirements -> bash 5.1 floor. OWNER PART pending: scratchpad launch/L5.7/owner_settings.md (step 0: default branch master->main in kcl/kklass/ktests; step 1: ruleset on main with required checks + admin bypass; step 2: approval for first-time contributors). Owner 2026-10-30: default branch -> main done by SV via gh api (kcl, kklass, ktests; all five repos now default to main; master kept); the owner applies the ruleset + first-time-contributor approval himself from an ENGLISH checklist (scratchpad launch/L5.7/owner_settings_en.md)."
     },
     "L6.0": {
       "executor": "S",
