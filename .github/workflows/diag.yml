@@ -427,6 +427,68 @@ jobs:
         shell: bash
         run: |
           base64 -d > "$RUNNER_TEMP/p.patch.gz" <<'B64'
+          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
+          PvDoyjQPDor0uBIzrRIs6B5hBNP8vdApwYTSSt8rqenxo7wWF4jiee7ijFaGp1POeXGhqUoOPcmAmPuSOi1c+uPTo+x0s3D5r1Gq
+          /eiyTGTduZW8PorzfTJ2mrO4LSoPmzfkRco0iCeFkKlQnL4RVV95n1JNquOH3yfHZP4MDd8TSrC5OZGV6qRiWvnUqW5uphnl9Odp
+          ikub4ny6iZjh7h/+jGs5oe/KyVFJ+ojJ4cfDk4smfv3bl8MLcG48P1zYuQz0TaSOsAholWSAasSqvDsR8cnSOpteQGm23JLZtN0X
+          s06jIWZD0+wt3b5enpO36UWrtGmd6iPySx7IywHXEfJePJN/Jz3bDIUib20aJE6L7jZjkiSP+6OYEtPEY1ZC8Zsj5nDQqTZWi2rf
+          xONlOQiuao/PXF2TjdefLybXe8f7VIrbUp+Ty2SF5udkJ8o3JoO/Fg76iejiGmZAtyu1wi3MtCl/CTM5Q6We7L4Rc3o10hfH4JRQ
+          2enhT3YDwrwVVC+6Rbd0c7taKMmMZyu7eP2n0kuueBP6q8Wy42tHVySlf2b6WFLHj+loRew/rrGkwLH8ako5UEDDr0QdCugFRayi
+          iUlzCTdhNy2dWJFs4/KpUvo/9uErjekwAAA=
           B64
           if [ -s "$RUNNER_TEMP/p.patch.gz" ]; then gzip -dc "$RUNNER_TEMP/p.patch.gz" | git -C ktests apply -v; fi
           git -C ktests status --short
@@ -498,6 +560,23 @@ jobs:
             t0=$SECONDS
             "$b" -c 'command -v timeout >/dev/null && exec timeout -k 10 800 "$@"; exec "$@"' _ "$b" "ktests/tests/$t.sh" -v info > "$RUNNER_TEMP/$t.log" 2>&1
             echo "== $t rc=$? dt=$(( SECONDS - t0 ))s"
-            grep -aE 'FAIL|samples=|Total|Passed|Failed' "$RUNNER_TEMP/$t.log" | cut -c1-900
+            grep -aE 'FAIL|samples=|SKIP|skipped|lsof parsers|marker caller|Total|Passed|Failed' "$RUNNER_TEMP/$t.log" | cut -c1-900
           done
+          true
+
+      # the ktests suite through the gate, as ci.yml's macOS rows run it (045/052 in a gate cell)
+      - name: D7e gate ktests (as ci.yml, ktests only)
+        timeout-minutes: 25
+        shell: bash
+        env:
+          GNUBIN: ${{ matrix.gnubin }}
+        run: |
+          set +e
+          out="$RUNNER_TEMP/gate-out"; mkdir -p "$out"
+          brewbash="$(brew --prefix)/bin/bash"
+          export KT_GATE_BASHES="$brewbash"
+          if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
+          "$brewbash" ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 ktests 2>&1 | tail -n 15
+          echo "gate rc=${PIPESTATUS[0]}"
+          for f in "$out"/cells/*/log.txt "$out"/cells/*/rerun-*/log.txt; do [ -f "$f" ] && { echo "== $f"; grep -a 'FAIL' "$f" | cut -c1-900; }; done
           true
