@@ -1,8 +1,9 @@
 # Read-only diagnostics of launch L5.4 (docs/dev/launch/L5_triage.md §6: D1 macOS,
 # D2 ubuntu host, D3 windows; D4 windows = SV-1: ktests 057's suspend in each
-# runtime, and 057 itself). Manual only (workflow_dispatch; input `only` names
-# the jobs to run, e.g. `gh workflow run diag.yml --ref main -f only=D4`); D1-D3
-# use no checkout and no third-party action, D4 the pinned actions of ci.yml
+# runtime, and 057 itself; D5 = the time of its powershell call per env).
+# Manual only (workflow_dispatch; input `only` names the jobs to run, e.g.
+# `gh workflow run diag.yml --ref main -f only=D4`); D1-D3 and D5 use no
+# checkout and no third-party action, D4 the pinned actions of ci.yml
 # (checkout, setup-msys2); every step is `set +e` and bounded by timeout-minutes.
 name: diag
 
@@ -10,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "jobs to run (space separated: D1 D2 D3 D4)"
+        description: "jobs to run (space separated: D1 D2 D3 D4 D5)"
         required: false
         default: "D1 D2 D3"
 
@@ -195,4 +196,53 @@ jobs:
           echo "row bash: $b"
           PATH="${b%/*}:$PATH" timeout -k 10 500 "$b" ktests/tests/057_GateDeafStop.sh 2>&1
           echo "057 rc=$?"
+          true
+
+  windows057ps:
+    name: D5 windows powershell timing (git-bash)
+    if: contains(inputs.only, 'D5')
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      # 057's suspend = powershell + Add-Type; D4 (run 41032204154): 0-6 s from Git's
+      # bash with the step's env, ~20 s from C:\msys64's bash, 36 s under env -i.
+      # Which part is slow (start-up, Get-Process, Add-Type), in which env?
+      - name: D5 powershell timing per env
+        timeout-minutes: 25
+        shell: bash
+        run: |
+          set +e
+          unset MSYSTEM
+          T="$(cygpath -u "$RUNNER_TEMP")/d5"; mkdir -p "$T/tmp" "$T/home" "$T/etc"
+          cat > "$T/pst.sh" <<'PST'
+          # pst.sh LABEL — time one powershell call of 057's shape (TEMP/TMP of its own)
+          ps="$(cygpath -u "${SYSTEMROOT:-C:\Windows}")/System32/WindowsPowerShell/v1.0/powershell.exe"
+          cw="$(cygpath -w "$D5T/tmp")"
+          t0=${EPOCHREALTIME/[.,]/}
+          MSYS2_ARG_CONV_EXCL='*' TEMP="$cw" TMP="$cw" timeout -k 5 120 "$ps" -NoProfile -NonInteractive -Command "\$sw=[Diagnostics.Stopwatch]::StartNew(); 'startup_ms=' + [int]([DateTime]::Now - [Diagnostics.Process]::GetCurrentProcess().StartTime).TotalMilliseconds; \$a=\$sw.ElapsedMilliseconds; \$p=Get-Process -Id \$PID; 'getprocess_ms=' + (\$sw.ElapsedMilliseconds-\$a); \$a=\$sw.ElapsedMilliseconds; Add-Type -Name N -Namespace W -MemberDefinition '[DllImport(\"ntdll.dll\")] public static extern int NtSuspendProcess(IntPtr h);'; 'addtype_ms=' + (\$sw.ElapsedMilliseconds-\$a); \$a=\$sw.ElapsedMilliseconds; \$null=[Diagnostics.Process]::Start((New-Object Diagnostics.ProcessStartInfo -Property @{FileName='cmd.exe'; Arguments='/c exit'; WindowStyle='Hidden'; UseShellExecute=\$false})); 'dotnetstart_ms=' + (\$sw.ElapsedMilliseconds-\$a); 'PSModulePath=' + \$env:PSModulePath; 'LocalAppData=' + [Environment]::GetFolderPath('LocalApplicationData'); 'USERPROFILE=' + \$env:USERPROFILE" </dev/null 2>&1 | tr -d '\r' | tr '\n' ' '
+          echo "| rc=${PIPESTATUS[0]} wall_ms=$(( (${EPOCHREALTIME/[.,]/} - t0) / 1000 )) [$1] runtime=$(uname -r)"
+          PST
+          G="/c/Program Files/Git/usr/bin/bash.exe" M=/c/msys64/usr/bin/bash.exe
+          w() { cygpath -w "$1"; }
+          cell=( "SYSTEMROOT=$SYSTEMROOT" "WINDIR=$WINDIR" "D5T=$T" "HOME=$T/home" "TMPDIR=$T/tmp" "TMP=$T/tmp" "TEMP=$T/tmp" "USERPROFILE=$T/home" "ProgramData=$T/etc" )
+          echo "LOCALAPPDATA=$LOCALAPPDATA APPDATA=$APPDATA USERPROFILE=$USERPROFILE ProgramData=$PROGRAMDATA ProgramFiles=$PROGRAMFILES"
+          echo "PSModulePath=$PSModulePath"
+          export D5T="$T"
+          for r in 1 2; do
+            echo "==== round $r"
+            PATH="${G%/*}:$PATH" "$G" "$T/pst.sh" git-full
+            PATH="${M%/*}:$PATH" "$M" "$T/pst.sh" m64-full
+            env -i "PATH=${G%/*}:$PATH" "${cell[@]}" "$G" "$T/pst.sh" git-cell
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "$M" "$T/pst.sh" m64-cell
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "LOCALAPPDATA=$LOCALAPPDATA" "APPDATA=$APPDATA" "$M" "$T/pst.sh" m64-cell+LOCALAPPDATA,APPDATA
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "USERPROFILE=$USERPROFILE" "$M" "$T/pst.sh" m64-cell+USERPROFILE
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "ProgramData=$PROGRAMDATA" "$M" "$T/pst.sh" m64-cell+ProgramData
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "ProgramFiles=$PROGRAMFILES" "$M" "$T/pst.sh" m64-cell+ProgramFiles
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "PSModulePath=$(w "$SYSTEMROOT")\System32\WindowsPowerShell\v1.0\Modules" "$M" "$T/pst.sh" m64-cell+PSModulePath=System32
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "PSModulePath=$PSModulePath" "$M" "$T/pst.sh" m64-cell+PSModulePath=step
+            env -i "PATH=${M%/*}:$PATH" "${cell[@]}" "LOCALAPPDATA=$LOCALAPPDATA" "APPDATA=$APPDATA" "USERPROFILE=$USERPROFILE" "ProgramData=$PROGRAMDATA" "ProgramFiles=$PROGRAMFILES" "$M" "$T/pst.sh" m64-cell+all5
+            env -i "PATH=${G%/*}:$PATH" "${cell[@]}" "LOCALAPPDATA=$LOCALAPPDATA" "APPDATA=$APPDATA" "USERPROFILE=$USERPROFILE" "ProgramData=$PROGRAMDATA" "ProgramFiles=$PROGRAMFILES" "$G" "$T/pst.sh" git-cell+all5
+          done
+          echo "==== m64 full env vs git full env (names only, sorted diff)"
+          diff <(PATH="${G%/*}:$PATH" "$G" -c 'env | cut -d= -f1 | sort') <(PATH="${M%/*}:$PATH" "$M" -c 'env | cut -d= -f1 | sort')
           true
