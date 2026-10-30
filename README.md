@@ -1,8 +1,11 @@
 # kbool
 
+[![ci](https://github.com/Keksov/kbool/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Keksov/kbool/actions/workflows/ci.yml)
+
 kbool is a Free Pascal–flavoured toolkit for bash: a unit system with `uses`,
 an object system with classes and dot notation, and ports of Free Pascal
-RTL/FCL classes. Pure bash (5.2 and 5.3 are tested), fork-free on its hot paths.
+RTL/FCL classes. Pure bash (5.1, 5.2 and 5.3 are tested on Linux, FreeBSD,
+macOS and Windows), fork-free on its hot paths.
 
 | folder | what it is | read |
 |---|---|---|
