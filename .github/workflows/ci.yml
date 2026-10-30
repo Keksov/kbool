@@ -14,6 +14,12 @@
 # green with a warning when the gate printed its __GATE__ line (DL11); FAIL, TIMEOUT,
 # STRAY, CRASH, usage errors, a platform setup failure (exit 5) and ENV/FLAKY without a
 # __GATE__ line are red.
+# Reusable (launch L5.6): kcl, kklass, kkore and ktests call this workflow through
+# workflow_call with `component` (the calling repo's name) and `component_ref` (its ref
+# under test). Then every job checks out Keksov/kbool main with all submodules at kbool's
+# pointers and replaces the `component` submodule by Keksov/<component> at component_ref
+# (step "component checkout"; its commit is in the step summary). With `component` empty
+# (kbool's own push / pull_request / workflow_dispatch) nothing changes.
 name: ci
 
 on:
@@ -23,12 +29,24 @@ on:
     paths-ignore: ['.github/workflows/diag.yml']
   pull_request:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      component:
+        description: "the calling submodule repo: kcl | kklass | kkore | ktests (empty: kbool itself)"
+        type: string
+        default: ""
+      component_ref:
+        description: "the ref of Keksov/<component> under test (the caller's github.ref)"
+        type: string
+        default: ""
 
 permissions:
   contents: read
 
+# in a called run `github` is the caller's context: the repository keeps this group apart
+# from the caller's own group (ci-<ref>) and from other callers
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -64,8 +82,37 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.component != '' && 'Keksov/kbool' || github.repository }}
+          ref: ${{ inputs.component != '' && 'main' || '' }}
           submodules: recursive
           persist-credentials: false
+
+      # called from a submodule repo (L5.6): that submodule at the commit under test
+      - name: component checkout
+        if: inputs.component != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Keksov/${{ inputs.component }}
+          ref: ${{ inputs.component_ref }}
+          path: ${{ inputs.component }}
+          persist-credentials: false
+
+      - name: component summary
+        if: inputs.component != ''
+        shell: bash
+        env:
+          COMPONENT: ${{ inputs.component }}
+          COMPONENT_REF: ${{ inputs.component_ref }}
+        run: |
+          {
+            echo "### component under test: $COMPONENT ($COMPONENT_REF)"
+            echo '```'
+            echo "kbool: $(git log -1 --oneline)"
+            echo "$COMPONENT: $(git -C "$COMPONENT" log -1 --oneline)"
+            echo "git submodule status (+ = not at kbool's pointer):"
+            git submodule status || echo "(git submodule status: rc $?)"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: tools (ubuntu host)
         if: matrix.image == ''
@@ -135,8 +182,37 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.component != '' && 'Keksov/kbool' || github.repository }}
+          ref: ${{ inputs.component != '' && 'main' || '' }}
           submodules: recursive
           persist-credentials: false
+
+      # called from a submodule repo (L5.6): that submodule at the commit under test
+      - name: component checkout
+        if: inputs.component != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Keksov/${{ inputs.component }}
+          ref: ${{ inputs.component_ref }}
+          path: ${{ inputs.component }}
+          persist-credentials: false
+
+      - name: component summary
+        if: inputs.component != ''
+        shell: bash
+        env:
+          COMPONENT: ${{ inputs.component }}
+          COMPONENT_REF: ${{ inputs.component_ref }}
+        run: |
+          {
+            echo "### component under test: $COMPONENT ($COMPONENT_REF)"
+            echo '```'
+            echo "kbool: $(git log -1 --oneline)"
+            echo "$COMPONENT: $(git -C "$COMPONENT" log -1 --oneline)"
+            echo "git submodule status (+ = not at kbool's pointer):"
+            git submodule status || echo "(git submodule status: rc $?)"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: brew install
         env:
@@ -235,8 +311,37 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.component != '' && 'Keksov/kbool' || github.repository }}
+          ref: ${{ inputs.component != '' && 'main' || '' }}
           submodules: recursive
           persist-credentials: false
+
+      # called from a submodule repo (L5.6): that submodule at the commit under test
+      - name: component checkout
+        if: inputs.component != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Keksov/${{ inputs.component }}
+          ref: ${{ inputs.component_ref }}
+          path: ${{ inputs.component }}
+          persist-credentials: false
+
+      - name: component summary
+        if: inputs.component != ''
+        shell: bash
+        env:
+          COMPONENT: ${{ inputs.component }}
+          COMPONENT_REF: ${{ inputs.component_ref }}
+        run: |
+          {
+            echo "### component under test: $COMPONENT ($COMPONENT_REF)"
+            echo '```'
+            echo "kbool: $(git log -1 --oneline)"
+            echo "$COMPONENT: $(git -C "$COMPONENT" log -1 --oneline)"
+            echo "git submodule status (+ = not at kbool's pointer):"
+            git submodule status || echo "(git submodule status: rc $?)"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       # The VM runs `prepare` and `run` as root with sh, in the synced workspace (usesh is
       # deprecated in v1.5.9 and ignored). `run` never fails: it leaves the gate's OUT dir and
@@ -327,8 +432,37 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: ${{ inputs.component != '' && 'Keksov/kbool' || github.repository }}
+          ref: ${{ inputs.component != '' && 'main' || '' }}
           submodules: recursive
           persist-credentials: false
+
+      # called from a submodule repo (L5.6): that submodule at the commit under test
+      - name: component checkout
+        if: inputs.component != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Keksov/${{ inputs.component }}
+          ref: ${{ inputs.component_ref }}
+          path: ${{ inputs.component }}
+          persist-credentials: false
+
+      - name: component summary
+        if: inputs.component != ''
+        shell: bash
+        env:
+          COMPONENT: ${{ inputs.component }}
+          COMPONENT_REF: ${{ inputs.component_ref }}
+        run: |
+          {
+            echo "### component under test: $COMPONENT ($COMPONENT_REF)"
+            echo '```'
+            echo "kbool: $(git log -1 --oneline)"
+            echo "$COMPONENT: $(git -C "$COMPONENT" log -1 --oneline)"
+            echo "git submodule status (+ = not at kbool's pointer):"
+            git submodule status || echo "(git submodule status: rc $?)"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       # Git for Windows' bash for both rows (the msys2 row's own shell has git too: its install: list has it).
       # core.autocrlf is not touched: every repo has `* text=auto eol=lf`.
