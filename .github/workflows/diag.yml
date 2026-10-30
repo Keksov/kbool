@@ -1,0 +1,91 @@
+# Read-only diagnostics of launch L5.4 (docs/dev/launch/L5_triage.md §6: D1 macOS,
+# D2 ubuntu host, D3 windows). Manual only (workflow_dispatch); no checkout, no
+# third-party action; every step is `set +e` and bounded by timeout-minutes.
+name: diag
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    name: D1 macos (${{ matrix.slug }})
+    runs-on: macos-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: bsd
+            brew: bash
+          - slug: gnu
+            brew: bash coreutils gnu-sed gawk findutils grep diffutils netcat socat
+    steps:
+      - name: brew install
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+          BREW_PKGS: ${{ matrix.brew }}
+        run: |
+          # shellcheck disable=SC2086
+          brew install $BREW_PKGS || brew install $BREW_PKGS
+      - name: diag L5.4 (read-only)
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set +e
+          b="$(brew --prefix)/bin/bash"
+          echo "== C2: signal dispositions a child bash inherits"
+          "$b" -c 'trap -p; trap ": x" PIPE INT QUIT; echo "after set:"; trap -p PIPE INT QUIT'
+          echo "== C3: open fds of a child bash"
+          "$b" -c 'for f in /dev/fd/*; do [[ -e $f ]] && printf "%s " "${f##*/}"; done; echo'
+          lsof -a -p $$ -d 0-99 2>/dev/null
+          echo "== C4: ps keywords (one per call)"
+          for k in sid sess tsess pgid etimes etime lstart state; do printf '%-7s ' "$k"; ps -o pid= -o "$k=" -p $$ 2>&1 | head -1; done
+          "$b" -c 'echo "self=$$ ppid=$PPID"; ps -o pid= -o pgid= -o sess= -p $$; ps -o pid= -o pgid= -o sess= -p $PPID; ( exec perl -MPOSIX -e "POSIX::setsid(); exec q(ps), q(-o), q(pid=), q(-o), q(sess=), q(-p), \$\$" )'
+          python3 -c 'import os; print("getsid self", os.getsid(0), "parent", os.getsid(os.getppid()), "pid1", os.getsid(1))'
+          echo "== C6: locale variables"
+          env | grep -E '^(LANG|LC_)' | sort
+          echo "== C5: ERE word boundaries in [[ =~ ]]"
+          "$b" -c 're="\\<foo\\>"; [[ "a foo b" =~ $re ]]; echo "\\<foo\\> rc=$?"; re="[[:<:]]foo[[:>:]]"; [[ "a foo b" =~ $re ]]; echo "[[:<:]] rc=$?"; re="\\bfoo\\b"; [[ "a foo b" =~ $re ]]; echo "\\b rc=$?"'
+          echo "== C1: timeout names"
+          for t in timeout gtimeout; do printf '%s: ' "$t"; command -v "$t" || echo "-"; done
+          ls -l "$(brew --prefix)/opt/coreutils/libexec/gnubin/timeout" 2>&1
+
+  ubuntu:
+    name: D2 ubuntu host
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: diag L5.4 (read-only, ubuntu host)
+        timeout-minutes: 3
+        run: |
+          set +e
+          grep -E '^Sig(Ign|Blk|Cgt)' /proc/$$/status
+          bash -c 'grep -E "^SigIgn" /proc/$$/status; trap ": x" PIPE; trap -p PIPE'
+          ls -l /proc/$$/fd
+          bash -c 'ls -l /proc/$$/fd'
+          readlink -f "$(command -v env)"; env --version 2>&1 | head -1
+          env --default-signal=INT,QUIT,PIPE bash -c 'grep -E "^SigIgn" /proc/$$/status; trap ": x" PIPE; trap -p PIPE'; echo "env --default-signal=INT,QUIT,PIPE rc=$?"
+
+  windows:
+    name: D3 windows
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: diag L5.4 (read-only, NtSuspendProcess)
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set +e
+          ( exec sleep 60 ) </dev/null >/dev/null 2>&1 & p=$!
+          sleep 1; w=$(cat /proc/$p/winpid); echo "pid $p winpid $w"
+          ps1="$(cygpath -u "$SYSTEMROOT")/System32/WindowsPowerShell/v1.0/powershell.exe"
+          c="$(cygpath -w "$RUNNER_TEMP")"
+          MSYS2_ARG_CONV_EXCL='*' TEMP="$c" TMP="$c" timeout -k 5 90 "$ps1" -NoProfile -NonInteractive -Command "Add-Type -Name N -Namespace W -MemberDefinition '[DllImport(\"ntdll.dll\")] public static extern int NtSuspendProcess(IntPtr h);'; \$q=Get-Process -Id $w; 'NtSuspendProcess=' + [W.N]::NtSuspendProcess(\$q.Handle); (Get-Process -Id $w).Threads | ForEach-Object { \$_.ThreadState.ToString() + '/' + \$_.WaitReason }"
+          echo "powershell rc=$?"
+          kill -KILL "$p"; sleep 1
+          kill -0 "$p" 2>/dev/null && echo "deaf=yes" || echo "deaf=no"
+          /usr/bin/kill -f -9 "$p" 2>/dev/null; wait "$p" 2>/dev/null; true
