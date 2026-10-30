@@ -998,6 +998,28 @@ jobs:
         shell: bash
         run: |
           base64 -d > "$RUNNER_TEMP/p.patch.gz" <<'B64'
+          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
           B64
           if [ -s "$RUNNER_TEMP/p.patch.gz" ]; then gzip -dc "$RUNNER_TEMP/p.patch.gz" | git -C kklass apply -v; fi
           git -C kklass status --short
@@ -1072,6 +1094,35 @@ jobs:
           D9
           echo "driver: $(wc -l < "$RUNNER_TEMP/d9.sh") lines"
 
+      # 139 S25's FIFO helper (s25src, from the patched checkout) on Darwin: a delivered text, a lone
+      # reader (the writer never opens: the watchdog's read-write open releases it, 5 tries), a stuck
+      # reader (no release: the watchdog kills the script after 30 s with its message)
+      - name: D9f the S25 FIFO watchdog on Darwin (ok, lone, stuck)
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set +e
+          b="$(brew --prefix)/bin/bash"; d="$RUNNER_TEMP/fp"; mkdir -p "$d"
+          awk '/^s25src\(\) \{/{f=1} f{print} f&&/^}$/{exit}' kklass/tests/139_ClassDeclarationSites.sh > "$d/fn.sh"
+          cat > "$d/neg.sh" <<'NEG'
+          d=$1 mode=$2
+          src=$(<"$d/fn.sh")
+          wr='printf '"'"'%s\ns25got=$?\n'"'"' "$2" > "$f"'
+          rd=': 2>/dev/null 1<>"$f"'
+          [[ $src == *"$wr"* && $src == *"$rd"* ]] || { echo "pattern miss"; exit 9; }
+          case $mode in
+            lone)  src=${src/"$wr"/exit 1} ;;
+            stuck) src=${src/"$wr"/exit 1}; src=${src/"$rd"/:} ;;
+          esac
+          eval "$src"
+          rm -f "$d/q"; mkfifo "$d/q"
+          t0=$SECONDS; s25src "$d/q" 'echo text-ran' "$d/e"; echo "mode=$mode r=$r got=[$s25got] dt=$((SECONDS-t0)) err=[$(<"$d/e")]"
+          NEG
+          for m in ok lone stuck; do
+            t0=$SECONDS; "$b" "$d/neg.sh" "$d" "$m" 2>&1; echo "  $m: rc=$? dt=$(( SECONDS - t0 ))s"
+          done
+          true
+
       - name: D9c every kklass test file directly, 3 passes (bound 180 s each)
         timeout-minutes: 45
         shell: bash
@@ -1083,7 +1134,7 @@ jobs:
           "$(brew --prefix)/bin/bash" "$RUNNER_TEMP/d9.sh" files 3 180
           true
 
-      - name: D9d the kklass suite threaded (tests.sh), 3 runs (bound 420 s each)
+      - name: D9d the kklass suite threaded (tests.sh), 5 runs (bound 420 s each)
         timeout-minutes: 25
         shell: bash
         env:
@@ -1091,7 +1142,7 @@ jobs:
         run: |
           set +e
           if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
-          "$(brew --prefix)/bin/bash" "$RUNNER_TEMP/d9.sh" suite 3 420
+          "$(brew --prefix)/bin/bash" "$RUNNER_TEMP/d9.sh" suite 5 420
           true
 
       # the kklass suite through the gate, as ci.yml's macOS rows run it (cell timeout 600 s;
