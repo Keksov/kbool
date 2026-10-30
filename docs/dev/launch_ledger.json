@@ -3,7 +3,7 @@
   "project": "kbool public launch — portability (Linux/BSD/macOS), CI, packaging, release",
   "created": "2026-10-20",
   "updated": "2026-10-30",
-  "status": "in progress — L0–L4 COMPLETE (OG2 = bash 5.1; floor gate + CI row 5.1); L5.0/L5.0b DONE (CI on push to main; red rows L5.0-o1 wait for L5.3/L5.4); next L5.1 full CI matrix",
+  "status": "in progress — L0–L4 COMPLETE (OG2 = bash 5.1); L5.0–L5.2 DONE (CI matrix of 13 rows on push to main: Linux x7, macOS x2, FreeBSD x2, Windows x2; 8 green, 5 red with real results); next L5.3 (CI failures -> L5_failures.tsv), then L5.4 triage/fixes",
   "plan": "docs/dev/LAUNCH_PLAN.md",
   "workflow": "per phase: one Opus worker -> supervisor review against the live tree -> gate on Windows bash 5.2.37 AND 5.3.9 (+ lab VMs from L1 on) -> commit (submodules first, then kbool bump; this ledger records the SHAs); hygiene block in every brief incl. no running lab VM; worker never commits or pushes",
   "decisions": {
@@ -559,7 +559,7 @@
         "L4.5"
       ],
       "card": "draft",
-      "status": "IN PROGRESS 2026-10-30: round 1 (Sonnet, card v2 after card-lint 2 BLOCKER/10 MAJOR; SV moved the macOS 3.2 guard after the gate) pushed to main: jobs linux (ubuntu host, alpine 5.1/5.2/5.3, debian:13, ubuntu:24.04, fedora:44 via .github/ci/linux.sh), macos (bsd, gnu), freebsd (vmactions 15.1 clean, gnu), windows (git-bash with KCL_NC from a private MSYS2, msys2); .github/ci/verdict.sh = one mapping (setup failure exit 5; 3|4 green only with a __GATE__ line); alpine.sh removed; actions pinned by SHA (checkout v7.0.1, upload-artifact v7.0.2, freebsd-vm v1.5.9, setup-msys2 v2.33.0). Round 1 CI run 40967544797: alpine 5.1/5.2 PASS 9534, alpine 5.3 FLAKY; macOS bsd FAIL 9301/9555 (9 cells), macOS gnu FAIL 9514/9555, Windows git-bash FAIL 9565/9571 (kkore 011, ktests 057), msys2 FAIL 9529/9550 (+1 STRAY ktests), Ubuntu host FAIL 9549/9556 (L5.0-o1); macOS 3.2 guard ok; debian/ubuntu-2404/fedora/FreeBSD x2 INTERRUPTED at cell 1 = harness bug (gate parent watch: kill -0 to a root su parent answers EPERM) -> fixed by SV in ktests gate.sh (floor gate 19112 PASS, Windows 19143 PASS); FreeBSD run script also needed set +e (vmactions runs sh -e). Round 2 pushed with both."
+      "status": "DONE 2026-10-30: round 1 (Sonnet, card v2 after card-lint 2 BLOCKER/10 MAJOR; SV moved the macOS 3.2 guard after the gate) pushed to main: jobs linux (ubuntu host, alpine 5.1/5.2/5.3, debian:13, ubuntu:24.04, fedora:44 via .github/ci/linux.sh), macos (bsd, gnu), freebsd (vmactions 15.1 clean, gnu), windows (git-bash with KCL_NC from a private MSYS2, msys2); .github/ci/verdict.sh = one mapping (setup failure exit 5; 3|4 green only with a __GATE__ line); alpine.sh removed; actions pinned by SHA (checkout v7.0.1, upload-artifact v7.0.2, freebsd-vm v1.5.9, setup-msys2 v2.33.0). Round 1 CI run 40967544797: alpine 5.1/5.2 PASS 9534, alpine 5.3 FLAKY; macOS bsd FAIL 9301/9555 (9 cells), macOS gnu FAIL 9514/9555, Windows git-bash FAIL 9565/9571 (kkore 011, ktests 057), msys2 FAIL 9529/9550 (+1 STRAY ktests), Ubuntu host FAIL 9549/9556 (L5.0-o1); macOS 3.2 guard ok; debian/ubuntu-2404/fedora/FreeBSD x2 INTERRUPTED at cell 1 = harness bug (gate parent watch: kill -0 to a root su parent answers EPERM) -> fixed by SV in ktests gate.sh (floor gate 19112 PASS, Windows 19143 PASS); FreeBSD run script also needed set +e (vmactions runs sh -e). Round 2 pushed with both. Round 2 CI run 40974474908 (236d040, ktests 3bd5e0e): every row reaches a verdict. Green: debian-13 PASS 9534, fedora-44 PASS 9534, freebsd gnu PASS 9533, alpine-53 PASS 9534; FLAKY (green): alpine-51 9533/9534, alpine-52 9531/9534, ubuntu-2404 9531/9534, freebsd clean 9532/9533. Red (results for L5.3): macOS bsd FAIL 9303/9555 (9 cells), macOS gnu FAIL 9518/9555 (4 cells + 2 FLAKY), Windows git-bash FAIL 8888/8890 (1 FAIL + 1 STRAY cell; total low: a cell lost its counts), msys2 FAIL 9532/9550, Ubuntu host FAIL 9549/9556 (L5.0-o1)."
     },
     "L5.2": {
       "executor": "OW",
@@ -568,7 +568,7 @@
         "L5.1"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-10-30 (superseded): owner amended OG3 2026-10-29 = push to main without branches; the full matrix went to main with L5.1."
     },
     "L5.3": {
       "executor": "S",
