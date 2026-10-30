@@ -328,7 +328,7 @@ jobs:
           submodules: recursive
           persist-credentials: false
 
-      # Git for Windows' bash for both rows (the msys2 row has no git inside its shell).
+      # Git for Windows' bash for both rows (the msys2 row's own shell has git too: its install: list has it).
       # core.autocrlf is not touched: every repo has `* text=auto eol=lf`.
       - name: line endings, OUT dir
         id: out
@@ -393,7 +393,7 @@ jobs:
           msystem: MSYS
           update: false
           path-type: minimal
-          install: gnu-netcat gawk diffutils findutils grep sed curl openssl perl util-linux
+          install: git gnu-netcat gawk diffutils findutils grep sed curl openssl perl util-linux
 
       - name: gate (msys2)
         if: matrix.slug == 'msys2'
