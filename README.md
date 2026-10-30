@@ -124,3 +124,5 @@ bash ktests/tools/gate.sh --bash C:/bin/Git/usr/bin/bash.exe --bash C:/bin/msys6
 * The examples on this page marked as runnable are run by
   `kkore/tests/015_DocExamples.sh`; the kklass book's by
   `kklass/tests/142_DocExamples.sh`.
+
+Contributing — the one test command, what CI checks, the house rules: [CONTRIBUTING.md](CONTRIBUTING.md).

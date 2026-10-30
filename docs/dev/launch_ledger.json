@@ -608,7 +608,7 @@
         "L5.5"
       ],
       "card": "draft",
-      "status": "IN PROGRESS 2026-10-30 (Opus worker, then SV): kbool ci.yml reusable via workflow_call (component, component_ref; checkout Keksov/kbool main + the component at the caller's ref; concurrency per repository) 9e894d7 - kbool run 41061878884 all 13 green; kcl thin ci.yml 6306e33 - run 41064473960: component replacement works on all 13 rows, 4 rows red on kkore 015 (sample checked `$KBOOL_HOME | grep -c kbool`: the workspace is .../kcl/kcl) -> kkore 015 fixed (path-independent). kklass/kkore/ktests thin workflows next."
+      "status": "DONE 2026-10-30 (Opus worker + SV): kbool ci.yml reusable via workflow_call (9e894d7); thin ci.yml in kcl 6306e33, kklass a8e74b6, kkore ca183f4, ktests 64227a7; kkore 015 sample made path-independent (8eecde1). Acceptance runs: kbool 41067647576 success; kcl 41067648488 success; kkore 41067620721 success; ktests 41067627344 success; kklass 41067613690: 12 rows green, Windows rows first failed in setup (MSYS2 mirrors: gnu-netcat download 416 / too slow), rerun: msys2 PASS, git-bash ktests STRAY (SV-2 shape, L56-o2). Component replacement verified in every row (step summary: `+<sha> <component>`)."
     },
     "L5.7": {
       "executor": "O",
@@ -617,7 +617,7 @@
         "L5.6"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-10-30 (Opus, SV review): CONTRIBUTING.md canonical in kbool (149 lines: one test command, suites, CI 13 rows + submodule PRs, verdict table from gate/verdict.sh, house rules, DL4 sentence) + short ones in kcl/kklass/kkore/ktests; README link; kklass book requirements -> bash 5.1 floor. OWNER PART pending: scratchpad launch/L5.7/owner_settings.md (step 0: default branch master->main in kcl/kklass/ktests; step 1: ruleset on main with required checks + admin bypass; step 2: approval for first-time contributors)."
     },
     "L6.0": {
       "executor": "S",
@@ -902,6 +902,9 @@
     "SV1-o2": "SV-2/C14 shape on msys2: diag run 41036267295, gate launched from Git bash with the D:/msys64 bash (mixed runtime, unlike ci.yml): ktests cell STRAY 0/0 906.9 s, no test started, start-grace did not fire; from the msys2 shell PASS. 045 flaky once on CI git-bash; 052 flaky once locally (cell CRASH under term).",
     "L5413-o1": "045 'stop: KILL is re-sent by the clock' (needs drops >= 5) intermittent on macOS gnu: each kt_strays_stop KILL round is a full kt_proc_snapshot --cmd (ps + python3 + ~550-row bash parse, ~140 ms idle on macos-latest, more under load) -> 4 rounds in the 3 s window. Options: a cheaper ps-backend snapshot for the stop loop, or assert elapsed time instead of a round count.",
     "L54-CI-o2": "kcl/tpipe 002 sigpipe_producer `sleep 8` orphan again (CI run 41041454478, fedora 44 row: cell 19 STRAY, pid ppid 1 age 4 s, stopped) - the L2.7-P tree stop race (old open L2.1 note) recurred once; watch the next runs.",
-    "L54-CI-o3": "ktests harness self-tests (gate-in-gate timing: 045, 050, 053, 054) FLAKY on CI runners (windows-latest both rows, macOS gnu) in runs 41056486953/41058770531; reruns pass; green by DL11. Candidates for a later robustness pass (L5.4-13 note: ps-backend snapshot cost on macOS; L5413-o1)."
+    "L54-CI-o3": "ktests harness self-tests (gate-in-gate timing: 045, 050, 053, 054) FLAKY on CI runners (windows-latest both rows, macOS gnu) in runs 41056486953/41058770531; reruns pass; green by DL11. Candidates for a later robustness pass (L5.4-13 note: ps-backend snapshot cost on macOS; L5413-o1).",
+    "L56-o1": "MSYS2 mirror outage made both Windows rows fail in setup (kklass run 41067613690: gnu-netcat 0.7.1-3 download 416/too slow on every mirror) - setup-msys2 has no retry; consider a retry step or caching if it recurs.",
+    "L56-o2": "Git-bash ktests cell STRAY: orphan /usr/bin/bash started during the cell (runs 41007020443, kklass 41067613690 rerun; SV-2/C14 shape, also seen mixed-runtime in diag 41036267295) - needs an investigation card (which test file leaves it; start-grace rule).",
+    "L57-o1": "SECURITY.md names no private reporting channel (owner: add e.g. GitHub private vulnerability reporting); ktests/docs/START_HERE.md stale for outside readers (emoji, missing lib/, QUICK_REFERENCE.md, MIGRATION_GUIDE.md); root README links into submodule folders may 404 on github.com (gitlinks) - check in L6.5."
   }
 }
