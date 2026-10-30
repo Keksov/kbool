@@ -180,7 +180,7 @@ L2.8's re-scan diff will not show these; L2/L3 gates will.
 | process table (ppid, pgid, sid, cmdline) | strays.sh:214-234 | `/proc/PID/{ppid,pgid,sid,cmdline}` ~0.1 ms each | only `/proc/PID/stat` + `cmdline` (stat is µs, not 20 ms) | none (procfs optional; `/proc/PID/status` other format) | none |
 | state + start time | strays.sh:239-253, ktest_runner.sh:764-773 | `stat` f3, f22 in ms; boot = now − `/proc/uptime` | f3, f22 in ticks; `btime` in `/proc/stat` | `ps -o state,etimes` | `ps -o state,etime` |
 | group members / descendants | ktest_runner.sh:706-795 | `/proc/*/pgid` + `ppid` | `stat` f4 (ppid), f5 (pgrp) | `ps -o pid,ppid,pgid` | same |
-| session of the segment | gate.sh:2472-2476 | `/proc/$$/sid` | `stat` f6 | `ps -o sid` (verify keyword) | no `sid` keyword (`sess` is a pointer) |
+| session of the segment | gate.sh:2472-2476 | `/proc/$$/sid` | `stat` f6 | `ps -o sid` (verify keyword) | no `sid` keyword (`sess` is a pointer); session ids from `python3` `os.getsid`, one fork per snapshot (L5.4-11) |
 | parent watch | gate.sh:982-988, 1836-1841 | `/proc/PPID/winpid` (pid reuse + Windows-level kill) | off today; (pid, starttime) pair would do | off; (pid, `lstart`) via ps | same |
 | session isolation | gate.sh:1162-1167, 1833 | `setsid` (msys) / perl | util-linux `setsid` (forks when it is a group leader; `-w` waits) | none in base; perl not in clean | perl present, no setsid |
 | INT/QUIT reset for `&` children | gate.sh:1104 | GNU `env --default-signal` | GNU env OK; **busybox env no** | **no** | **no** |

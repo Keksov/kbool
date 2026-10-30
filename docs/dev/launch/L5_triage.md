@@ -712,7 +712,9 @@ After the decisions (outline; SV fills the cards from the chosen option):
 * **OG12 = (a)** → L5.4-10 [O]: gate.sh PIPE default (env/perl/jobctl), 056 case, README; floor gate;
   CI ubuntu-host and macOS: thttpserver 002/005/006, tutil 005 pass.
 * **OG13** (after D1) → L5.4-11 [O or S].
-* **OG14 = (a)** → L5.4-12 [S]: tregex 002/011 `\<` probe + N/A, docs.
+* **OG14 = (b)** (owner, 2026-10-30) → L5.4-12 [O + critic]: TRegEx rewrites `\<` `\>` `\b` where the
+  C library does not spell them (FreeBSD `\b` → `(\<|\>)`, macOS → `[[:<:]]`/`[[:>:]]`), probed once,
+  inserted groups removed from the user's numbering; 002/011 N/A branches go.
 
 ## 5. Expected effect per CI row
 
