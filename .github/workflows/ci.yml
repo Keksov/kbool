@@ -19,6 +19,8 @@ name: ci
 on:
   push:
     branches: [main]
+    # a diagnostics-only commit (manual workflow) is not a reason to re-run the matrix
+    paths-ignore: ['.github/workflows/diag.yml']
   pull_request:
   workflow_dispatch:
 
