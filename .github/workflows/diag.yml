@@ -8,7 +8,10 @@
 # kcl/tregex gate with the uncommitted kcl patch);
 # D9 = L5.4-14 macOS: every kklass test file run directly with a bound (rc, time,
 # the process tree of a hung one), the kklass suite threaded, and the kklass gate,
-# optionally with an uncommitted kklass/tests patch).
+# optionally with an uncommitted kklass/tests patch);
+# D10 = L5.8 windows git-bash: which ktests file leaves the orphan /usr/bin/bash
+# (sampled process table, the ktests suite x5 and the ktests gate x2, optionally
+# with an uncommitted ktests patch).
 # Manual only (workflow_dispatch; input `only` names the jobs to run, e.g.
 # `gh workflow run diag.yml --ref main -f only=D4`); D1-D3 and D5 use no
 # checkout and no third-party action, D4/D6/D7/D8/D9 the pinned actions of ci.yml
@@ -19,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6 D7 D8 D9)"
+        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6 D7 D8 D9 D10)"
         required: false
         default: "D1 D2 D3"
 
@@ -29,7 +32,8 @@ permissions:
 jobs:
   macos:
     name: D1 macos (${{ matrix.slug }})
-    if: contains(inputs.only, 'D1')
+    # word match: `only=D10` must not run D1
+    if: contains(format(' {0} ', inputs.only), ' D1 ')
     runs-on: macos-latest
     timeout-minutes: 15
     strategy:
@@ -1157,3 +1161,226 @@ jobs:
           if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
           "$(brew --prefix)/bin/bash" "$RUNNER_TEMP/d9.sh" gate 500 900
           true
+
+  # D10 = L5.8 (ledger L56-o2): the Git-bash ktests cell leaves an orphan /usr/bin/bash.
+  # Git-bash row as ci.yml (private MSYS2 for nc only). A sampler (snap.sh) logs the
+  # cygwin process table every 0.5 s (new pid / exec / gone, with ppid pgid sid winpid
+  # and argv); after each run orph.sh names every orphan born in it with its sampled
+  # ancestry (the test file that made it) and its Windows view, then KILLs it by pid.
+  ktestsstray:
+    name: D10 windows git-bash ktests stray
+    if: contains(inputs.only, 'D10')
+    runs-on: windows-latest
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: MSYS2 for nc (as ci.yml's git-bash row)
+        id: nc
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MSYS
+          update: false
+          path-type: minimal
+          install: gnu-netcat
+
+      # the uncommitted L5.8 fix, applied to the checkout only (an empty block: none)
+      - name: D10a apply the L5.8 patch to ktests
+        shell: bash
+        run: |
+          base64 -d > "$RUNNER_TEMP/l58.patch.gz" <<'B64'
+          B64
+          if [[ -s "$RUNNER_TEMP/l58.patch.gz" ]]; then gzip -dc "$RUNNER_TEMP/l58.patch.gz" | git -C ktests apply -v; else echo "no patch"; fi
+          git -C ktests status --short
+
+      - name: D10 tools (sampler, orphan report)
+        shell: bash
+        run: |
+          D="$(cygpath -u "$RUNNER_TEMP")/d10"; mkdir -p "$D"
+          cat > "$D/snap.sh" <<'SNAP'
+          #!/usr/bin/env bash
+          # snap.sh LOG STOPFILE — an event log of the cygwin process table until
+          # STOPFILE exists or the parent dies. Lines (EPOCHREALTIME first):
+          #   T N pid ppid pgid sid winpid exename :: cmdline   new pid, or ppid/winpid changed (exec)
+          #   T G pid                                           pid gone
+          log=$1 stop=$2 owner=$PPID me=$BASHPID
+          declare -A seen
+          exec 9>>"$log"
+          while [[ ! -e "$stop" ]] && kill -0 "$owner" 2>/dev/null; do
+              t=$EPOCHREALTIME
+              declare -A now=()
+              for d in /proc/[0-9]*; do
+                  p=${d#/proc/}
+                  pp="" w=""
+                  { read -r pp < "$d/ppid"; read -r w < "$d/winpid"; } 2>/dev/null
+                  [[ -n "$pp" ]] || continue
+                  [[ "$p" == "$me" || "$pp" == "$me" ]] && continue
+                  now[$p]=1
+                  if [[ "${seen[$p]-}" != "$pp $w" ]]; then
+                      pg="" sd="" ex="" argv=()
+                      { read -r pg < "$d/pgid"; read -r sd < "$d/sid"; read -r ex < "$d/exename"; } 2>/dev/null
+                      { mapfile -d '' -t argv < "$d/cmdline"; } 2>/dev/null
+                      c="${argv[*]}"; c="${c//$'\n'/ }"
+                      printf '%s N %s %s %s %s %s %s :: %s\n' "$t" "$p" "$pp" "$pg" "$sd" "$w" "$ex" "${c:0:300}" >&9
+                      seen[$p]="$pp $w"
+                  fi
+              done
+              for p in "${!seen[@]}"; do
+                  [[ -n "${now[$p]+x}" ]] || { printf '%s G %s\n' "$t" "$p" >&9; unset 'seen[$p]'; }
+              done
+              unset now
+              sleep 0.5
+          done
+          SNAP
+          cat > "$D/orph.sh" <<'ORPH'
+          #!/usr/bin/env bash
+          # orph.sh LOG T0 SID|any LABEL [PID...] — after a run:
+          #  1. the gate's rule over session SID (strays.sh list --all --session --since T0)
+          #  2. LATE ORPHANS: every pid sampled (LOG = snap.sh) with ppid 1 after T0 in a
+          #     session it does not lead, alive >= 15 s after that: one line each with
+          #     the test file among its sampled ancestors
+          #  3. full ancestry + Windows view of each pid still an orphan now (ppid 1,
+          #     sid SID or any, pid != sid, first sampled after T0) and of each PID given
+          #     (the gate's stray pids); the live ones are KILLed by pid.
+          log=$1 t0=$2 sid=$3 label=$4; shift 4
+          extra=("$@")
+
+          # anc_file PID — REPLY = "NNN_Name.sh" of the nearest sampled ancestor (or PID)
+          # whose command line names a test file, else "-"
+          anc_file() {
+              REPLY=$(awk -v p="$1" '
+                  $2=="N" { if (!(($3) in first)) { first[$3]=$1; pp[$3]=$4 }
+                            if (match($0, /[0-9][0-9][0-9]_[A-Za-z0-9]+\.sh/) && !(($3) in tf)) tf[$3]=substr($0, RSTART, RLENGTH) }
+                  END { q=p; for (i=0; i<20 && q!="" && q!=1; i++) { if (q in tf) { print tf[q]; exit } q=pp[q] } print "-" }' "$log")
+          }
+
+          echo "---- [$label] strays.sh list --all --session $sid --since $t0"
+          [[ "$sid" != any ]] && bash ktests/tools/strays.sh list --all --session "$sid" --since "$t0" 2>&1
+
+          echo "---- [$label] late orphans (reparented to 1 after T0, outside their own session lead, alive >= 15 s after)"
+          awk -v t0="$t0" '
+              $2=="N" && $1+0 >= t0+0 && $4==1 && $3!=$6 && !(($3) in rp) { rp[$3]=$1; line[$3]=$0 }
+              $2=="G" && (($3) in rp) && !(($3) in gone) { gone[$3]=$1 }
+              END { for (p in rp) { g = (p in gone) ? gone[p] : "alive"; life = (p in gone) ? gone[p]-rp[p] : 99999
+                    if (life >= 15) printf "%s %s %s\n", p, (g=="alive" ? "alive-at-end" : sprintf("%.0fs", life)), line[p] } }' "$log" |
+          while read -r p life rest; do
+              anc_file "$p"
+              printf '   pid %s life-after-reparent %s file %s | %s\n' "$p" "$life" "$REPLY" "${rest:0:260}"
+          done
+
+          orphs=()
+          for d in /proc/[0-9]*; do
+              p=${d#/proc/}; pp="" sd=""
+              { read -r pp < "$d/ppid"; read -r sd < "$d/sid"; } 2>/dev/null
+              [[ "$pp" == 1 && "$p" != "$sd" && "$p" != "$$" ]] || continue
+              [[ "$sid" == any || "$sd" == "$sid" ]] || continue
+              first=$(awk -v p="$p" '$2=="N" && $3==p {print $1; exit}' "$log")
+              [[ -n "$first" ]] || continue
+              awk -v a="$first" -v b="$t0" 'BEGIN{exit !(a+0 >= b+0)}' || continue
+              orphs+=("$p")
+          done
+          echo "---- [$label] orphans now (session $sid, born after T0): ${orphs[*]:-none}; pids given: ${extra[*]:-none}"
+          for p in "${orphs[@]}" "${extra[@]}"; do
+              anc_file "$p"
+              echo "== [$label] PID $p (test file: $REPLY): sampled ancestry (each ancestor's newest N line before the child's birth)"
+              q=$p tb=""
+              for (( depth = 0; depth < 14; depth++ )); do
+                  line=""
+                  [[ -n "$tb" ]] && line=$(awk -v p="$q" -v tb="$tb" '$2=="N" && $3==p && $1+0 <= tb+0 {l=$0} END{print l}' "$log")
+                  [[ -n "$line" ]] || line=$(awk -v p="$q" '$2=="N" && $3==p {print; exit}' "$log")
+                  [[ -n "$line" ]] || { echo "   [$depth] $q: never sampled"; break; }
+                  echo "   [$depth] ${line:0:420}"
+                  gone=$(awk -v p="$q" -v t="${line%% *}" '$2=="G" && $3==p && $1+0 >= t+0 {print $1; exit}' "$log")
+                  [[ -n "$gone" ]] && echo "       gone at $gone"
+                  set -- $line
+                  tb=$(awk -v p="$q" '$2=="N" && $3==p {print $1; exit}' "$log")
+                  q=$4
+                  [[ "$q" == 1 ]] && { echo "   (first sampled with ppid 1)"; break; }
+              done
+              echo "== [$label] PID $p: every N/G line of it"
+              awk -v p="$p" '($2=="N" || $2=="G") && $3==p' "$log" | cut -c1-420
+              tb=$(awk -v p="$p" '$2=="N" && $3==p {print $1; exit}' "$log")
+              pg=$(awk -v p="$p" '$2=="N" && $3==p {print $5; exit}' "$log")
+              echo "== [$label] PID $p: processes of its pgid $pg first sampled within 3 s of its birth $tb"
+              awk -v g="$pg" -v tb="$tb" '$2=="N" && $5==g && $1+0 >= tb-3 && $1+0 <= tb+3' "$log" | cut -c1-420
+              [[ -d "/proc/$p" ]] || { echo "   ($p is gone now)"; continue; }
+              w=""; { read -r w < "/proc/$p/winpid"; } 2>/dev/null
+              for k in ppid pgid sid winpid exename; do printf '   %s=%s\n' "$k" "$(cat "/proc/$p/$k" 2>/dev/null)"; done
+              printf '   cmdline=[%s]\n' "$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)"
+              printf '   stat=[%s]\n' "$(cat "/proc/$p/stat" 2>/dev/null)"
+              if [[ -n "$w" ]]; then
+                  echo "== [$label] PID $p: Windows view of winpid $w and its children"
+                  timeout -k 5 60 powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter 'ProcessId=$w or ParentProcessId=$w' | Format-List ProcessId,ParentProcessId,Name,CreationDate,CommandLine" 2>&1 | tr -d '\r' | grep -v '^$'
+              fi
+              kill -KILL "$p" 2>/dev/null
+              sleep 0.5
+              [[ -d "/proc/$p" ]] && /usr/bin/kill -f -9 "$p" 2>/dev/null
+              sleep 0.3
+              [[ -d "/proc/$p" ]] && echo "   $p STILL ALIVE after KILL and kill -f" || echo "   $p killed"
+          done
+          ORPH
+          ls -l "$D"
+
+      - name: D10b ktests suite threaded (tests.sh), 5 runs, sampled
+        timeout-minutes: 60
+        shell: bash
+        env:
+          M2LOC: ${{ steps.nc.outputs.msys2-location }}
+        run: |
+          set +e
+          unset MSYSTEM
+          GBASH="$(cygpath -u 'C:\Program Files\Git\usr\bin\bash.exe')"
+          KCL_NC="$(cygpath -u "$M2LOC")/usr/bin/nc.exe"; export KCL_NC
+          D="$(cygpath -u "$RUNNER_TEMP")/d10"
+          sid=$(cat /proc/$$/sid)
+          "$GBASH" --version | sed -n 1p; echo "step shell pid $$ sid $sid"
+          for i in 1 2 3 4 5; do
+            log="$D/run$i.log"; stop="$D/run$i.stop"; t0=$EPOCHREALTIME; s0=$SECONDS
+            "$GBASH" "$D/snap.sh" "$log" "$stop" & sp=$!
+            timeout -k 30 900 "$GBASH" ktests/tests/tests.sh > "$D/run$i.out" 2>&1
+            rc=$?
+            echo "=== run $i: rc=$rc dt=$(( SECONDS - s0 ))s"
+            grep -aE '^(Total tests|Passed|Failed):|\[FAIL\] [0-9]{3}_|WARN|stray' "$D/run$i.out" | cut -c1-700
+            touch "$stop"; wait "$sp"
+            "$GBASH" "$D/orph.sh" "$log" "$t0" "$sid" "run$i"
+          done
+          true
+
+      - name: D10c gate ktests (as ci.yml, ktests only), 2 runs, sampled
+        timeout-minutes: 40
+        shell: bash
+        env:
+          M2LOC: ${{ steps.nc.outputs.msys2-location }}
+        run: |
+          set +e
+          unset MSYSTEM
+          GBASH="$(cygpath -u 'C:\Program Files\Git\usr\bin\bash.exe')"
+          KCL_NC="$(cygpath -u "$M2LOC")/usr/bin/nc.exe"; export KCL_NC
+          export KT_GATE_BASHES="$GBASH"
+          D="$(cygpath -u "$RUNNER_TEMP")/d10"
+          for i in 1 2; do
+            log="$D/gate$i.log"; stop="$D/gate$i.stop"; OUT="$D/gate$i"; mkdir -p "$OUT"; t0=$EPOCHREALTIME
+            "$GBASH" "$D/snap.sh" "$log" "$stop" & sp=$!
+            timeout -k 120 1100 "$GBASH" ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 ktests > "$D/gate$i.out" 2>&1
+            rc=$?
+            echo "=== gate $i: rc=$rc"; tail -n 6 "$D/gate$i.out"
+            for f in "$OUT"/cells/*/strays.txt "$OUT"/cells/*/rerun-*/strays.txt; do [[ -s "$f" ]] && { echo "== $f"; cat "$f"; }; done
+            for f in "$OUT"/cells/*/log.txt "$OUT"/cells/*/rerun-*/log.txt; do [[ -f "$f" ]] && { echo "== $f"; grep -a 'FAIL' "$f" | cut -c1-700; }; done
+            touch "$stop"; wait "$sp"
+            extra=$(cat "$OUT"/cells/*/strays.txt "$OUT"/cells/*/rerun-*/strays.txt 2>/dev/null | grep -aoE 'pid [0-9]+' | awk '{print $2}' | sort -u)
+            # shellcheck disable=SC2086
+            "$GBASH" "$D/orph.sh" "$log" "$t0" any "gate$i" $extra
+          done
+          true
+
+      - name: D10 logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: d10-logs
+          path: ${{ runner.temp }}/d10
+          retention-days: 5
+          if-no-files-found: warn
