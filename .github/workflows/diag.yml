@@ -5,10 +5,13 @@
 # D7 = L5.4-13 macOS: lsof output of a pipe's two ends and of a cwd, the 052
 # sampler's pace, ktests 045 and 052 run directly, optionally with a patch;
 # D8 = L5.4-12b macOS: raw ERE word edges, kcl/tregex 002/005/011/015 and the
-# kcl/tregex gate with the uncommitted kcl patch).
+# kcl/tregex gate with the uncommitted kcl patch);
+# D9 = L5.4-14 macOS: every kklass test file run directly with a bound (rc, time,
+# the process tree of a hung one), the kklass suite threaded, and the kklass gate,
+# optionally with an uncommitted kklass/tests patch).
 # Manual only (workflow_dispatch; input `only` names the jobs to run, e.g.
 # `gh workflow run diag.yml --ref main -f only=D4`); D1-D3 and D5 use no
-# checkout and no third-party action, D4/D6/D7/D8 the pinned actions of ci.yml
+# checkout and no third-party action, D4/D6/D7/D8/D9 the pinned actions of ci.yml
 # (checkout, setup-msys2); every step is `set +e` and bounded by timeout-minutes.
 name: diag
 
@@ -16,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6 D7 D8)"
+        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6 D7 D8 D9)"
         required: false
         default: "D1 D2 D3"
 
@@ -958,4 +961,148 @@ jobs:
           "$brewbash" ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 kcl/tregex 2>&1 | tail -n 15
           echo "gate rc=${PIPESTATUS[0]}"
           for f in "$out"/cells/*/log.txt "$out"/cells/*/rerun-*/log.txt; do [ -f "$f" ] && { echo "== $f"; grep -a 'FAIL' "$f" | cut -c1-900; }; done
+          true
+
+  kklasshang:
+    name: D9 macos kklass hang (${{ matrix.slug }})
+    if: contains(inputs.only, 'D9')
+    runs-on: macos-latest
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: bsd
+            brew: bash
+            gnubin: "no"
+          - slug: gnu
+            brew: bash coreutils gnu-sed gawk findutils grep diffutils netcat socat
+            gnubin: "yes"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: brew install
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+          BREW_PKGS: ${{ matrix.brew }}
+        run: |
+          # shellcheck disable=SC2086
+          brew install $BREW_PKGS || brew install $BREW_PKGS
+
+      # L5.4-14's uncommitted kklass/tests change (empty: none), applied to the checkout only
+      - name: D9a apply the L5.4-14 patch to kklass
+        shell: bash
+        run: |
+          base64 -d > "$RUNNER_TEMP/p.patch.gz" <<'B64'
+          B64
+          if [ -s "$RUNNER_TEMP/p.patch.gz" ]; then gzip -dc "$RUNNER_TEMP/p.patch.gz" | git -C kklass apply -v; fi
+          git -C kklass status --short
+
+      # a bounded runner: CMD in its own process group; past SNAP s one dump of its
+      # process tree (ps + the fds lsof sees), past BOUND s the dump, then TERM/KILL
+      - name: D9b the bounded runner
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/d9.sh" <<'D9'
+          set -m
+          tree() {  # PID -> PID and its descendants, plus its process group
+            ps -axo pid=,ppid=,pgid= | awk -v r="$1" '{ pp[$1] = $2; pg[$1] = $3 }
+              END { for (p in pp) { if (pg[p] == r) { print p; continue }
+                    q = p; n = 0; while ((q in pp) && n < 64) { if (q == r) { print p; break }; q = pp[q]; n++ } } }'
+          }
+          dump() {  # PID
+            local l q k=0; l=" $(tree "$1" | tr '\n' ' ') "
+            ps -axo pid=,ppid=,pgid=,stat=,etime=,command= | awk -v l="$l" 'index(l, " " $1 " ")' | cut -c1-400
+            for q in $l; do
+              (( ++k > 12 )) && break
+              echo "   -- lsof $q"; lsof -n -P -p "$q" 2>/dev/null | awk 'NR > 1 && $4 ~ /^[0-9]+[rwu]/' | cut -c1-220 | head -15
+            done
+          }
+          run() {  # BOUND SNAP LOG CMD... -> RC DT (s); a watchdog group, no polling
+            local n=$1 snap=$2 log=$3 p wd t0=$SECONDS; shift 3
+            rm -f "$RUNNER_TEMP/d9.hit"
+            "$@" > "$log" 2>&1 < /dev/null & p=$!
+            (
+              if (( snap > 0 && snap < n )); then
+                sleep "$snap"; echo "   still running after ${snap}s, process tree of $p:"; dump "$p"; sleep $(( n - snap ))
+              else sleep "$n"; fi
+              : > "$RUNNER_TEMP/d9.hit"; echo "   TIMEOUT ${n}s, process tree of $p:"; dump "$p"
+              l=$(tree "$p" | tr '\n' ' ')
+              kill -TERM -- "-$p" 2>/dev/null; kill -TERM $l 2>/dev/null; sleep 2
+              kill -KILL -- "-$p" 2>/dev/null; kill -KILL $l 2>/dev/null
+            ) & wd=$!
+            wait "$p" 2>/dev/null; RC=$?
+            kill -TERM -- "-$wd" 2>/dev/null; wait "$wd" 2>/dev/null
+            [[ -e $RUNNER_TEMP/d9.hit ]] && RC=124; DT=$(( SECONDS - t0 ))
+          }
+          strip() { perl -pe 's/\e\[[0-9;]*[A-Za-z]//g' "$1"; }
+          b=$(brew --prefix)/bin/bash
+          mode=$1 reps=$2 bound=$3
+          case $mode in
+            files)
+              for (( pass = 1; pass <= reps; pass++ )); do
+                bad=""; t1=$SECONDS
+                for f in kklass/tests/[0-9]*.sh; do
+                  t=${f##*/}; t=${t%.sh}
+                  run "$bound" 0 "$RUNNER_TEMP/$t.log" "$b" "$f"
+                  printf 'pass %s %-36s rc=%-3s dt=%ss\n' "$pass" "$t" "$RC" "$DT"
+                  if (( RC != 0 )); then bad+=" $t($RC)"; strip "$RUNNER_TEMP/$t.log" | tail -n 20 | cut -c1-600 | sed 's/^/   | /'; fi
+                done
+                echo "== pass $pass done in $(( SECONDS - t1 ))s, rc != 0:${bad:- none}"
+              done ;;
+            suite)
+              for (( i = 1; i <= reps; i++ )); do
+                run "$bound" 0 "$RUNNER_TEMP/suite-$i.log" "$b" kklass/tests/tests.sh
+                echo "== suite run $i rc=$RC dt=${DT}s"
+                strip "$RUNNER_TEMP/suite-$i.log" | grep -aE 'FAIL|Total|Passed|Failed' | cut -c1-600
+              done ;;
+            gate)
+              out="$RUNNER_TEMP/gate-out"; mkdir -p "$out"
+              export KT_GATE_BASHES="$b"
+              run "$bound" "$reps" "$RUNNER_TEMP/gate.log" "$b" ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 600 kklass
+              echo "== gate rc=$RC dt=${DT}s"; tail -n 15 "$RUNNER_TEMP/gate.log"
+              for f in "$out"/cells/*/log.txt "$out"/cells/*/rerun-*/log.txt; do
+                [ -f "$f" ] && { echo "== $f"; strip "$f" | grep -a 'FAIL' | cut -c1-900; }
+              done ;;
+          esac
+          D9
+          echo "driver: $(wc -l < "$RUNNER_TEMP/d9.sh") lines"
+
+      - name: D9c every kklass test file directly, 3 passes (bound 180 s each)
+        timeout-minutes: 45
+        shell: bash
+        env:
+          GNUBIN: ${{ matrix.gnubin }}
+        run: |
+          set +e
+          if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
+          "$(brew --prefix)/bin/bash" "$RUNNER_TEMP/d9.sh" files 3 180
+          true
+
+      - name: D9d the kklass suite threaded (tests.sh), 3 runs (bound 420 s each)
+        timeout-minutes: 25
+        shell: bash
+        env:
+          GNUBIN: ${{ matrix.gnubin }}
+        run: |
+          set +e
+          if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
+          "$(brew --prefix)/bin/bash" "$RUNNER_TEMP/d9.sh" suite 3 420
+          true
+
+      # the kklass suite through the gate, as ci.yml's macOS rows run it (cell timeout 600 s;
+      # one process-tree dump at 500 s if it still runs)
+      - name: D9e gate kklass (as ci.yml, kklass only)
+        timeout-minutes: 20
+        shell: bash
+        env:
+          GNUBIN: ${{ matrix.gnubin }}
+        run: |
+          set +e
+          if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
+          "$(brew --prefix)/bin/bash" "$RUNNER_TEMP/d9.sh" gate 500 900
           true
