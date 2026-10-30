@@ -64,6 +64,53 @@ bash kcl/tregex/tests/003_Match.sh -v info     # one file directly, every assert
   tree — run a bash with its own folder first on `PATH`; for both at once:
   `KT_GATE_BASHES="C:/Program Files/Git/usr/bin/bash.exe;C:/msys64/usr/bin/bash.exe" bash ktests/tools/gate.sh all`.
 
+## Running the tests by hand
+
+Moved verbatim from the README on 2026-10-31 (only "on this page" became "in
+README.md and docs/reference.md").
+
+```bash
+bash tests/tests.sh                          # every suite of the tree (the master sweep)
+bash kkore/tests/tests.sh                    # one suite
+bash kcl/tlist/tests/tests.sh --verbosity info
+bash kklass/tests/tests.sh --mode single     # sequential; the default is threaded x8
+bash kkore/tests/tests.sh -n 15              # only test file 015 (-n 1,3-5 lists, ranges)
+```
+
+To check a change on **both runtimes**, use the phase gate: each suite runs
+in a hermetic sandbox under each bash, one line per (bash, suite), one verdict
+and exit code; `--changed` picks the suites your uncommitted diff touches
+(name suites instead, or `all`) — [ktests/tools/README.md](ktests/tools/README.md#gatesh--the-phase-gate):
+
+```bash
+bash ktests/tools/gate.sh --bash C:/bin/Git/usr/bin/bash.exe --bash C:/bin/msys64/usr/bin/bash.exe --changed
+```
+
+* Run suites **one at a time** (they share `tests/.ckk` and temp names), and
+  read results by grepping **all** `[FAIL]` lines, not the tail.
+* A second bash: the runner starts every test file with the `bash` found on
+  `PATH`, so put that bash's folder FIRST on `PATH` and start the runner with
+  it — `PATH="/opt/bash53/bin:$PATH" /opt/bash53/bin/bash tests/tests.sh` —
+  otherwise the children run the other build. Environment variables set in one
+  MSYS2 / Git-bash installation may not reach a bash of another: set them inside
+  the second shell (`bash -c 'export X=…; …'`).
+* The runner **isolates the configuration** of every test file: an empty
+  `HOME` of its own, the `/etc/kbool` level pointed at a missing folder,
+  `KBOOL_CONFIG`, `KBOOL_HOME`, `USERPROFILE` and `ProgramData` unset,
+  `BASH_ENV` emptied — a developer's `~/.kbool/config` cannot change a
+  result. A test that needs a config installs its own. A suite file run
+  on its own (`bash kkore/tests/011_ConfigProject.sh`) sees the environment
+  as it is.
+* **No process may outlive a run**: the master sweep fails a suite that left
+  any process of its session running whose parent is gone (named, then
+  stopped); a TERM/Ctrl-C to the sweep stops the running suite too; and
+  `bash ktests/tools/strays.sh list` / `stop` finds and ends leftovers of a
+  killed run (once per bash runtime; unfiltered `stop` only touches orphans
+  older than 120 min) — see `ktests/tools/README.md`.
+* The examples in README.md and docs/reference.md marked as runnable are run by
+  `kkore/tests/015_DocExamples.sh`; the kklass book's by
+  `kklass/tests/142_DocExamples.sh`.
+
 ## What CI checks
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the gate (`--rerun-failed 1

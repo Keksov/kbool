@@ -1,7 +1,8 @@
 # kbool reference
 
-Moved verbatim from the README on 2026-10-22; the entry page is [../README.md](../README.md).
+Moved verbatim from the README on 2026-10-22 (section "Loading kbool" on 2026-10-31); the entry page is [../README.md](../README.md).
 
+- [Loading kbool](#loading-kbool)
 - [Units](#units)
 - [`kk.uses`](#kkuses)
 - [Namespaces and defines](#namespaces-and-defines)
@@ -9,6 +10,35 @@ Moved verbatim from the README on 2026-10-22; the entry page is [../README.md](.
 - [Projects: `kk.project`](#projects-kkproject)
 - [Reloading during development](#reloading-during-development)
 - [Messages](#messages)
+
+## Loading kbool
+
+Nothing is built or installed: scripts `source` `kbool.sh` from wherever the
+tree lives. Prerequisites: bash ≥ 5.1 (tested: 5.1.16 and 5.2.37 on Debian, 5.3.15
+under Git-bash and 5.3.9 under MSYS2, on Windows); for some kcl units the GNU tools they wrap or call —
+coreutils (`head`, `tail`, `stat`, `mktemp`), `grep`, `sed`, `gawk`,
+findutils `find` — and GNU netcat (`nc`) for `thttpserver`.
+
+`kbool.sh` must be **sourced** (executed it prints an error and exits 2). It
+loads the system units `kuse klib kerr kvar kcfg` — they are always there, like
+FPC's `System` — then reads the configuration. Everything else is a unit you
+name: `kk.uses kklass`, `kk.uses tlist tdictionary`. `source kbool.sh` finds the
+file through `$PATH` (bash's `sourcepath`, on by default) when the kbool folder
+is on it.
+
+**`KBOOL_HOME`** is exported by `kbool.sh`: the folder it was loaded from (the
+system search path is `$KBOOL_HOME/kkore`, `$KBOOL_HOME/kklass`, every folder of
+`$KBOOL_HOME/kcl`). It means only that: a preset `KBOOL_HOME` naming another
+folder is overwritten with one `kbool: WARNING:` line. Sourcing ANOTHER copy
+of `kbool.sh` while one is loaded is a no-op with one
+`kbool: WARNING: … is ignored: kbool is already loaded from …` line (the same
+file in any spelling is silent). A unit outside the kbool
+tree finds `kbool.sh` through it (see [the header shapes](#units)), so a child
+shell started from a kbool script can load such a unit directly.
+
+Sourcing a unit file directly — `source kcl/tlist/tlist.sh`,
+`source kklass/kklass.sh` — still works: its first header line loads
+`kbool.sh` when it is not loaded yet. `kk.uses` is the canonical way.
 
 ## Units
 

@@ -683,8 +683,8 @@
         "L6.3",
         "L6.4"
       ],
-      "card": null,
-      "status": "planned"
+      "card": "scratchpad launch/L6.5/card.md",
+      "status": "DONE 2026-10-31 (Opus worker, SV review; kkore 044502c): README rewritten (pitch: one API across bash versions and platforms, claimed as far as the 13 CI rows; first snippet = Pascal DSL TCounter, doctested; TStringList block doctested; Why; Install; Requirements from tools.tsv with the honest split - core needs no GNU tool (bash + POSIX utilities; 'pure bash' would contradict tools.tsv), wrappers GNU or rc 2 naming the package, thttpserver GNU netcat/socat; Platforms = ci.yml rows; zoo table 12 rows each pinned by an existing test; comparison with niieani/bash-oo-framework, tomas/skull, Ad5001/BashOOP, elibs/ebash, labbots/bash-utility from their own pages, read 2026-10-31; How it was built per DL4 with numbers.json figures). New docs/portability.md (every zoo row with its test). Moved verbatim: loading paragraphs -> docs/reference.md 'Loading kbool'; tests-by-hand -> CONTRIBUTING.md. Worker BLOCKED on kkore 015 README doctest count 1 -> SV changed it to 2 (option a). SV edits: pitch precise about which bash runs where; 'outside the two rows below' wording. Gates: worker kklass PASS 858x2; SV kkore __GATE__:PASS:2:2:0:0:0:0:0:1542:1542; mdlinks 4 files 98 links 0 broken."
     },
     "L6.6": {
       "executor": "S",
@@ -920,6 +920,7 @@
     "L60-o1": "kcl READMEs/docs still say 'bash 5.2.37 / 5.3.9' in many places (stale since the 2026-10-26 runtime change to Git-bash 5.3.15 / MSYS2 5.3.9); L6.0 fixed only the lines it touched -> L6.6 stale-paths sweep.",
     "L60-o2": "ktests 042_KilledRunCleanup failed on the kcl CI msys2 row (run 41122457081, after its rerun): 'results seen rc=1; after kill [kt_iso.46102] (want kt_iso.<pid> only), after next run [kt_iso.46102]' - intermittent harness flake, unrelated to L6.0; watch for recurrence.",
     "L66-o1": "ktests/docs/README.md still carries legacy 'Migration' / 'Benefits' prose from an older era (copy-template migration, '130+ existing tests'); not wrong links any more, but stale for a fresh reader -> L6.8 fresh-reader critic to judge.",
-    "L66-o2": "CI windows (msys2) row flaky, 3 sightings 2026-10-30/31, each green on rerun: kcl 41122457081 ktests 042 (= L60-o2); kcl 41131693383 ktests 045_StrayGuard + 054_GateSelection (nested gate INTERRUPTED after 149 s - the L58-o1 FIFO wedge shape); ktests 41131709554 kcl/thttpserver STRAY (2 processes, stopped). Likely one cause family with L58-o1 (cygwin FIFO opens under load); candidate for an investigation card before L8 if it keeps recurring."
+    "L66-o2": "CI windows (msys2) row flaky, 3 sightings 2026-10-30/31, each green on rerun: kcl 41122457081 ktests 042 (= L60-o2); kcl 41131693383 ktests 045_StrayGuard + 054_GateSelection (nested gate INTERRUPTED after 149 s - the L58-o1 FIFO wedge shape); ktests 41131709554 kcl/thttpserver STRAY (2 processes, stopped). Likely one cause family with L58-o1 (cygwin FIFO opens under load); candidate for an investigation card before L8 if it keeps recurring.",
+    "L65-o1": "docs/dev/README.md (the index the README's 'How it was built' links) does not list LAUNCH_PLAN.md / launch_ledger.json; docs/reference.md 'Loading kbool' keeps a verbatim 'Prerequisites ... tested ...' sentence that now duplicates README Requirements -> L6.8 critic / small fix."
   }
 }
