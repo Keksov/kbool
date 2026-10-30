@@ -1192,6 +1192,39 @@ jobs:
         shell: bash
         run: |
           base64 -d > "$RUNNER_TEMP/l58.patch.gz" <<'B64'
+          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
           B64
           if [[ -s "$RUNNER_TEMP/l58.patch.gz" ]]; then gzip -dc "$RUNNER_TEMP/l58.patch.gz" | git -C ktests apply -v; else echo "no patch"; fi
           git -C ktests status --short
