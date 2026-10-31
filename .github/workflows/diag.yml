@@ -1428,11 +1428,14 @@ jobs:
   # non-invasive cdb stack dump, TERM, KILL, a strace attach, kill -f. Then the prototype variants
   # (no `<>`; coproc pipe; polling watchdog; no FIFO) at one load, and the ktests suite x3 with a
   # watcher that dumps any bash spinning in state R for 30 s.
+  # Phase 2 (L5.9 fix): the uncommitted ktests patch (coproc watchdog on cygwin) is applied
+  # to the checkout; stages: the runner's own spawn under stress (default backend, and the
+  # FIFO forced as the control), the ktests suite x5, the ktests gate x2.
   fifowedge:
     name: D11 windows fifo wedge (${{ matrix.slug }})
     if: contains(format(' {0} ', inputs.only), ' D11 ')
     runs-on: windows-latest
-    timeout-minutes: 110
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -1453,6 +1456,122 @@ jobs:
           update: false
           path-type: minimal
           install: git gnu-netcat gawk diffutils findutils grep sed curl openssl perl util-linux
+
+      # the uncommitted L5.9 ktests patch, applied to the checkout only (an empty block: none)
+      - name: D11a apply the L5.9 patch to ktests
+        shell: bash
+        run: |
+          base64 -d > "$RUNNER_TEMP/l59.patch.gz" <<'B64'
+          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
+          B64
+          if [[ -s "$RUNNER_TEMP/l59.patch.gz" ]]; then gzip -dc "$RUNNER_TEMP/l59.patch.gz" | git -C ktests apply -v; else echo "no patch"; fi
+          git -C ktests status --short
 
       - name: D11 tools
         shell: bash
@@ -1790,6 +1909,33 @@ jobs:
               wait $!
               printf '%s %s %s\n' "$I" "$t0" "$t0" >> "$D/t.$L"
           }
+
+          # real - the runner's own spawn (launch L5.9 phase 2): kt_runner_group_spawn
+          # from the ktests checkout in STRESS_KTESTS (sourced at top level, in lanes
+          # only), the backend as kt_runner_group_backend picks it (KT_RUNNER_WATCH
+          # forces one); the group's body records its pid and leaves; the runner waits
+          # for it and closes (kt_runner_group_close). A FIFO is removed when there is one.
+          if [[ "${1:-}" == lane && "${5:-}" == real && -n "${STRESS_KTESTS:-}" ]]; then
+              source "$STRESS_KTESTS/ktest.sh"
+          fi
+          _real_body() {   # L I DIR
+              rec "$BASHPID" sub "$3"
+              printf '%s b %s %s\n' "$2" "$BASHPID" "$EPOCHREALTIME" > "$3/b.$1"
+          }
+          lane_real() {
+              local L=$1 I=$2 D=$3 t0 t1
+              t0=$EPOCHREALTIME
+              printf '%s A %s %s\n' "$I" "$BASHPID" "$t0" > "$D/s.$L"
+              set -m
+              kt_runner_group_spawn "$D/f.$L.$I" "" _real_body "$L" "$I" "$D"
+              set +m
+              t1=$EPOCHREALTIME
+              printf '%s W %s %s\n' "$I" "$BASHPID" "$t1" > "$D/s.$L"
+              wait "$_KT_GROUP_PID"
+              kt_runner_group_close "$_KT_GROUP_WFD"
+              [[ -p "$D/f.$L.$I" ]] && rm -f -- "$D/f.$L.$I"
+              printf '%s %s %s\n' "$I" "$t0" "$t1" >> "$D/t.$L"
+          }
           D11VARIANTS
           cat > "$T/wdump.sh" <<'D11WDUMP'
           #!/usr/bin/env bash
@@ -1890,6 +2036,12 @@ jobs:
           #   variants  stress.sh rdwr wronly coproc poll nofifo at 8 lanes + 2 hogs, 150 s each
           #   suite     the ktests suite threaded (tests.sh) x3, each bounded 900 s, with
           #             wwatch.sh (spinning bash processes, dumped with wdump.sh)
+          #   real      (phase 2) stress.sh `real` = the runner's own kt_runner_group_spawn
+          #             from the checkout: the default backend at 4 lanes / 0 hogs and 8 / 2
+          #             (240 s each), and KT_RUNNER_WATCH=fifo at 4 / 0 (240 s, the control)
+          #   suite5    the ktests suite threaded x5 (bound 900 s each) + wwatch + the
+          #             stray check of the run's session after each run
+          #   gate2     the ktests gate (as ci.yml, this bash only) x2
           set +e
           stage=$1 D=$2 T=${D}/tools
           mkdir -p "$D"
@@ -1929,31 +2081,65 @@ jobs:
                   [[ -s "$w" ]] && { echo "---- $w"; cut -c1-240 "$w" | head -n 400; }
               done
               ;;
+          real)
+              for cfg in "4 0 -" "8 2 -" "4 0 fifo"; do
+                  set -- $cfg
+                  o="$D/real-$1-$2-$3"
+                  if [[ "$3" == fifo ]]; then export KT_RUNNER_WATCH=fifo; else unset KT_RUNNER_WATCH; fi
+                  STRESS_KTESTS="$PWD/ktests" STRESS_WDUMP=1 STRESS_DEADLINE=240 timeout -k 30 400 "$BASH" "$T/stress.sh" run "$1" 100000 20 "$2" "$o" real 2>&1 | grep -a -v '^cleanup' | tail -n 40
+                  [[ -s "$o/wdump.txt" ]] && { echo "---- $o/wdump.txt"; cut -c1-240 "$o/wdump.txt" | head -n 200; }
+              done
+              unset KT_RUNNER_WATCH
+              ;;
+          suite5)
+              sid=$(cat /proc/$$/sid)
+              for i in 1 2 3 4 5; do
+                  w="$D/swatch$i.log" stop="$D/swatch$i.stop"; : > "$w"; s0=$SECONDS; t0=$EPOCHREALTIME
+                  "$BASH" "$T/wwatch.sh" "$w" "$stop" "$T/wdump.sh" & wp=$!
+                  timeout -k 30 900 "$BASH" ktests/tests/tests.sh > "$D/suite5-$i.out" 2>&1
+                  rc=$?
+                  echo "=== suite5 run $i: rc=$rc dt=$(( SECONDS - s0 ))s"
+                  grep -aE '^(Total tests|Passed|Failed):|\[FAIL\] [0-9]{3}_|\[WARN\]' "$D/suite5-$i.out" | cut -c1-300
+                  touch "$stop"; wait "$wp"
+                  echo "--- strays of session $sid since run $i:"; "$BASH" ktests/tools/strays.sh list --all --session "$sid" --since "$t0" 2>&1 | head -20
+                  [[ -s "$w" ]] && { echo "---- $w"; cut -c1-240 "$w" | head -n 200; }
+              done
+              ;;
+          gate2)
+              export KT_GATE_BASHES="$BASH"
+              for i in 1 2; do
+                  OUT="$D/gate$i"; mkdir -p "$OUT"
+                  timeout -k 120 1100 "$BASH" ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 ktests > "$D/gate$i.out" 2>&1
+                  echo "=== gate $i: rc=$?"; tail -n 6 "$D/gate$i.out"
+                  for f in "$OUT"/cells/*/strays.txt "$OUT"/cells/*/rerun-*/strays.txt; do [[ -s "$f" ]] && { echo "== $f"; cat "$f"; }; done
+                  cut -f1,8,17,22 "$OUT/cells.tsv" 2>/dev/null
+              done
+              ;;
           esac
           exit 0
           D11RUN
           ls -l "$T"
 
-      - name: D11 git-bash (probe, stress, variants, suite)
+      - name: D11 git-bash (probe, real, suite5, gate2)
         if: matrix.slug == 'git-bash'
-        timeout-minutes: 95
+        timeout-minutes: 100
         shell: bash
         run: |
           set +e
           unset MSYSTEM
           GBASH="$(cygpath -u 'C:\Program Files\Git\usr\bin\bash.exe')"
           D="$(cygpath -u "$RUNNER_TEMP")/d11"
-          for s in probe stress variants suite; do echo "######## $s"; "$GBASH" "$D/tools/d11run.sh" "$s" "$D"; done
+          for s in probe real suite5 gate2; do echo "######## $s"; "$GBASH" "$D/tools/d11run.sh" "$s" "$D"; done
           true
 
-      - name: D11 msys2 (probe, stress, variants, suite)
+      - name: D11 msys2 (probe, real, suite5, gate2)
         if: matrix.slug == 'msys2'
-        timeout-minutes: 95
+        timeout-minutes: 100
         shell: msys2 {0}
         run: |
           set +e
           D="$(cygpath -u "$RUNNER_TEMP")/d11"
-          for s in probe stress variants suite; do echo "######## $s"; /usr/bin/bash "$D/tools/d11run.sh" "$s" "$D"; done
+          for s in probe real suite5 gate2; do echo "######## $s"; /usr/bin/bash "$D/tools/d11run.sh" "$s" "$D"; done
           true
 
       - name: D11 logs
