@@ -11,7 +11,10 @@
 # optionally with an uncommitted kklass/tests patch);
 # D10 = L5.8 windows git-bash: which ktests file leaves the orphan /usr/bin/bash
 # (sampled process table, the ktests suite x5 and the ktests gate x2, optionally
-# with an uncommitted ktests patch).
+# with an uncommitted ktests patch);
+# D11 = L5.9 windows (both rows): the cygwin FIFO wedge of the runner's group start
+# (a stress reproducer with wedge dumps, prototype variants, the ktests suite x3
+# with a spinning-process watcher).
 # Manual only (workflow_dispatch; input `only` names the jobs to run, e.g.
 # `gh workflow run diag.yml --ref main -f only=D4`); D1-D3 and D5 use no
 # checkout and no third-party action, D4/D6/D7/D8/D9 the pinned actions of ci.yml
@@ -22,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6 D7 D8 D9 D10)"
+        description: "jobs to run (space separated: D1 D2 D3 D4 D5 D6 D7 D8 D9 D10 D11)"
         required: false
         default: "D1 D2 D3"
 
@@ -1415,5 +1418,549 @@ jobs:
         with:
           name: d10-logs
           path: ${{ runner.temp }}/d10
+          retention-days: 5
+          if-no-files-found: warn
+
+  # D11 = L5.9 (ledger L58-o1, L66-o2): the cygwin FIFO wedge of the threaded runner's group start.
+  # Per runtime row (as ci.yml): stress.sh mimics the group start (mkfifo; exec {w}<>F; a forked
+  # subshell opens exec {r}<F, forks a reader, closes; the runner writes done) in many lanes at
+  # three loads; a lane that stalls 20 s is a WEDGE: /proc stat twice, Windows threads, a
+  # non-invasive cdb stack dump, TERM, KILL, a strace attach, kill -f. Then the prototype variants
+  # (no `<>`; coproc pipe; polling watchdog; no FIFO) at one load, and the ktests suite x3 with a
+  # watcher that dumps any bash spinning in state R for 30 s.
+  fifowedge:
+    name: D11 windows fifo wedge (${{ matrix.slug }})
+    if: contains(format(' {0} ', inputs.only), ' D11 ')
+    runs-on: windows-latest
+    timeout-minutes: 110
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: git-bash
+          - slug: msys2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: MSYS2 (msys2 row, as ci.yml)
+        if: matrix.slug == 'msys2'
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MSYS
+          update: false
+          path-type: minimal
+          install: git gnu-netcat gawk diffutils findutils grep sed curl openssl perl util-linux
+
+      - name: D11 tools
+        shell: bash
+        run: |
+          T="$(cygpath -u "$RUNNER_TEMP")/d11/tools"; mkdir -p "$T"
+          cat > "$T/stress.sh" <<'D11STRESS'
+          #!/usr/bin/env bash
+          # stress.sh - L5.9 reproducer of the ktests runner's group-start FIFO pattern.
+          #
+          #   [STRESS_DEADLINE=S] stress.sh run LANES ITERS STALL HOGS OUTDIR VARIANT
+          #
+          # LANES concurrent lanes each run ITERS "group starts" of VARIANT; HOGS busy
+          # loops add CPU load. A lane (or its group subshell) whose state does not move
+          # for STALL seconds is a WEDGE: its /proc stat is sampled twice 2 s apart
+          # (state, utime, stime in ms), then TERM, KILL and at last a Windows-side
+          # kill -f -9 (after its winpid and exename are checked again). Every pid
+          # started is recorded in OUTDIR/pids (pid winpid role); the EXIT trap and the
+          # deadline (STRESS_DEADLINE, default 400 s) kill what is left of them.
+          #
+          # VARIANT
+          #   cur      the runner today: mkfifo F; exec {w}<>F; ( exec {r}<F; close w;
+          #            { read -u r; } & ; close r ) & ; wait; printf done >&w; close w
+          #   rdwr     only the runner side: mkfifo F; exec {w}<>F; close w; rm F
+          #   nofifo   no FIFO, no watchdog: just the fork + wait (the control)
+          #   (prototype variants live in variants.sh as lane_<name>)
+          set -u
+          me=$0
+
+          # rec PID ROLE DIR - append "PID WINPID ROLE" to DIR/pids (no fork)
+          rec() {
+              local w=""
+              { read -r w < "/proc/$1/winpid"; } 2>/dev/null
+              printf '%s %s %s\n' "$1" "${w:-?}" "$2" >> "$3/pids"
+          }
+
+          lane_cur() {   # L I DIR
+              local L=$1 I=$2 D=$3 f w r t0 t1
+              f="$D/f.$L.$I"
+              mkfifo -- "$f" || { printf '%s mkfifo-fail\n' "$I" >> "$D/err.$L"; return 0; }
+              t0=$EPOCHREALTIME
+              printf '%s A %s %s\n' "$I" "$BASHPID" "$t0" > "$D/s.$L"
+              exec {w}<>"$f"
+              t1=$EPOCHREALTIME
+              printf '%s W %s %s\n' "$I" "$BASHPID" "$t1" > "$D/s.$L"
+              (
+                  trap '' TTOU TTIN
+                  rec "$BASHPID" sub "$D"
+                  printf '%s B %s %s\n' "$I" "$BASHPID" "$EPOCHREALTIME" > "$D/b.$L"
+                  if exec {r}<"$f"; then
+                      printf '%s b %s %s\n' "$I" "$BASHPID" "$EPOCHREALTIME" > "$D/b.$L"
+                      exec {w}>&-
+                      { IFS= read -r -u "$r" _l; exit 0; } >/dev/null 2>&1 &
+                      rec "$!" rdr "$D"
+                      exec {r}<&-
+                  fi
+                  :
+              ) < /dev/null &
+              wait $!
+              printf 'done\n' >&$w
+              exec {w}>&-
+              rm -f -- "$f"
+              printf '%s %s %s\n' "$I" "$t0" "$t1" >> "$D/t.$L"
+          }
+
+          lane_rdwr() {
+              local L=$1 I=$2 D=$3 f w t0 t1
+              f="$D/f.$L.$I"
+              mkfifo -- "$f" || { printf '%s mkfifo-fail\n' "$I" >> "$D/err.$L"; return 0; }
+              t0=$EPOCHREALTIME
+              printf '%s A %s %s\n' "$I" "$BASHPID" "$t0" > "$D/s.$L"
+              exec {w}<>"$f"
+              t1=$EPOCHREALTIME
+              exec {w}>&-
+              rm -f -- "$f"
+              printf '%s %s %s\n' "$I" "$t0" "$t1" >> "$D/t.$L"
+          }
+
+          lane_nofifo() {
+              local L=$1 I=$2 D=$3 t0
+              t0=$EPOCHREALTIME
+              printf '%s W %s %s\n' "$I" "$BASHPID" "$t0" > "$D/s.$L"
+              ( trap '' TTOU TTIN; : ) < /dev/null &
+              wait $!
+              printf '%s %s %s\n' "$I" "$t0" "$t0" >> "$D/t.$L"
+          }
+
+          [[ -f "${me%/*}/variants.sh" ]] && . "${me%/*}/variants.sh"
+
+          lane() {   # L ITERS DIR VARIANT
+              local L=$1 N=$2 D=$3 V=$4 i a b n=0 sum=0 mx=0
+              for (( i = 1; i <= N; i++ )); do
+                  a=$EPOCHREALTIME
+                  "lane_$V" "$L" "$i" "$D"
+                  b=$EPOCHREALTIME
+                  b=$(( 10#${b/./} - 10#${a/./} )); (( n++, sum += b )); (( b > mx )) && mx=$b
+                  printf '%s %s %s' "$n" "$sum" "$mx" > "$D/it.$L"
+              done
+              printf '%s E %s %s\n' "$N" "$BASHPID" "$EPOCHREALTIME" > "$D/s.$L"
+          }
+
+          # stat3 PID - REPLY = "STATE utime stime" from /proc/PID/stat ("-" when gone)
+          stat3() {
+              local l x
+              REPLY="-"
+              { IFS= read -r l < "/proc/$1/stat"; } 2>/dev/null || return 1
+              x=( ${l##*) } )
+              REPLY="${x[0]} ${x[11]} ${x[12]}"
+          }
+
+          # winkill PID WINPID - kill -f -9 PID when it still has WINPID and is a bash
+          winkill() {
+              local w="" e=""
+              { read -r w < "/proc/$1/winpid"; read -r e < "/proc/$1/exename"; } 2>/dev/null
+              [[ -n "$w" && "$w" == "$2" && "$e" == */bash ]] || return 1
+              timeout -k 2 20 "${BASH%/*}/kill" -f -9 "$1" </dev/null >/dev/null 2>&1
+          }
+
+          G_D=""
+          G_PG=""; { read -r G_PG < "/proc/$BASHPID/pgid"; } 2>/dev/null
+          cleanup() {
+              local p w r
+              [[ -n "$G_D" && -f "$G_D/pids" ]] || return 0
+              while read -r p w r; do
+                  [[ -d "/proc/$p" ]] || continue
+                  # ours: same process group as this supervisor (lanes, subshells, readers
+                  # and hogs never get a group of their own); the winpid recorded at fork
+                  # time may be the pre-exec one
+                  local g2="" w2=""; { read -r g2 < "/proc/$p/pgid"; read -r w2 < "/proc/$p/winpid"; } 2>/dev/null
+                  [[ -n "$g2" && "$g2" == "$G_PG" ]] || continue
+                  kill -KILL "$p" 2>/dev/null
+                  sleep 0.2
+                  [[ -d "/proc/$p" ]] && winkill "$p" "$w2" && echo "cleanup: winkill $p ($r)"
+              done < "$G_D/pids"
+          }
+
+          run() {
+              local lanes=$1 iters=$2 stall=$3 hogs=$4 D=$5 V=$6 i p w now line f
+              mkdir -p "$D"; : > "$D/pids"; : > "$D/wedges"
+              local -a lp=() hp=()
+              local -A last=() since=() done_=()
+              G_D=$D
+              trap 'cleanup' EXIT
+              trap 'exit 143' TERM INT HUP
+              local dls=${STRESS_DEADLINE:-400}
+              for (( i = 0; i < hogs; i++ )); do
+                  timeout -k 2 $(( dls + 30 )) "$BASH" -c 'while :; do :; done' &
+                  hp+=($!); rec "$!" hog "$D"
+              done
+              for (( i = 0; i < lanes; i++ )); do
+                  "$BASH" "$me" lane "$i" "$iters" "$D" "$V" &
+                  lp+=($!); rec "$!" "lane$i" "$D"
+              done
+              local t_start=$EPOCHREALTIME dl=$(( ${EPOCHREALTIME%.*} + dls ))
+              while :; do
+                  if (( ${EPOCHREALTIME%.*} > dl )); then echo "DEADLINE reached"; break; fi
+                  local alive=0
+                  now=${EPOCHREALTIME%.*}
+                  for (( i = 0; i < lanes; i++ )); do
+                      [[ -n "${done_[$i]-}" ]] && continue
+                      line=""; { IFS= read -r line < "$D/s.$i"; } 2>/dev/null
+                      if [[ "$line" == *" E "* ]] || ! [[ -d "/proc/${lp[$i]}" ]]; then
+                          done_[$i]=1; continue
+                      fi
+                      alive=1
+                      local bl=""; { IFS= read -r bl < "$D/b.$i"; } 2>/dev/null
+                      if [[ "$line|$bl" != "${last[$i]-}" ]]; then
+                          last[$i]="$line|$bl"; since[$i]=$now; continue
+                      fi
+                      (( now - ${since[$i]} >= stall )) || continue
+                      # a WEDGE: which process and which stage
+                      set -- $line; local it=$1 stg=$2 pid=$3
+                      if [[ "$stg" == W ]]; then
+                          set -- $bl
+                          if [[ "${1:-}" == "$it" && -d "/proc/$3" ]]; then stg="$2"; pid=$3
+                          elif [[ "${1:-}" == "$it" ]]; then stg="W-afterchild($2 $3 gone)"
+                          else stg="W-nochild"; fi
+                      fi
+                      stat3 "$pid"; local s1=$REPLY; sleep 2; stat3 "$pid"; local s2=$REPLY
+                      w=""; { read -r w < "/proc/$pid/winpid"; } 2>/dev/null
+                      local cmd=""; { cmd=$(tr '\0' ' ' < "/proc/$pid/cmdline"); } 2>/dev/null
+                      printf 'WEDGE lane=%s iter=%s stage=%s pid=%s winpid=%s stalled>=%ss stat[t]=%s stat[t+2s]=%s cmd=[%s]\n' \
+                          "$i" "$it" "$stg" "$pid" "$w" "$stall" "$s1" "$s2" "${cmd:0:120}" | tee -a "$D/wedges"
+                      local kids="" kd
+                      for kd in /proc/[0-9]*; do
+                          local kp=""; { read -r kp < "$kd/ppid"; } 2>/dev/null
+                          [[ "$kp" == "$pid" ]] && kids+="${kd#/proc/} "
+                      done
+                      printf '      children of %s: %s\n' "$pid" "${kids:-none}" | tee -a "$D/wedges"
+                      local wd="${me%/*}/wdump.sh" q
+                      if [[ -n "${STRESS_WDUMP:-}" && -f "$wd" ]]; then
+                          for q in $pid $kids; do "$BASH" "$wd" "$q" look >> "$D/wdump.txt" 2>&1; done
+                      fi
+                      kill -TERM "$pid" 2>/dev/null; sleep 1
+                      stat3 "$pid"; local s3=$REPLY
+                      kill -KILL "$pid" 2>/dev/null; sleep 1
+                      stat3 "$pid"; local s4=$REPLY
+                      if [[ -n "${STRESS_WDUMP:-}" && -f "$wd" ]]; then
+                          for q in $pid $kids; do "$BASH" "$wd" "$q" strace >> "$D/wdump.txt" 2>&1; done
+                      fi
+                      local wk=no
+                      if [[ -d "/proc/$pid" && -n "$w" ]]; then winkill "$pid" "$w" && wk=yes; sleep 0.5; fi
+                      for q in $kids; do
+                          local qw=""; { read -r qw < "/proc/$q/winpid"; } 2>/dev/null
+                          [[ -n "$qw" ]] && { kill -KILL "$q" 2>/dev/null; sleep 0.3; [[ -d "/proc/$q" ]] && winkill "$q" "$qw"; }
+                      done
+                      stat3 "$pid"
+                      printf '      after TERM: %s; after KILL: %s; winkill=%s; now: %s\n' "$s3" "$s4" "$wk" "$REPLY" | tee -a "$D/wedges"
+                      since[$i]=$now; last[$i]=""
+                  done
+                  (( alive )) || break
+                  sleep 1
+              done
+              for p in "${hp[@]}"; do kill "$p" 2>/dev/null; done
+              for p in "${lp[@]}"; do kill "$p" 2>/dev/null; done
+              sleep 1
+              cleanup
+              local nw; nw=$(grep -c '^WEDGE' "$D/wedges")
+              local tot=0 mx=0 sum=0 it ta tb dt
+              for f in "$D"/t.*; do
+                  [[ -f "$f" ]] || continue
+                  while read -r it ta tb; do
+                      (( tot++ ))
+                      dt=$(( (10#${tb/./} - 10#${ta/./}) / 1000 ))
+                      (( dt > mx )) && mx=$dt
+                      (( sum += dt ))
+                  done < "$f"
+              done
+              local in=0 isum=0 imx=0 a b c
+              for f in "$D"/it.*; do
+                  [[ -f "$f" ]] || continue
+                  read -r a b c < "$f"
+                  (( in += a, isum += b )); (( c > imx )) && imx=$c
+              done
+              local el=$(( (10#${EPOCHREALTIME/./} - 10#${t_start/./}) / 1000000 ))
+              printf 'RESULT variant=%s bash=%s lanes=%s iters=%s hogs=%s completed=%s wedges=%s open_max_ms=%s open_avg_ms=%s iter_avg_ms=%s iter_max_ms=%s elapsed_s=%s\n' \
+                  "$V" "${BASH_VERSION}" "$lanes" "$iters" "$hogs" "$tot" "$nw" "$mx" "$(( tot ? sum / tot : 0 ))" "$(( in ? isum / in / 1000 : 0 ))" "$(( imx / 1000 ))" "$el" | tee -a "$D/result"
+          }
+
+          case "${1:-}" in
+              lane) shift; lane "$@" ;;
+              run)  shift; run "$@" ;;
+              *) echo "usage: $0 run LANES ITERS STALL HOGS OUTDIR VARIANT" >&2; exit 2 ;;
+          esac
+          D11STRESS
+          cat > "$T/variants.sh" <<'D11VARIANTS'
+          # variants.sh - prototype lanes for stress.sh (sourced). Each mimics one group
+          # start + normal end of the runner under one option; same state protocol as
+          # lane_cur (s.L: "I A|W pid t"; b.L: "I B|b pid t"; t.L: "I t0 t1").
+
+          # (b) no `<>`: the child opens the read end (blocks until a writer), the
+          # runner opens write-only (blocks until a reader). Pure reader + pure writer.
+          lane_wronly() {
+              local L=$1 I=$2 D=$3 f w t0 t1 cp
+              f="$D/f.$L.$I"
+              mkfifo -- "$f" || { printf '%s mkfifo-fail\n' "$I" >> "$D/err.$L"; return 0; }
+              t0=$EPOCHREALTIME
+              (
+                  trap '' TTOU TTIN
+                  rec "$BASHPID" sub "$D"
+                  printf '%s B %s %s\n' "$I" "$BASHPID" "$EPOCHREALTIME" > "$D/b.$L"
+                  if exec {r}<"$f"; then
+                      printf '%s b %s %s\n' "$I" "$BASHPID" "$EPOCHREALTIME" > "$D/b.$L"
+                      { IFS= read -r -u "$r" _l; exit 0; } >/dev/null 2>&1 &
+                      rec "$!" rdr "$D"
+                      exec {r}<&-
+                  fi
+                  :
+              ) < /dev/null &
+              cp=$!
+              printf '%s A %s %s\n' "$I" "$BASHPID" "$t0" > "$D/s.$L"
+              exec {w}>"$f"
+              t1=$EPOCHREALTIME
+              printf '%s W %s %s\n' "$I" "$BASHPID" "$t1" > "$D/s.$L"
+              wait "$cp"
+              printf 'done\n' >&$w
+              exec {w}>&-
+              rm -f -- "$f"
+              printf '%s %s %s\n' "$I" "$t0" "$t1" >> "$D/t.$L"
+          }
+
+          # (a1) no FIFO: the group subshell is a coproc; the runner keeps the write end
+          # of the coproc's stdin pipe, the group moves that read end to a new fd, puts
+          # /dev/null on stdin and gives the fd to the watchdog.
+          lane_coproc() {
+              local L=$1 I=$2 D=$3 w t0 t1 cp
+              t0=$EPOCHREALTIME
+              printf '%s A %s %s\n' "$I" "$BASHPID" "$t0" > "$D/s.$L"
+              coproc KTW {
+                  trap '' TTOU TTIN
+                  rec "$BASHPID" sub "$D"
+                  printf '%s b %s %s\n' "$I" "$BASHPID" "$EPOCHREALTIME" > "$D/b.$L"
+                  exec {r}<&0 0</dev/null 1>/dev/null
+                  { IFS= read -r -u "$r" _l; exit 0; } >/dev/null 2>&1 &
+                  rec "$!" rdr "$D"
+                  exec {r}<&-
+                  :
+              }
+              cp=$KTW_PID
+              exec {w}>&"${KTW[1]}"
+              t1=$EPOCHREALTIME
+              printf '%s W %s %s\n' "$I" "$BASHPID" "$t1" > "$D/s.$L"
+              wait "$cp" 2>/dev/null
+              printf 'done\n' >&$w
+              exec {w}>&-
+              printf '%s %s %s\n' "$I" "$t0" "$t1" >> "$D/t.$L"
+          }
+
+          # (a2) no FIFO: the watchdog polls the runner (kill -0 + /proc state, no fork)
+          # and naps on a pty master (read -t, no fork); the group shell ends its own
+          # watchdog at its end. TICK = KT_POLL_TICK (default 0.5 s).
+          lane_poll() {
+              local L=$1 I=$2 D=$3 t0 rp=$BASHPID
+              t0=$EPOCHREALTIME
+              printf '%s W %s %s\n' "$I" "$BASHPID" "$t0" > "$D/s.$L"
+              (
+                  trap '' TTOU TTIN
+                  rec "$BASHPID" sub "$D"
+                  printf '%s b %s %s\n' "$I" "$BASHPID" "$EPOCHREALTIME" > "$D/b.$L"
+                  {
+                      trap '' TSTP
+                      exec {n}<>/dev/ptmx
+                      local st=""
+                      while kill -0 "$rp" 2>/dev/null; do
+                          st=""; { IFS= read -r st < "/proc/$rp/stat"; } 2>/dev/null
+                          st=${st##*) }; [[ "${st%% *}" == Z ]] && break
+                          read -r -t "${KT_POLL_TICK:-0.5}" -u "$n" _x
+                      done
+                      exit 0
+                  } >/dev/null 2>&1 &
+                  local wd=$!
+                  rec "$wd" rdr "$D"
+                  :          # the group's work
+                  kill "$wd" 2>/dev/null
+              ) < /dev/null &
+              wait $!
+              printf '%s %s %s\n' "$I" "$t0" "$t0" >> "$D/t.$L"
+          }
+          D11VARIANTS
+          cat > "$T/wdump.sh" <<'D11WDUMP'
+          #!/usr/bin/env bash
+          # wdump.sh PID [look|strace|all] - everything we can learn about a (wedged) cygwin process
+          # without changing it: /proc view, Windows threads (state, wait reason, CPU),
+          # (when cdb exists) a non-invasive stack dump of every thread (msys-2.0.dll
+          # symbols resolved to the nearest export), and LAST a 4 s cygwin strace attach
+          # (its detach kills the target: the caller kills it anyway).
+          p=$1 mode=${2:-all}
+          w=""; { read -r w < "/proc/$p/winpid"; } 2>/dev/null
+          [[ -n "$w" ]] || { echo "wdump: $p gone"; exit 0; }
+          echo "== wdump pid $p winpid $w ($mode)"
+          if [[ "$mode" != strace ]]; then
+          for k in ppid pgid sid exename; do printf '   %s=%s\n' "$k" "$(cat "/proc/$p/$k" 2>/dev/null)"; done
+          printf '   cmdline=[%s]\n' "$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null | cut -c1-200)"
+          printf '   stat=[%s]\n' "$(cat "/proc/$p/stat" 2>/dev/null)"
+          printf '   fds: '; for f in /proc/$p/fd/*; do printf '%s->%s ' "${f##*/}" "$(readlink "$f" 2>/dev/null)"; done; echo
+          PS=$(cygpath -u "${SYSTEMROOT:-C:\\Windows}")/System32/WindowsPowerShell/v1.0/powershell.exe
+          for r in 1 2; do
+              echo "== threads of winpid $w (sample $r)"
+              timeout -k 5 40 "$PS" -NoProfile -Command "\$p = Get-Process -Id $w -ErrorAction SilentlyContinue; if (\$p) { 'proc cpu user ' + \$p.UserProcessorTime.TotalMilliseconds + ' ms, kernel ' + \$p.PrivilegedProcessorTime.TotalMilliseconds + ' ms'; \$p.Threads | ForEach-Object { 'tid {0} state {1} wait {2} prio {3} user {4} ms kernel {5} ms start 0x{6:X}' -f \$_.Id, \$_.ThreadState, \$(if (\$_.ThreadState -eq 'Wait') { \$_.WaitReason } else { '-' }), \$_.CurrentPriority, [int]\$_.UserProcessorTime.TotalMilliseconds, [int]\$_.PrivilegedProcessorTime.TotalMilliseconds, [int64]\$_.StartAddress } }" 2>&1 | tr -d '\r'
+              sleep 2
+          done
+          for c in "/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe" "/c/Program Files/Windows Kits/10/Debuggers/x64/cdb.exe"; do
+              [[ -x "$c" ]] || continue
+              echo "== cdb -pv stacks of winpid $w"
+              MSYS2_ARG_CONV_EXCL='*' timeout -k 5 90 "$c" -pv -p "$w" -c ".symopt+0x40; ~* k 25; qd" 2>&1 | tr -d '\r' | grep -v '^\s*$' | grep -iv 'symbol\|deferred\|\*\*\*' | cut -c1-200 | head -150
+              break
+          done
+          fi
+          st=$(command -v strace)
+          if [[ "$mode" != look && -n "$st" ]]; then
+              echo "== strace -p $w for 4 s (last 60 lines; the detach KILLS the target)"
+              o=$(mktemp); timeout -k 2 4 "$st" -p "$w" -o "$o" >/dev/null 2>&1
+              tail -n 60 "$o" | cut -c1-240; echo "   ($(wc -l < "$o") lines)"; rm -f "$o"
+          fi
+          D11WDUMP
+          cat > "$T/wwatch.sh" <<'D11WWATCH'
+          #!/usr/bin/env bash
+          # wwatch.sh OUT STOPFILE [WDUMP] - watch for SPINNING bash processes until
+          # STOPFILE exists or the parent dies. Every 3 s: each bash's /proc stat
+          # (state, utime, stime in ms). A pid in state R in 10 samples in a row (30 s)
+          # whose CPU grew >= 5 s in that window, kernel time >= user time, is a
+          # SPINNER: one line in OUT with its ancestry (pid ppid pgid cmdline of each
+          # ancestor), then (WDUMP given) `wdump.sh PID look` (threads, cdb), then
+          # `wdump.sh PID strace` (its detach kills the target). Each pid once.
+          out=$1 stop=$2 wd=${3:-} owner=$PPID me=$BASHPID
+          declare -A nR=() c0=() seen=() kt0=()
+          exec 9>>"$out"
+          anc() {
+              local q=$1 i l pp pg c
+              for (( i = 0; i < 10 && q > 1; i++ )); do
+                  pp=""; pg=""; { read -r pp < "/proc/$q/ppid"; read -r pg < "/proc/$q/pgid"; } 2>/dev/null
+                  c=""; { c=$(tr '\0' ' ' < "/proc/$q/cmdline"); } 2>/dev/null
+                  printf '   [%s] pid %s ppid %s pgid %s :: %s\n' "$i" "$q" "${pp:-?}" "${pg:-?}" "${c:0:220}" >&9
+                  [[ -n "$pp" ]] || break
+                  q=$pp
+              done
+          }
+          while [[ ! -e "$stop" ]] && kill -0 "$owner" 2>/dev/null; do
+              for d in /proc/[0-9]*; do
+                  p=${d#/proc/}
+                  [[ "$p" == "$me" ]] && continue
+                  e=""; { read -r e < "$d/exename"; } 2>/dev/null
+                  [[ "$e" == */bash ]] || continue
+                  l=""; { IFS= read -r l < "$d/stat"; } 2>/dev/null || continue
+                  x=( ${l##*) } )
+                  st=${x[0]} ut=${x[11]} kt=${x[12]}
+                  if [[ "$st" != R ]]; then nR[$p]=0; continue; fi
+                  if (( ${nR[$p]:-0} == 0 )); then c0[$p]=$(( ut + kt )); kt0[$p]=$kt; fi
+                  nR[$p]=$(( ${nR[$p]:-0} + 1 ))
+                  (( nR[$p] >= 10 )) || continue
+                  [[ -n "${seen[$p]-}" ]] && continue
+                  dc=$(( ut + kt - ${c0[$p]} )); dk=$(( kt - ${kt0[$p]} ))
+                  if (( dc >= 5000 && dk * 2 >= dc )); then
+                      seen[$p]=1
+                      printf '%s SPINNER pid %s state R x%s cpu+%sms (kernel +%sms) stat=[%s]\n' "$EPOCHREALTIME" "$p" "${nR[$p]}" "$dc" "$dk" "$l" >&9
+                      anc "$p"
+                      k=""; for kd in /proc/[0-9]*; do kp=""; { read -r kp < "$kd/ppid"; } 2>/dev/null; [[ "$kp" == "$p" ]] && k+="${kd#/proc/} "; done
+                      printf '   children: %s\n' "${k:-none}" >&9
+                      if [[ -n "$wd" ]]; then
+                          "$BASH" "$wd" "$p" look >&9 2>&1
+                          for q in $k; do "$BASH" "$wd" "$q" look >&9 2>&1; done
+                          "$BASH" "$wd" "$p" strace >&9 2>&1
+                      fi
+                  else
+                      nR[$p]=0
+                  fi
+              done
+              sleep 3
+          done
+          D11WWATCH
+          cat > "$T/d11run.sh" <<'D11RUN'
+          #!/usr/bin/env bash
+          # d11run.sh STAGE DIR - L5.9 diag driver, run by the row's own bash.
+          #   probe     runtime, CPUs, tools (strace, cdb, kill -f)
+          #   stress    stress.sh `cur` (the runner's group-start pattern) at 3 loads, 240 s each
+          #   variants  stress.sh rdwr wronly coproc poll nofifo at 8 lanes + 2 hogs, 150 s each
+          #   suite     the ktests suite threaded (tests.sh) x3, each bounded 900 s, with
+          #             wwatch.sh (spinning bash processes, dumped with wdump.sh)
+          set +e
+          stage=$1 D=$2 T=${D}/tools
+          mkdir -p "$D"
+          case "$stage" in
+          probe)
+              "$BASH" --version | sed -n 1p; uname -a; echo "nproc=$(nproc)"
+              echo "strace=$(command -v strace || echo none)"
+              for c in "/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe" "/c/Program Files/Windows Kits/10/Debuggers/x64/cdb.exe"; do
+                  [[ -x "$c" ]] && echo "cdb=$c"
+              done
+              "${BASH%/*}/kill" --help 2>&1 | grep -i -- '-f' | head -2
+              ;;
+          stress)
+              for cfg in "4 0" "8 2" "16 4"; do
+                  set -- $cfg
+                  o="$D/stress-$1-$2"
+                  STRESS_WDUMP=1 STRESS_DEADLINE=240 timeout -k 30 400 "$BASH" "$T/stress.sh" run "$1" 100000 20 "$2" "$o" cur 2>&1 | grep -a -v '^cleanup' | tail -n 40
+                  [[ -s "$o/wdump.txt" ]] && { echo "---- $o/wdump.txt"; cut -c1-240 "$o/wdump.txt" | head -n 400; }
+              done
+              ;;
+          variants)
+              for v in rdwr wronly coproc poll nofifo; do
+                  o="$D/var-$v"
+                  STRESS_WDUMP=1 STRESS_DEADLINE=150 timeout -k 30 300 "$BASH" "$T/stress.sh" run 8 100000 20 2 "$o" "$v" 2>&1 | grep -a -v '^cleanup' | tail -n 30
+                  [[ -s "$o/wdump.txt" ]] && { echo "---- $o/wdump.txt"; cut -c1-240 "$o/wdump.txt" | head -n 300; }
+              done
+              ;;
+          suite)
+              for i in 1 2 3; do
+                  w="$D/watch$i.log" stop="$D/watch$i.stop"; : > "$w"; s0=$SECONDS
+                  "$BASH" "$T/wwatch.sh" "$w" "$stop" "$T/wdump.sh" & wp=$!
+                  timeout -k 30 900 "$BASH" ktests/tests/tests.sh > "$D/suite$i.out" 2>&1
+                  rc=$?
+                  echo "=== suite run $i: rc=$rc dt=$(( SECONDS - s0 ))s"
+                  grep -aE '^(Total tests|Passed|Failed):|\[FAIL\] [0-9]{3}_' "$D/suite$i.out" | cut -c1-300
+                  touch "$stop"; wait "$wp"
+                  [[ -s "$w" ]] && { echo "---- $w"; cut -c1-240 "$w" | head -n 400; }
+              done
+              ;;
+          esac
+          exit 0
+          D11RUN
+          ls -l "$T"
+
+      - name: D11 git-bash (probe, stress, variants, suite)
+        if: matrix.slug == 'git-bash'
+        timeout-minutes: 95
+        shell: bash
+        run: |
+          set +e
+          unset MSYSTEM
+          GBASH="$(cygpath -u 'C:\Program Files\Git\usr\bin\bash.exe')"
+          D="$(cygpath -u "$RUNNER_TEMP")/d11"
+          for s in probe stress variants suite; do echo "######## $s"; "$GBASH" "$D/tools/d11run.sh" "$s" "$D"; done
+          true
+
+      - name: D11 msys2 (probe, stress, variants, suite)
+        if: matrix.slug == 'msys2'
+        timeout-minutes: 95
+        shell: msys2 {0}
+        run: |
+          set +e
+          D="$(cygpath -u "$RUNNER_TEMP")/d11"
+          for s in probe stress variants suite; do echo "######## $s"; /usr/bin/bash "$D/tools/d11run.sh" "$s" "$D"; done
+          true
+
+      - name: D11 logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: d11-logs-${{ matrix.slug }}
+          path: ${{ runner.temp }}/d11
           retention-days: 5
           if-no-files-found: warn
