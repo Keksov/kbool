@@ -35,6 +35,8 @@ delete, quit), and leaves nothing behind.
 
 ## Requirements
 bash 5.1 or newer, `curl`, and a listener for the server: GNU netcat 0.7.1
-(on Windows the one from MSYS2) or `socat` 1.7.4 or newer (`apt install
-socat`). The service is plain HTTP without authentication: keep it on
+(on Windows the one from MSYS2) or `socat` 1.7.4 or newer. Install one:
+Debian/Ubuntu `apt install socat`; Fedora `dnf install socat`; Alpine `apk add
+socat`; FreeBSD `pkg install socat` or `pkg install gnetcat`; macOS `brew
+install socat`. The service is plain HTTP without authentication: keep it on
 127.0.0.1. Its test is [tests/](tests/001_Notes.sh), suite id `examples`.

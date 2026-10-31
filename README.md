@@ -105,7 +105,11 @@ described in [Loading kbool](docs/reference.md#loading-kbool).
 ## Requirements
 
 **bash ≥ 5.1.** `kbool.sh` refuses an older bash (macOS's `/bin/bash` 3.2, for example) with
-exit 2 and one line on stderr. On macOS, use Homebrew's bash.
+exit 2 and one line on stderr. Where the system has no bash that new: macOS `brew install bash`,
+FreeBSD `pkg install bash` (FreeBSD has no `/bin/bash`; run scripts as `bash file`, or start them
+with `#!/usr/bin/env bash`).
+
+Installing packages needs root: `sudo apt install …`, `sudo pkg install …`.
 
 What else a unit runs comes from the per-unit inventory of external commands (an internal
 development file: [`docs/dev/launch/tools.tsv`](docs/dev/launch/tools.tsv)):
@@ -128,8 +132,10 @@ The split:
   install: FreeBSD `pkg install gsed`, macOS `brew install gnu-sed`, Alpine `apk add sed`.
   Debian and Ubuntu need `gawk` (their default awk is mawk). The full table is in
   [kkore/README.md §7](kkore/README.md#7-the-gnu-tool-resolver-ktoolsh).
-* **`thttpserver` needs GNU netcat or socat**: Homebrew `netcat`, FreeBSD `netcat`, MSYS2
+* **`thttpserver` needs GNU netcat or socat**: Homebrew `netcat`, FreeBSD `pkg install gnetcat` (not
+  FreeBSD's `netcat` package: that is netcat 1.10 and is refused), MSYS2
   `gnu-netcat`, otherwise `socat` ([details](kcl/thttpserver/README.md#network-backend)).
+  `KCL_NC=/path/to/nc` points kbool at a GNU netcat with another name or location.
 
 ## Platforms
 
@@ -154,7 +160,8 @@ their packages with [`.github/ci/linux.sh`](.github/ci/linux.sh).
 | `windows (msys2)` | Windows, `windows-latest` | MSYS2 (GNU) | MSYS2 bash |
 
 The `macos (bsd tools …)` row also checks that `/bin/bash` 3.2 is refused. On the rows without
-a GNU tool, the wrapper tests are counted as `SKIP` with the reason.
+a GNU tool, each wrapper test case still passes, with a `SKIP: <reason>` text (visible with
+`--verbosity info`), so the counts stay equal on every row.
 
 ## The portability layer ("the zoo")
 
@@ -250,6 +257,9 @@ From the kbool root, every suite under the bash you start it with:
 ```bash
 bash ktests/tools/gate.sh all
 ```
+
+With a single bash the gate prints `[WARN] one runtime only` — that is expected; CONTRIBUTING shows
+how to run two runtimes.
 
 More options (one suite, `--changed`, two runtimes at once, running a suite directly), what CI
 checks and the house rules: [CONTRIBUTING.md](CONTRIBUTING.md#run-the-tests--one-command).

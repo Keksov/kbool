@@ -37,7 +37,9 @@
     "OG15": "2026-10-30 owner: default branch of kcl/kklass/ktests switched to main by SV via gh api; GitHub protection settings applied by the owner from an English checklist.",
     "OG16": "2026-10-30 owner: only the owner merges into main and every PR must be green in CI; keep the admin bypass (direct pushes keep working; never tick the bypass checkbox on a red PR). Applied by SV via gh api (rulesets 'main', 13 required checks, restrict updates).",
     "OG4": "2026-10-31 owner: repo descriptions + topics as proposed by SV; applied by SV via gh repo edit.",
-    "OG17": "2026-10-31 owner: security reports via GitHub private vulnerability reporting (SV enabled it in all five repos; SECURITY.md points there); README status line 'pre-release - no tagged version yet; the API may still change before the first release'."
+    "OG17": "2026-10-31 owner: security reports via GitHub private vulnerability reporting (SV enabled it in all five repos; SECURITY.md points there); README status line 'pre-release - no tagged version yet; the API may still change before the first release'.",
+    "OG5": "2026-11-01 owner: the first release is 0.1.0, one version number (tag) for all five repos; the README status line becomes '0.x: the API may still change between minor versions' at tagging.",
+    "OG18": "2026-11-01 owner: L7.3 may download and run the asciinema/agg release binary inside the kb-ubuntu lab VM (VM reset to clean afterwards)."
   },
   "pending_owner_decisions": {
     "OG1": {
@@ -779,8 +781,9 @@
       "dep": [
         "L6.8"
       ],
-      "card": "draft",
-      "status": "planned"
+      "card": "scratchpad launch/L8.1/card.md",
+      "status": "DONE 2026-11-01 (Sonnet worker): README from GitHub main followed word by word on kb-ubuntu (clean) and kb-freebsd (clean). Ubuntu 24.04 bash 5.2.21: worked as written, gate all __GATE__:PASS:31:31:0:0:0:0:0:9730:9730. FreeBSD 15.1 pkg bash 5.3.20: 3 frictions, all in the demo's netcat prerequisite (README said FreeBSD `netcat` = netcat 1.10, refused; `pkg install gnetcat` installs `gnetcat`, not auto-detected; the error led with `apt install socat`); worked with socat; gate all __GATE__:PASS:31:31:0:0:0:0:0:9707:9707 with no GNU wrapper tools. Also: README said wrapper tests are 'counted as SKIP' (they pass with a SKIP: reason); gate's one-runtime WARN; notes.ini dirtied the clone. Friction tables: scratchpad launch/L8.1/friction.md.",
+      "done": "2026-11-01"
     },
     "L8.2": {
       "executor": "O->S",
@@ -788,8 +791,9 @@
       "dep": [
         "L8.1"
       ],
-      "card": null,
-      "status": "planned"
+      "card": "scratchpad launch/L8.2/card.md",
+      "status": "DONE 2026-11-01 (Sonnet worker, SV review; kcl a90a70c): thttpserver auto backend tries GNU `gnetcat` on PATH after a missing/non-GNU nc, before socat (008 §5, 5 stub cases); README Requirements (bash via brew/pkg, root for packages, FreeBSD pkg install gnetcat, KCL_NC), the SKIP wording, the one-runtime WARN; notes.sh/examples README per-platform install hints; /notes.ini in .gitignore. Gate kcl/thttpserver examples kkore __GATE__:PASS:6:6:0:0:0:0:0:2658:2658.",
+      "done": "2026-11-01"
     },
     "L8.3": {
       "executor": "OW",

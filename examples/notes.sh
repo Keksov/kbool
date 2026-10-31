@@ -200,7 +200,7 @@ if ! App.Initialize; then                       # --port / -p / --address
 fi
 ths._backend                                    # which listener will the server use?
 if [[ "$__THS_BACKEND" != gnu && "$__THS_BACKEND" != socat ]]; then
-    echo "notes: no network listener - install GNU netcat or socat (apt install socat) [$__THS_BACKEND_WHY]" >&2
+    echo "notes: no network listener - install socat or GNU netcat (Debian/Ubuntu: apt install socat; Fedora: dnf install socat; Alpine: apk add socat; FreeBSD: pkg install socat or gnetcat; macOS: brew install socat) [$__THS_BACKEND_WHY]" >&2
     App.delete
     exit 2
 fi
