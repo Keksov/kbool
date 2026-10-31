@@ -769,8 +769,9 @@
       "dep": [
         "L7.4"
       ],
-      "card": null,
-      "status": "planned"
+      "card": "scratchpad launch/L7.5/card.md",
+      "status": "DONE 2026-11-01 (Opus worker, SV review): docs/benchmarks.md (128 lines: summary, the 14-figure table Ubuntu VM vs Windows Git-bash with bash baselines first, why a fork dominates, method + reproduce command, caveats - not a platform comparison, wrapper fixed cost 2.1x-7.4x over the bare tool on Linux vs 1.2x-1.4x on Windows, bench gates calibrated on Windows, thttpserver network part not run - and when not to use kbool). Every figure mapped to bench-*.json keys or raw lines. README Reference links it.",
+      "done": "2026-11-01"
     },
     "L8.1": {
       "executor": "S",
@@ -946,6 +947,7 @@
     "L72K-o1": "L7.2-K critic risks: a cache compiled on Linux keeps raw CRs and loses them when sourced on MSYS (caches are per machine in practice); the kk._fn_text $( ) fallback may already drop CRs on MSYS2 (unverified); the helper's rc 1 is silent.",
     "L72-o1": "README curl examples rely on NO_PROXY for localhost on machines that export HTTP_PROXY (notes_session.sh exports NO_PROXY; the thttpserver README has the same note).",
     "L74-o1": "kcl/thttpserver/bench.sh parts (b)-(d) SKIP on both platforms: tests/_ths_socket.sh calls kt_need_timeout, which the bench never loads (bench defect).",
-    "L74-o2": "Wrapper benches (tawk, tfind, tgrep, thead, tsed, ttail) print FAIL against their ratio gates on Linux (2.1x-7.4x vs 1.3-1.5x) while exiting 0: the gates were calibrated on Windows where the bare tool costs a 16 ms fork; on Linux the bare tool is cheap so the wrapper's fixed in-shell cost dominates. L7.5 must not quote them as passing; recalibrate or state per platform."
+    "L74-o2": "Wrapper benches (tawk, tfind, tgrep, thead, tsed, ttail) print FAIL against their ratio gates on Linux (2.1x-7.4x vs 1.3-1.5x) while exiting 0: the gates were calibrated on Windows where the bare tool costs a 16 ms fork; on Linux the bare tool is cheap so the wrapper's fixed in-shell cost dominates. L7.5 must not quote them as passing; recalibrate or state per platform.",
+    "L75-o1": "kklass/bench/kklass_bench.sh labels the computed-read row '(F7: forks per read)'; 673 us on Windows rules out a fork per read - stale label."
   }
 }

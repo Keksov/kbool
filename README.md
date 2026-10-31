@@ -240,6 +240,7 @@ notes [kklass/docs/dev/USES_PLAN.md](kklass/docs/dev/USES_PLAN.md).
 - [Reloading during development](docs/reference.md#reloading-during-development)
 - [Messages](docs/reference.md#messages)
 - [Portability](docs/portability.md)
+- [Benchmarks](docs/benchmarks.md)
 - [Changelog](CHANGELOG.md)
 
 ## Running the tests
