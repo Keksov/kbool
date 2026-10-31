@@ -69,6 +69,8 @@ kk.uses tstringlist; echo "again: rc=$?"     # => again: rc=0
 Both blocks are run as written by the test suite (`kkore/tests/015_DocExamples.sh`). The
 whole DSL is in [the kklass book](kklass/docs/kklass_book.md#pascal-dsl-class--end-with-real-function-bodies).
 
+A small HTTP service: [examples/](examples/README.md)
+
 ## Why
 
 What a bash script gets from kbool that bash alone does not give it:

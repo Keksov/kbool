@@ -733,7 +733,7 @@
         "L6.5"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-10-31 (SV): spec = scratchpad launch/L7.2/card.md (notes service: endpoints, INI storage, TRegEx whole-word search, the curl session script, its test suite)."
     },
     "L7.2": {
       "executor": "S",
@@ -742,7 +742,7 @@
         "L7.1"
       ],
       "card": "draft",
-      "status": "planned"
+      "status": "DONE 2026-10-31 (Sonnet worker, SV review): examples/notes.sh (Pascal-DSL TNotes, thttpserver routes, TMemIniFile, TRegEx \\b search), examples/notes_session.sh (the curl session for L7.3), examples/tests (suite id 'examples', 17 cases, SKIP without netcat/socat), examples/README.md, one README line. SV: MSYS2 nc path checks the default C:/msys64 first. The worker found the kklass CR bug -> L7.2-K. Final SV gates: Windows `all` __GATE__:PASS:62:62:0:0:0:0:0:19491:19491; floor kb-debian kklass kkore examples __GATE__:PASS:6:6:0:0:0:0:0:3330:3330."
     },
     "L7.3": {
       "executor": "S",
@@ -839,6 +839,20 @@
       "owner_model": "O",
       "status": "DONE 2026-10-30 (ktests 8f88fdb). Cause: on the Git runtime under load a nested ktests.sh wedges at its start (FIFO open in kt_runner_group_open / kt_runner_group_watchdog spins in state R, acts on no cygwin signal); when the outer timeout stops the nested run, kt_runner_group_end gives up after 10 KILL rounds and the wedged member survives as an orphan /usr/bin/bash = the gate's STRAY. Evidence: diag 41096859295 run 3 (048_SummaryFile nested 'ok Inner' runner pid 52639 alive 4+ min after its group stop), diag 41106197363 run 1 (054 nested gate, argv-less pgid leader). Fix: kt_runner_group_end step 5 - when the KILL rounds give up, rescan and hand survivors (members + tracked descendants passing kt_runner_proc_same) to kt_proc_winkill (cygwin only); KT_GROUP_END_STATS winkill=[PID=WINPID]; 044 new case (deaf member simulated on every platform; SV added a no-process-table skip after the critic). Proof: diag 41106197363 with the patch - ktests x5 threaded + gate x2 on the Git-bash runner, no stray (__GATE__:PASS:1:1:0:0:0:0:0:691:691 twice). Gates: Windows ktests PASS 1383/1383 (worker) and SV re-gate after the skip edit; bash floor kb-debian 5.1.16/5.2.37 PASS 1354/1354. diag.yml D10 + D1 word match pushed (67c3b4f, afe7279). Critic (Sonnet): no bug; risks recorded as L58-o3.",
       "done": "2026-10-30"
+    },
+    "L5.9": {
+      "title": "Windows FIFO wedge in the ktests runner (L58-o1, L66-o2)",
+      "owner_model": "O",
+      "done": "2026-10-31",
+      "card": "scratchpad launch/L5.9/card.md",
+      "status": "DONE 2026-10-31 (ktests ba743bb). Phase 1: on cygwin `exec {fd}<>F` on a fresh FIFO sometimes never returns (main thread loops NtOpenFile+Sleep(0), fifo_reader idle, deaf to SIGKILL; cdb stacks on windows-latest, diag D11 41173189237); ~1 wedge per 2,000-4,500 group starts on runners. SV decision: option a1, cygwin only. Phase 2: the group is a coproc on Git-bash/MSYS2, the watchdog reads its stdin pipe, the runner keeps a dup of the write end, SIGPIPE guard on the 'done' write (test 060 found rc=141 without it); KT_RUNNER_WATCH=fifo|coproc seam; Linux/macOS/BSD unchanged. Proof: diag 41177527973 + 41177809175 ~210k coproc group starts 0 wedges vs FIFO control 14; ktests x5 + gate x2 per Windows row clean. Critic (Opus): no bug; fixed tests never start FIFO groups on cygwin, $! pid + reap-race guard, exact PIPE trap restore, closed-stdout fallback, stdin/pgid checks. Gates: worker ktests Windows 1411/1411, floor 1382/1382. Final SV gates: Windows `all` __GATE__:PASS:62:62:0:0:0:0:0:19491:19491; floor kb-debian kklass kkore examples __GATE__:PASS:6:6:0:0:0:0:0:3330:3330."
+    },
+    "L7.2-K": {
+      "title": "kklass: $'\\r' in a Pascal-DSL method body became empty on MSYS2/Git-bash",
+      "owner_model": "O",
+      "done": "2026-10-31",
+      "card": "scratchpad launch/L7.2-K/card.md",
+      "status": "DONE 2026-10-31 (kklass 5ccd7fc). Root cause: MSYS2/Cygwin bash drops every raw CR when it parses text; declare -f prints $'\\r' as a raw CR (quoted, or bare inside \"${x:-...}\"); kklass re-parses declare -f texts in kk.pascal._body, kk.register_static_methods, kk.decl._ns_snap and the compiler. Fix: kk._fn_text_cr rewrites raw CRs to $'\\r' words, verified by a declare -f round trip, only where the parser drops CRs (no-op on Linux/macOS/BSD, no forks). Test 149 (19 cases, fails on the old tree). Critic (Opus): no bug. SV bumped the compiled-cache format 3 -> 4 (+ test 147 pins) so stale MSYS caches rebuild. Final SV gates: Windows `all` __GATE__:PASS:62:62:0:0:0:0:0:19491:19491; floor kb-debian kklass kkore examples __GATE__:PASS:6:6:0:0:0:0:0:3330:3330."
     }
   },
   "open": {
@@ -916,14 +930,19 @@
     "L56-o1": "MSYS2 mirror outage made both Windows rows fail in setup (kklass run 41067613690: gnu-netcat 0.7.1-3 download 416/too slow on every mirror) - setup-msys2 has no retry; consider a retry step or caching if it recurs.",
     "L56-o2": "CLOSED 2026-10-30 by L5.8: the leak (orphan of a wedged nested run) is fixed; the wedge itself is L58-o1.",
     "L57-o1": "SECURITY.md names no private reporting channel (owner: add e.g. GitHub private vulnerability reporting); ktests/docs/START_HERE.md stale for outside readers (emoji, missing lib/, QUICK_REFERENCE.md, MIGRATION_GUIDE.md); root README links into submodule folders may 404 on github.com (gitlinks) - check in L6.5.",
-    "L58-o1": "The Git-runtime wedge itself: under load the threaded runner's FIFO opens (kt_runner_group_open exec {fd}<>fifo; kt_runner_group_watchdog exec {r}<fifo) hang spinning; nested runs then time out (048 rc=124, 053/054 rc=124/137 in D10, 044 'cleanups done 0 of 0') and the gate's own cell wedges (C14). Avoiding FIFO opens on cygwin = design decision (SV/owner).",
+    "L58-o1": "CLOSED 2026-10-31 by L5.9 (coproc watchdog on cygwin).",
     "L58-o2": "050_GateCli failed once locally on 5.3.9 without --rerun-failed: rc=137 [kt-gate 2 94491 ...] (L5.8 --repeat 5 run grep5).",
     "L58-o3": "Critic risks of L5.8 step 5: (a) kt_proc_winkill runs up to timeout -k 2 20 per survivor serially inside TERM traps - an outer timeout/second signal can cut the stop short; (b) the '>= end + 3 s' give-up branch can reach step 5 with 0 KILL rounds after a clock jump/scan stall (cygwin only; still the run's own members); (c) winkill=[...] records an attempt, not a confirmed kill; (d) KT_GATE_S_NOWINKILL does not reach nested ktests.sh.",
     "L60-o1": "kcl READMEs/docs still say 'bash 5.2.37 / 5.3.9' in many places (stale since the 2026-10-26 runtime change to Git-bash 5.3.15 / MSYS2 5.3.9); L6.0 fixed only the lines it touched -> L6.6 stale-paths sweep.",
     "L60-o2": "ktests 042_KilledRunCleanup failed on the kcl CI msys2 row (run 41122457081, after its rerun): 'results seen rc=1; after kill [kt_iso.46102] (want kt_iso.<pid> only), after next run [kt_iso.46102]' - intermittent harness flake, unrelated to L6.0; watch for recurrence.",
     "L66-o1": "ktests/docs/README.md still carries legacy 'Migration' / 'Benefits' prose from an older era (copy-template migration, '130+ existing tests'); not wrong links any more, but stale for a fresh reader -> L6.8 fresh-reader critic to judge.",
-    "L66-o2": "CI windows (msys2) row flaky, 3 sightings 2026-10-30/31, each green on rerun: kcl 41122457081 ktests 042 (= L60-o2); kcl 41131693383 ktests 045_StrayGuard + 054_GateSelection (nested gate INTERRUPTED after 149 s - the L58-o1 FIFO wedge shape); ktests 41131709554 kcl/thttpserver STRAY (2 processes, stopped). Likely one cause family with L58-o1 (cygwin FIFO opens under load); candidate for an investigation card before L8 if it keeps recurring.",
+    "L66-o2": "CLOSED 2026-10-31 by L5.9 (the msys2 sightings were the FIFO wedge); watch the Windows rows for recurrence.",
     "L65-o1": "docs/dev/README.md (the index the README's 'How it was built' links) does not list LAUNCH_PLAN.md / launch_ledger.json; docs/reference.md 'Loading kbool' keeps a verbatim 'Prerequisites ... tested ...' sentence that now duplicates README Requirements -> L6.8 critic / small fix.",
-    "L68-o1": "Leftovers of L6.8 (minor): ktests/templates/test-example.sh calls undefined init_test_tmpdir and leaves tests unclosed; ktests/docs/README.md phase-gate example uses C:/bin/... paths; ktests.sh -h prints 'Usage: test_suite.sh'; kcl unit READMEs still carry phase jargon (thttpserver 35, tsed 27, tpipe 26, tawk 17 hits; tlist 'found_in_P2'); a few ID-free 'used to' history notes in the kklass book."
+    "L68-o1": "Leftovers of L6.8 (minor): ktests/templates/test-example.sh calls undefined init_test_tmpdir and leaves tests unclosed; ktests/docs/README.md phase-gate example uses C:/bin/... paths; ktests.sh -h prints 'Usage: test_suite.sh'; kcl unit READMEs still carry phase jargon (thttpserver 35, tsed 27, tpipe 26, tawk 17 hits; tlist 'found_in_P2'); a few ID-free 'used to' history notes in the kklass book.",
+    "L59-o1": "Older 044 cases (N4, R1 and similar) still open FIFO groups directly through kt_runner_group_open on cygwin (a few starts per sweep; ~0.1-0.3 % per Windows CI run may still wedge). Gate them on cygwin or move them to the coproc path if a sighting recurs.",
+    "L59-o2": "kcl/thttpserver also uses cygwin FIFOs (relay `<(exec cat fifo.N)`, batch mkfifo); ktests CI 41131709554 had two orphan `cat .../thttpserver.g...` for 878 s in a TIMEOUT cell. Same family, kcl code.",
+    "L59-o3": "Option a1 (coproc) on every platform would make group starts ~3x cheaper there too (measured on Windows); a later, separate decision.",
+    "L72K-o1": "L7.2-K critic risks: a cache compiled on Linux keeps raw CRs and loses them when sourced on MSYS (caches are per machine in practice); the kk._fn_text $( ) fallback may already drop CRs on MSYS2 (unverified); the helper's rc 1 is silent.",
+    "L72-o1": "README curl examples rely on NO_PROXY for localhost on machines that export HTTP_PROXY (notes_session.sh exports NO_PROXY; the thttpserver README has the same note)."
   }
 }
