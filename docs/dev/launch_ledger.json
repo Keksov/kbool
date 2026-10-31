@@ -39,7 +39,8 @@
     "OG4": "2026-10-31 owner: repo descriptions + topics as proposed by SV; applied by SV via gh repo edit.",
     "OG17": "2026-10-31 owner: security reports via GitHub private vulnerability reporting (SV enabled it in all five repos; SECURITY.md points there); README status line 'pre-release - no tagged version yet; the API may still change before the first release'.",
     "OG5": "2026-11-01 owner: the first release is 0.1.0, one version number (tag) for all five repos; the README status line becomes '0.x: the API may still change between minor versions' at tagging.",
-    "OG18": "2026-11-01 owner: L7.3 may download and run the asciinema/agg release binary inside the kb-ubuntu lab VM (VM reset to clean afterwards)."
+    "OG18": "2026-11-01 owner: L7.3 may download and run the asciinema/agg release binary inside the kb-ubuntu lab VM (VM reset to clean afterwards).",
+    "OG19": "2026-11-01 owner: go for release 0.1.0 (release commits, tags v0.1.0, GitHub Releases in all five repos). Announcements stay with the owner (OG6)."
   },
   "pending_owner_decisions": {
     "OG1": {
@@ -803,7 +804,7 @@
         "L8.2"
       ],
       "card": null,
-      "status": "planned"
+      "status": "DONE 2026-11-01: OG5 = 0.1.0, one tag for all five repos."
     },
     "L8.4": {
       "executor": "S",
@@ -811,8 +812,9 @@
       "dep": [
         "L8.3"
       ],
-      "card": "draft",
-      "status": "planned"
+      "card": "scratchpad launch/L8.4/release_plan.md",
+      "status": "DONE 2026-11-01 on the owner's go (SV): release commits 'release 0.1.0' (CHANGELOG '## 0.1.0 - 2026-11-01', Draft lines removed; README status '0.1.0 - the API may still change between minor versions (0.x)'): kcl fe7836f, kklass 432fbf6, kkore 6afc858, ktests e6509e9, kbool 861926f. CI green on all five (kbool msys2 row green on rerun, see L84-o1). Annotated tags v0.1.0 ('kbool 0.1.0') on those commits, pushed; GitHub Releases v0.1.0 in all five (notes = each CHANGELOG 0.1.0 section, links absolute to the tag; kbool latest). Verified: five releases public (not draft/prerelease); a fresh `git clone --recurse-submodules --branch v0.1.0` checks out exactly the tagged submodule commits; smoke TStringList ok.",
+      "done": "2026-11-01"
     },
     "L8.5": {
       "executor": "O",
@@ -954,6 +956,7 @@
     "L72-o1": "README curl examples rely on NO_PROXY for localhost on machines that export HTTP_PROXY (notes_session.sh exports NO_PROXY; the thttpserver README has the same note).",
     "L74-o1": "kcl/thttpserver/bench.sh parts (b)-(d) SKIP on both platforms: tests/_ths_socket.sh calls kt_need_timeout, which the bench never loads (bench defect).",
     "L74-o2": "Wrapper benches (tawk, tfind, tgrep, thead, tsed, ttail) print FAIL against their ratio gates on Linux (2.1x-7.4x vs 1.3-1.5x) while exiting 0: the gates were calibrated on Windows where the bare tool costs a 16 ms fork; on Linux the bare tool is cheap so the wrapper's fixed in-shell cost dominates. L7.5 must not quote them as passing; recalibrate or state per platform.",
-    "L75-o1": "kklass/bench/kklass_bench.sh labels the computed-read row '(F7: forks per read)'; 673 us on Windows rules out a fork per read - stale label."
+    "L75-o1": "kklass/bench/kklass_bench.sh labels the computed-read row '(F7: forks per read)'; 673 us on Windows rules out a fork per read - stale label.",
+    "L84-o1": "After L5.9 the windows (msys2) row still timed out once: kbool CI 41239534708 (release commit 861926f), ktests cell TIMEOUT 900 s with an EMPTY log (0/0) - nothing printed at all; green on rerun; ktests' own CI on the same tree green. Suspects: the gate's own cell/segment start path (C14 shape), or old 044 cases that open FIFOs directly on cygwin (L59-o1). Next sighting: download the artifact, run D11-style sampling (diag.yml) on the cell start."
   }
 }
