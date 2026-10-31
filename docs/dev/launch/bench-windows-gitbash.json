@@ -1,0 +1,267 @@
+{
+  "platform": "Windows (Git-bash) - MINGW64_NT-10.0-26200 3.6.10-5a1665c8.x86_64 x86_64",
+  "bash": "5.3.15(2)-release",
+  "cpu": "AMD Ryzen 7 8845H w/ Radeon 780M Graphics",
+  "date": "2026-10-31T09:24:18Z",
+  "kbool_head": {
+    "root": "cf0a246-dirty",
+    "kcl": "41d9c25",
+    "kklass": "5ccd7fc",
+    "kkore": "7e5729c",
+    "ktests": "ba743bb"
+  },
+  "runs": 3,
+  "headline": {
+    "empty_function_call": {
+      "value": 5.032,
+      "unit": "us/call",
+      "median_of": 3,
+      "runs": [
+        5.032,
+        5.109,
+        4.884
+      ],
+      "source": "a loop of 100000 calls of an empty function f() { :; } in this shell, EPOCHREALTIME around the loop (no fork inside; the loop's own cost is included)"
+    },
+    "command_substitution": {
+      "value": 16008.55,
+      "unit": "us/call",
+      "median_of": 3,
+      "runs": [
+        16008.55,
+        15653.425,
+        21803.575
+      ],
+      "source": "a loop of 200 x=$(true) in this shell, EPOCHREALTIME around the loop (one fork per iteration)"
+    },
+    "source_kbool": {
+      "value": 32.8,
+      "unit": "ms",
+      "median_of": 3,
+      "runs": [
+        32.6,
+        32.8,
+        59.5
+      ],
+      "source": "EPOCHREALTIME around a child '/usr/bin/bash -c \"source KBOOL/kbool.sh\"' started from this shell; mean of 5 children per run (includes the child's bash start-up)"
+    },
+    "uses_tstringlist": {
+      "value": 171.7,
+      "unit": "ms",
+      "median_of": 3,
+      "runs": [
+        164.6,
+        171.7,
+        219.2
+      ],
+      "source": "EPOCHREALTIME around a child '/usr/bin/bash -c \"source KBOOL/kbool.sh; kk.uses tstringlist\"'; mean of 5 children per run (includes the child's bash start-up)"
+    },
+    "uses_dateutils": {
+      "value": 383.7,
+      "unit": "ms",
+      "median_of": 3,
+      "runs": [
+        380.2,
+        386,
+        383.7
+      ],
+      "source": "EPOCHREALTIME around a child '/usr/bin/bash -c \"source KBOOL/kbool.sh; kk.uses dateutils\"'; mean of 5 children per run (includes the child's bash start-up)"
+    },
+    "pascal_class_build_15_methods": {
+      "value": 24,
+      "unit": "ms",
+      "median_of": 3,
+      "runs": [
+        22.8,
+        24,
+        24.7
+      ],
+      "source": "generated in benchrun.sh (kklass_bench.sh has no such row): 10 distinct classes, each 'class TBenchPN / public / var A / var B / 15 x proc / end', its 15 method bodies as functions and 'build TBenchPN' (the fork-free build of kklass_pascal.sh), eval'd in one shell after kk.uses kklass_pascal; EPOCHREALTIME around the 10 evals, mean per class (text generation is outside the timing)"
+    },
+    "kklass_new": {
+      "value": 126.7,
+      "unit": "us/instance",
+      "median_of": 3,
+      "runs": [
+        126.7,
+        120.9,
+        132.7
+      ],
+      "source": "row '.new (first 60)' of kklass/bench/kklass_bench.sh"
+    },
+    "kklass_method_call": {
+      "value": 212.9,
+      "unit": "us/call",
+      "median_of": 3,
+      "runs": [
+        232.4,
+        212.1,
+        212.9
+      ],
+      "source": "row 'method call (echo body)' of kklass/bench/kklass_bench.sh"
+    },
+    "kklass_property_read": {
+      "value": 34.8,
+      "unit": "us/read",
+      "median_of": 3,
+      "runs": [
+        53.6,
+        33.4,
+        34.8
+      ],
+      "source": "row 'property read' of kklass/bench/kklass_bench.sh"
+    },
+    "kklass_computed_read": {
+      "value": 673,
+      "unit": "us/read",
+      "median_of": 3,
+      "runs": [
+        678.9,
+        673,
+        609.1
+      ],
+      "source": "row 'computed read @1000 live' of kklass/bench/kklass_bench.sh"
+    },
+    "kklass_delete_at_1000": {
+      "value": 166.7,
+      "unit": "us/delete",
+      "median_of": 3,
+      "runs": [
+        202.8,
+        159.8,
+        166.7
+      ],
+      "source": "row '.delete @1000 live instances' of kklass/bench/kklass_bench.sh"
+    },
+    "tdictionary_add": {
+      "value": 235,
+      "unit": "us/op",
+      "median_of": 3,
+      "runs": [
+        231,
+        235,
+        238
+      ],
+      "source": "row 'Add (insert)' of kcl/tdictionary/bench.sh"
+    },
+    "tdictionary_get": {
+      "value": 257,
+      "unit": "us/op",
+      "median_of": 3,
+      "runs": [
+        257,
+        253,
+        300
+      ],
+      "source": "row 'GetItem (direct call)' of kcl/tdictionary/bench.sh"
+    },
+    "tregex_ismatch": {
+      "value": 107.4,
+      "unit": "us/op",
+      "median_of": 3,
+      "runs": [
+        104,
+        112.5,
+        107.4
+      ],
+      "source": "row 'TRegEx.isMatch (static-proc dispatch)' of kcl/tregex/bench.sh"
+    }
+  },
+  "raw": {
+    "kklass/bench/kklass_bench.sh": {
+      "exit": 0,
+      "wall_ms": 2722,
+      "output": "kklass micro-benchmark  (bash 5.3.15(2)-release)\n  template bytes: 1110\n\nidentifier guards (round 3 / P11, round 4 / P12):\n  .new + .delete cycle (small shell)              274.3 us/cycle  (total 82 ms)\n  kk._is_ident (the guard)                         13.4 us/call  (total 26 ms)\n  the replaced =~ guard (reference)                17.7 us/call  (total 35 ms)\n  kk.derivesFrom (child, parent)                   64.3 us/call  (total 128 ms)\n  kk._outName NAME PREFIX (kkore)                  28.7 us/call  (total 57 ms)\n  (locale: LC_ALL=C LANG=unset)\n\ninstance creation / .delete scaling (F1):\n  .new (first 60)                                 155.9 us/inst  (total 9 ms)\n  .delete @50 live instances (1421 fns)           171.3 us/del  (total 1 ms)\n  computed read @50 live (F7: forks per read)     632.7 us/read  (total 126 ms)\n  .new (61..1010)                                 161.8 us/inst  (total 153 ms)\n  shell functions with 1000 live instances: ~19281 (19 per instance)\n  .delete @1000 live instances (19281 fns)        162.7 us/del  (total 1 ms)\n  leftover o1001-1010 instances with functions: 0\n\nper-op (instance o1):\n  method call (echo body)                         202.4 us/call  (total 202 ms)\n  inst.call m1                                    241.9 us/call  (total 241 ms)\n  internal $this.m call (R2_P8)                   193.1 us/call  (total 386 ms)\n  property read                                    37.8 us/read  (total 37 ms)\n  property write                                   30.0 us/write  (total 30 ms)\n  computed read @1000 live (F7: forks per read)    666.1 us/read  (total 133 ms)\n\nserialization (round 2 / P7, 5 properties, @1000 live):\n  toJSON, clean values                            276.1 us/call  (total 138 ms)\n  toJSON, hostile values (escape slow path)       959.4 us/call  (total 479 ms)\n  fromJSON, clean values                         1046.8 us/call  (total 209 ms)\n"
+    },
+    "kcl/dateutils/bench.sh": {
+      "exit": 0,
+      "wall_ms": 16231,
+      "output": "dateutils micro-benchmark  (bash 5.3.15(2)-release, N=3000, pure dispatch, no $() capture)\n  yearOf                        206 us/call  (0.206 ms)\n  monthOf                       207 us/call  (0.207 ms)\n  dayOfTheWeek                  124 us/call  (0.124 ms)\n  incDay                        179 us/call  (0.179 ms)\n  incMonth                      697 us/call  (0.697 ms)\n    WARNING: above the 0.3 ms/call target\n  daysBetween                   294 us/call  (0.294 ms)\n  compareDateTime               278 us/call  (0.278 ms)\n  weekOfTheYear                 552 us/call  (0.552 ms)\n    WARNING: above the 0.3 ms/call target\n\ncaller cost — the D3 return contract (N=300):\n  direct (RESULT)               285 us/call\n  $( ) capture                26427 us/call\n  direct is faster by            92x\n\nzero-fork check (empty PATH):\n  OK — hot path spawned no external process\n"
+    },
+    "kcl/math/bench.sh": {
+      "exit": 0,
+      "wall_ms": 17242,
+      "output": "math micro-benchmark  (bash 5.3.15(2)-release, N=3000)\n\nTier A — pure-bash integer core (target <= 0.3 ms/call):\n  min                       101 us/call  (0.101 ms)\n  max                       102 us/call  (0.102 ms)\n  sign                       99 us/call  (0.099 ms)\n  inRange                   155 us/call  (0.155 ms)\n  ensureRange               151 us/call  (0.151 ms)\n  compareValue              109 us/call  (0.109 ms)\n  ifThen                     46 us/call  (0.046 ms)\n  ceil                      118 us/call  (0.118 ms)\n  floor                     175 us/call  (0.175 ms)\n  divMod                    250 us/call  (0.250 ms)\n  intPower                  117 us/call  (0.117 ms)\n  sumInt                    558 us/call  (0.558 ms)\n    WARNING: above the 0.3 ms/call target\n  randomRange               320 us/call  (0.320 ms)\n    WARNING: above the 0.3 ms/call target\n  isNan                      90 us/call  (0.090 ms)\n\n  decimal-operand comparison (pure-bash decimal split; ~0.4 ms, fork-free):\n  max (decimal)             339 us/call  (0.339 ms)\n  sign (decimal)            208 us/call  (0.208 ms)\n\nTier B — float engine (pipe round-trip; cold path):\n  sin                       213 us/call  (0.213 ms)\n  sqrt                      219 us/call  (0.219 ms)\n  roundTo                   175 us/call  (0.175 ms)\n  power                     185 us/call  (0.185 ms)\n  mean(8)                   175 us/call  (0.175 ms)\n\nCaller cost (D3, P7): what it costs to USE a result.\n  Before P7 every member printed, so a caller had to capture with $( ).\n  min, D3 form               80 us/call  (direct call + $RESULT)\n  min, $( ) form          15658 us/call  ($( ) capture — one fork)\n  -> the direct form is 195x cheaper for the caller\n\nengine liveness under a domain error (R11):\n  OK — 3 domain errors answered (nan/inf/inf), engine still pid 1429632\n\nzero-fork check (Tier-A core with empty PATH):\n  OK — Tier-A hot paths spawned no external process\n\nsingle-engine-process check:\n  OK — one awk co-process reused across 100 calls (pid 1429640)\n"
+    },
+    "kcl/tarray/bench.sh": {
+      "exit": 0,
+      "wall_ms": 8427,
+      "output": "tarray micro-benchmark  (bash 5.3.15(2)-release)\n\nsort scaling (default byte mode):\n  sort n=100                                    192.4 us/elem  (total 19 ms)\n  sort n=1000                                   262.9 us/elem  (total 262 ms)\n  sort n=5000                                   344.9 us/elem  (total 1724 ms)\n\ncomparator modes at n=1000:\n  byte mode (inlined [[ < ]])                   250.7 us/elem  (total 250 ms)\n  -n numeric (inlined (( )), 10# keys)          323.2 us/elem  (total 323 ms)\n  cmpFn (plain-fn call per compare)             354.6 us/elem  (total 354 ms)\n\nsearch on n=5000 (sorted numeric):\n  binarySearch (500 hits)                       848.0 us/search  (total 424 ms)\n  indexOf full-scan miss (10)                250011.2 us/search  (total 2500 ms)\n\nsingle-pass helpers at n=5000:\n  reverse in-place                                7.1 us/elem  (total 35 ms)\n  concat 5k+5k                                    1.9 us/elem  (total 19 ms)\n\ninformational — /usr/bin/sort on the same n=1000 (fork+pipe, line-based):\n  one fork+pipe round trip                    total 41 ms\n  (faster per element at scale — but forks, corrupts newline-containing\n   elements, and cannot binary-search; see README positioning)\n\nzero-fork check (every entry point with empty PATH):\n  OK — all 13 members spawned no external process\n"
+    },
+    "kcl/tawk/bench.sh": {
+      "exit": 0,
+      "wall_ms": 16691,
+      "output": "tawk micro-benchmark  (bash 5.3.15(2)-release, GNU Awk 5.4.1, API 4.1, PMA Avon 8-g1, (GNU MPFR 4.2.2, GNU MP 6.3.0) at /usr/bin/gawk)\ncorpus: big.txt = 10000 lines, one.txt = 1 line (`aNNNNN xyz`, two fields each)\n        NR=21 interleaved runs, ND=300 calls\n\n(a) the argv model — typed options into a command line, running NOTHING:\n  buildArgv (the override, one extra, one var)          1696.2 us/call  (total 508 ms)\n  argv NAME (buildArgv + validate + copy)               2326.6 us/call  (total 697 ms)\n  argv NAME copied                                   11 words: /usr/bin/gawk --sandbox --lint -v lim=5 -e {print $2} -e END{print NR} -- /tmp/kbool_bench_tawk.P6xEDC/big.txt\n  RUNS NOTHING: with cmd pointed at a counting function, 600 builds invoked it 0 times\n  FORK-FREE:    BASHPID 1429662 unchanged across all 1200 builds\n  buildArgv REFUSED (rc 2, -Wsandbox after -n --lint)    1356.7 us/call  (total 407 ms)\n\n(b) the wrapper's FIXED delta — exactly what `TAwk.apply` does around the\n    one fork (a fresh instance name per call, as apply uses):\n  new PROGRAM+sandbox+argv+delete (family row)          3821.9 us/call  (total 1146 ms)\n  new PROGRAM+sandbox+buildArgv+delete (apply delta)    3100.5 us/call  (total 930 ms)\n  the second row is the WHOLE difference between `TAwk.apply` and the bare\n  tool below, plus `run`'s own bookkeeping (the `command -v` probe, the\n  `mapRc` dispatch); the constructor assigns NINE properties and declares\n  FOUR arrays (tsed: eleven and two), the build walks the rc 2 list; it is\n  paid once per CALL, never per record, and it does not grow with the corpus\n  — the process start it is measured against does not either.\n  tawk._enc on a 1024-byte value                         144.3 us/call  (total 43 ms)\n  encoded length                                     1219 bytes (expected 1219)\n  buildArgv, no variable                                 968.3 us/call  (total 290 ms)\n  buildArgv, one 1 KiB setVar value                     1188.1 us/call  (total 356 ms)\n  the variable's share of a build (difference)           219.7 us/call\n  round trip through gawk: byte-exact (1024 bytes)\n\n(c) TAwk.apply '{print $2}' FILE vs a bare `gawk --sandbox -e '{print $2}' -- FILE` (INTERLEAVED, medians):\n  bare `gawk --sandbox -e` big.txt, 10000 lines (baseline) median     27.87 ms  mean     37.59 ms  (21 runs)\n  TAwk.apply big.txt, 10000 lines                    median     33.39 ms  mean     42.86 ms  (21 runs)\n    gate: apply vs bare gawk, big.txt, 10000 lines   ratio 1.19x  (gate 1.5x) PASS\n  delta 5522 us per call; section (b) measured the wrapper at 3100 us\n  worst SINGLE pairing in this sample: 3.86x — one sample is not a measurement\n\n  bare `gawk --sandbox -e` one.txt, 1 line (baseline) median     27.02 ms  mean     27.55 ms  (21 runs)\n  TAwk.apply one.txt, 1 line                         median     32.98 ms  mean     52.33 ms  (21 runs)\n    gate: apply vs bare gawk, one.txt, 1 line        ratio 1.22x  (gate 1.5x) PASS\n  delta 5952 us per call; section (b) measured the wrapper at 3100 us\n  worst SINGLE pairing in this sample: 6.36x — one sample is not a measurement\n\n(d) counting — the `count` sink vs `gawk --sandbox -e … -- FILE | wc -l` (published, NOT gated):\n  `gawk … | wc -l` (baseline)                      median     40.80 ms  mean     52.88 ms  (21 runs)\n  a.count (10000 records)                            median    191.76 ms  mean    193.12 ms  (21 runs)\n  the same sink over ONE record (the fixed half)     median     32.22 ms  mean     41.04 ms  (21 runs)\n    published: a.count vs the wc equivalent          ratio 4.69x of the shell equivalent\n  both answered 10000 / 10000 records\n  marginal cost of ONE record read into bash: ~15 us (10000-record row minus\n  the 1-record row, over 9999 records)\n  the sink is the SLOWER of the two: that per-record price is what having\n  the records in THIS shell costs, and when all you want is the number,\n  the pipeline is the right answer.\n\n(e) zero-fork check ($BASHPID around every TAwk/TUtil member, five REFUSED\n    paths, `apply`, and inside the callback and `.Add`):\n  BASHPID 1429662 unchanged across all 33 member calls — twenty-seven members\n  and `apply`, plus the five rc 2 paths (a `-W` deny-list hit, an in-place\n  sink, a path-less `apply`, an empty-program `apply`, an illegal `setVar`\n  name) — and both callback/.Add invocations: the only fork per call is gawk\n  itself, and a refused call does not even pay that\n\ngates: 2/2 PASS (TAwk.apply <= 1.5x a bare `gawk --sandbox -e`, medians of 21 interleaved runs)\n"
+    },
+    "kcl/tdictionary/bench.sh": {
+      "exit": 0,
+      "wall_ms": 10719,
+      "output": "tdictionary micro-benchmark  (bash 5.3.15(2)-release, N=300)\n\nCore ops (fresh dict, unique keys; instance dispatch included):\n  Add (insert)                    252 us/call  (0.252 ms)\n  TryGetValue (hit)               262 us/call  (0.262 ms)\n  GetItem (direct call)           253 us/call  (0.253 ms)\n  ContainsKey (hit)               206 us/call  (0.206 ms)\n  ContainsKey (miss)              193 us/call  (0.193 ms)\n  AddOrSetValue (overwrite)       274 us/call  (0.274 ms)\n  SetItem (update)                256 us/call  (0.256 ms)\n  Remove                          236 us/call  (0.236 ms)\n\n  informational — $() capture adds a subshell fork per call:\n  GetItem via $()               31617 us/call  (31.617 ms)\n\nForEach (1000 pairs, no-op callback):\n  ForEach per pair                 16 us/call  (0.016 ms)\n\nO(1) scaling check — same op at 1k vs 10k pairs (must be flat):\n  TryGetValue @ 1k pairs          269 us/call  (0.269 ms)\n  TryGetValue @ 10k pairs         290 us/call  (0.290 ms)\n  OK — flat within noise (269 vs 290 us/call): O(1) confirmed\n\nzero-fork check (direct-call ops with empty PATH):\n  OK — Add/TryGetValue/ContainsKey/AddOrSetValue/Remove/count spawned no external process\n\nreference point — tlist instance dispatch (same kklass machinery):\n  tlist.Add                       346 us/call  (0.346 ms)\n"
+    },
+    "kcl/tfind/bench.sh": {
+      "exit": 0,
+      "wall_ms": 11707,
+      "output": "tfind micro-benchmark  (bash 5.3.15(2)-release, find (GNU findutils) 4.11.0)\ncorpus: 20 dirs x 20 .txt (+1 .dat) = 400 matches in tree/, 1 match in one/\n        NR=21 interleaved runs, ND=300 calls\n\n(a) the argv model — typed options into a command line, running NOTHING:\n  buildArgv (the override)                           739.7 us/call  (total 221 ms)\n  argv NAME (buildArgv + validate + copy)           1501.1 us/call  (total 450 ms)\n  argv NAME copied                               8 words: /usr/bin/find /tmp/kbool_bench_tfind.rUMu7R/tree -maxdepth 9 -name *.txt -type f\n  RUNS NOTHING: with cmd pointed at a counting function, 300 builds invoked it 0 times\n  FORK-FREE:    BASHPID 1430221 unchanged across all 900 builds\n  buildArgv REFUSED (rc 2, a `-weird` start point)     520.4 us/call  (total 156 ms)\n\n(b) the wrapper's FIXED delta — one instance, one property, one build, one\n    destruction (what `byName` does around the same single fork):\n  new + name + argv + delete (the byName delta)     3494.6 us/call  (total 1048 ms)\n  this is the WHOLE difference between `byName` and the bare tool below;\n  the constructor assigns NINE properties (thead's assigns six), it is paid\n  once per CALL, never per record, and it does not grow with the corpus —\n  the process start it is measured against does not either.\n\n(b2) the H2 static — one line (published, not gated):\n  TFind.quoteGlob a*b?c[d]e\\f (no fork)               66.0 us/call  (total 19 ms)\n\n(c) TFind.byName '*.txt' TREE vs a bare `find TREE -name '*.txt'` (INTERLEAVED, medians):\n  bare `find tree/ (400 matches) -name '*.txt'` (baseline) median     25.99 ms  mean     29.63 ms  (21 runs)\n  TFind.byName '*.txt' tree/ (400 matches)       median     31.86 ms  mean     49.85 ms  (21 runs)\n    gate: byName vs bare find, tree/ (400 matches) (medians) ratio 1.22x  (gate 1.5x) PASS\n  delta 5866 us per call; section (b) measured the wrapper at 3494 us\n  worst SINGLE pairing in this sample: 3.90x — one sample is not a measurement\n\n  bare `find one/ (1 match) -name '*.txt'` (baseline) median     24.23 ms  mean     27.55 ms  (21 runs)\n  TFind.byName '*.txt' one/ (1 match)            median     30.83 ms  mean     51.77 ms  (21 runs)\n    gate: byName vs bare find, one/ (1 match) (medians) ratio 1.27x  (gate 1.5x) PASS\n  delta 6599 us per call; section (b) measured the wrapper at 3494 us\n  worst SINGLE pairing in this sample: 4.04x — one sample is not a measurement\n\n(d) counting — the `count` sink vs `find … -print0 | tr -dc '\\0' | wc -c` (published, NOT gated):\n  `find … -print0 | tr -dc '\\0' | wc -c` (baseline) median     46.28 ms  mean     63.76 ms  (21 runs)\n  f.print0 = 1; f.count (400 records)            median     72.63 ms  mean     78.67 ms  (21 runs)\n  the same sink over ONE record (the fixed half) median     26.96 ms  mean     29.91 ms  (21 runs)\n    published: f.count vs the wc equivalent      ratio 1.56x of the shell equivalent\n  both answered 400 / 400 records\n  marginal cost of ONE record read into bash: ~114 us (400-record row minus\n  the 1-record row, over 399 records)\n  at this corpus the sink is the SLOWER of the two: that per-record price\n  is what having the records in THIS shell costs, and when all you want is\n  the number, the pipeline is the right answer.\n\n(e) zero-fork check ($BASHPID around every TFind/TUtil member, a REFUSED\n    build, `byName`, and inside the callback and `.Add`):\n  BASHPID 1430221 unchanged across all 20 members, `byName`, both rc 2\n  paths, and both callback/.Add invocations — the only fork per call is\n  find itself, and a refused call does not even pay that\n\ngates: 2/2 PASS (TFind.byName <= 1.5x a bare `find … -name`, medians of 21 interleaved runs)\n"
+    },
+    "kcl/tgrep/bench.sh": {
+      "exit": 0,
+      "wall_ms": 20301,
+      "output": "tgrep micro-benchmark  (bash 5.3.15(2)-release, grep (GNU grep) 3.0)\ncorpus: 10000 lines in tree/big.txt + 2 in tree/sub/small.txt; NR=20 runs, ND=300 calls\n\nthe argv model — 22 typed options into a command line, running NOTHING:\n  buildArgv (the override, 22 options)             917.3 us/call  (total 275 ms)\n  argv NAME (buildArgv + validate + copy)         1760.0 us/call  (total 528 ms)\n  argv NAME copied                             11 words: /usr/bin/grep -i -r -n -m 8 --include=*.txt -e needle -- /tmp/kbool_bench_tgrep.5C0KGE/tree\n  RUNS NOTHING: with cmd pointed at a counting function, 300 builds invoked it 0 times\n  FORK-FREE:    BASHPID 1430493 unchanged across all 900 builds\n\nTGrep.search vs a bare `grep -r` over the same tree (101 hits):\n  bare `grep -r -e needle -- TREE` (baseline)  median    25.48 ms   mean    39.09 ms  (20 runs)\n  TGrep.search needle TREE                     median    31.69 ms   mean    31.37 ms  (20 runs)\n    gate: search vs bare grep -r (medians)     ratio 1.24x  (gate 1.3x) PASS\n  TGrep.new + .delete (the search delta)          2913.4 us/call  (total 874 ms)\n  search costs 6213 us more per call than bare grep; the construction above\n  is 2913 us of that, the rest is four kklass dispatches\n\n(b2) the H2 statics — one line each (published, not gated):\n  TGrep.contains needle TREE (rc only)         median    30.79 ms   mean    31.11 ms  (20 runs)\n  TGrep.countMatching needle TREE (101 lines)  median    38.22 ms   mean    42.12 ms  (20 runs)\n\ncounting — the `count` sink vs `grep -c` (published, NOT gated):\n  bare `grep -c -r` (baseline, 101 hits)       median    24.97 ms   mean    29.34 ms  (20 runs)\n  g.count (101 records read into bash)         median    50.56 ms   mean    59.77 ms  (20 runs)\n    published: g.count vs grep -c, sparse      ratio 2.02x of bare grep -c\n  g.countOnly=1; g.toArray (2 records)         median    30.93 ms   mean    39.78 ms  (20 runs)\n    published: countOnly vs grep -c            ratio 1.23x of bare grep -c\n  countOnly delivers the per-file numbers grep itself computed: /tmp/kbool_bench_tgrep.5C0KGE/tree/big.txt:100 /tmp/kbool_bench_tgrep.5C0KGE/tree/sub/small.txt:1\n  g.count, DENSE (10002 records)               median  2191.51 ms   mean  2191.51 ms  (4 runs)\n    published: g.count vs grep -c, dense       ratio 87.74x of bare grep -c\n\nzero-fork check ($BASHPID around every TGrep member and in the callback):\n  BASHPID 1430493 unchanged across all 13 members, `search`, and both\n  callback/.Add invocations — the only fork per call is grep itself\n\nhits: sparse 101 (want 101), dense 10002 (want 10002)\ngates: 1/1 PASS (TGrep.search <= 1.3x a bare grep -r on the same tree)\n"
+    },
+    "kcl/thashset/bench.sh": {
+      "exit": 0,
+      "wall_ms": 14191,
+      "output": "thashset micro-benchmark  (bash 5.3.15(2)-release)\n\nmembership per-op (fresh set, unique elements):\n  Add n=1000                                        219.1 us/op  (total 219 ms)\n  Contains n=1000 (hit)                             192.6 us/op  (total 192 ms)\n  Contains n=1000 (miss)                            192.7 us/op  (total 192 ms)\n  Remove n=1000                                     222.2 us/op  (total 222 ms)\n  Add n=5000                                        224.4 us/op  (total 1122 ms)\n  Contains n=5000 (hit)                             194.6 us/op  (total 973 ms)\n  Contains n=5000 (miss)                            219.8 us/op  (total 1099 ms)\n  Remove n=5000                                     261.3 us/op  (total 1306 ms)\n\nset algebra 1k x 1k (PLAN gate: no op may cost more than 3x a 1k Add loop):\n  baseline: 1k Add loop                             263.6 us/op  (total 263 ms)\n  UnionWith 1k into a disjoint 1k                   285 ms  ratio 1.0x of the 1k-Add baseline (gate 3x) PASS\n  IntersectWith 1k x 1k (50% overlap)               140 ms  ratio 0.5x of the 1k-Add baseline (gate 3x) PASS\n  ExceptWith 1k x 1k (50% overlap)                  254 ms  ratio 0.9x of the 1k-Add baseline (gate 3x) PASS\n  SymmetricExceptWith 1k x 1k (50%)                 514 ms  ratio 1.9x of the 1k-Add baseline (gate 3x) PASS\n  result sizes: union 2000 (want 2000), intersect 500 (500), except 500 (500), symex 1000 (1000)\n  the four truth tables hold at this size\n\nO(1) proof — Contains per-op at 100 vs 10 000 elements (must be FLAT):\n  Contains @ 100 elements                           242.7 us/op  (total 485 ms)\n  Contains @ 10 000 elements                        237.8 us/op  (total 475 ms)\n  ratio 0.9x over a 100x larger set — FLAT means < 2.0x  ... PASS\n  (a linear scan would show ~100x here; declare -A is a real hash table)\n\nevent gate — 1k Add unhooked vs the same loop with a do-nothing listener:\n  1k Add, no listener (gate skips dispatch)         267.4 us/op  (total 267 ms)\n  1k Add, do-nothing listener attached              655.4 us/op  (total 655 ms)\n  overhead 2.4x — one virtual Notify dispatch plus the callback per element\n\nzero-fork check:\n  BASHPID 1430708 unchanged across all 17 methods + new/delete\n  every member runs with an empty PATH — no external command anywhere (ok: 6|3|0|5|5|a|0)\n"
+    },
+    "kcl/thead/bench.sh": {
+      "exit": 0,
+      "wall_ms": 25627,
+      "output": "thead micro-benchmark  (bash 5.3.15(2)-release, head (GNU coreutils) 8.32)\ncorpus: 10000 lines in big.txt; NR=21 interleaved runs, ND=300 calls\n\n(a) the argv model — typed options into a command line, running NOTHING:\n  buildArgv (the override)                           662.0 us/call  (total 198 ms)\n  argv NAME (buildArgv + validate + copy)           1327.0 us/call  (total 398 ms)\n  argv NAME copied                               6 words: /usr/bin/head -q -n 5000 -- /tmp/kbool_bench_thead.08Aauc/big.txt\n  RUNS NOTHING: with cmd pointed at a counting function, 300 builds invoked it 0 times\n  FORK-FREE:    BASHPID 1430735 unchanged across all 900 builds\n\n(b) the wrapper's FIXED delta — one instance, one build, one destruction:\n  new + argv + delete (the `take` delta)            3439.9 us/call  (total 1031 ms)\n  this is the WHOLE difference between `take` and the bare tool below;\n  it is paid once per CALL, never per record, and it does not grow with\n  the corpus — the process start it is measured against does not either.\n\n(c) THead.take N FILE vs a bare `head -n N -- FILE` (INTERLEAVED, medians):\n  bare `head -n 1 -- FILE` (baseline)            median     23.90 ms  mean     32.08 ms  (21 runs)\n  THead.take 1 FILE                              median     30.46 ms  mean     48.64 ms  (21 runs)\n    gate: take vs bare head, -n 1 (medians)      ratio 1.27x  (gate 1.5x) PASS\n  delta 6559 us per call; section (b) measured the wrapper at 3439 us\n\n  bare `head -n 5000 -- FILE` (baseline)         median     22.19 ms  mean     33.01 ms  (21 runs)\n  THead.take 5000 FILE                           median     30.80 ms  mean     50.37 ms  (21 runs)\n    gate: take vs bare head, -n 5000 (medians)   ratio 1.38x  (gate 1.5x) PASS\n  delta 8611 us per call; section (b) measured the wrapper at 3439 us\n\n(d) counting — the `count` sink vs `head -n 5000 | wc -l` (published, NOT gated):\n  `head -n 5000 -- FILE | wc -l` (baseline)      median     37.87 ms  mean     52.29 ms  (21 runs)\n  h.lines = 5000; h.count                        median    793.36 ms  mean    809.48 ms  (21 runs)\n    published: h.count vs wc -l                  ratio 20.94x of the wc -l equivalent\n  both answered 5000 / 5000 records; the gap is one bash read per record,\n  which is what having the records in THIS shell costs (~151 us each)\n\n(e) zero-fork check ($BASHPID around every THead member and in the callback):\n  BASHPID 1430735 unchanged across all 13 members, `take`, and all four\n  callback/.Add invocations — the only fork per call is head itself\n\ngates: 2/2 PASS (THead.take <= 1.5x a bare `head -n`, medians of 21 interleaved runs)\n"
+    },
+    "kcl/thttpserver/bench.sh": {
+      "exit": 0,
+      "wall_ms": 4306,
+      "output": "thttpserver micro-benchmark  (bash 5.3.15(2)-release)\n\n(a) the replay path — per request, NR=7 interleaved samples x NQ=4 requests (no socket, no fork):\n  request object + parse (new + ReadFrom 4-header GET + delete)      median     4.93 ms   mean     4.89 ms   (7)\n  route to a function (RouteRequest, parsed request)                 median     4.63 ms   mean     4.75 ms   (7)\n  route to a route class (new + HandleRequest + delete)              median     5.43 ms   mean     5.30 ms   (7)\n  response (new + Attach + Write + SendContent + delete)             median     3.53 ms   mean     3.53 ms   (7)\n  THttpServer.ServeOne over TReplayTransport (all of it)             median    29.66 ms   mean    30.36 ms   (7)\n  THttpApplication.DoRun (one ServeOne + the app's checks)           median    33.11 ms   mean    33.03 ms   (7)\n  forks                                                              none ($BASHPID unchanged)\n\n/c/projects/kkbot/kbool/kcl/thttpserver/tests/_ths_socket.sh: line 77: kt_need_timeout: command not found\n(b)-(d) SKIPPED — no network backend: \n"
+    },
+    "kcl/tinifile/bench.sh": {
+      "exit": 0,
+      "wall_ms": 5726,
+      "output": "tinifile micro-benchmark  (bash 5.3.15(2)-release)\n\nload (parse whole file at Create):\n  load 1sec x 100key = 100 keys                   155.1 us/key  (total 15 ms)\n  load 10sec x 100key = 1000 keys                 153.4 us/key  (total 153 ms)\n  load 1sec x 1000key = 1000 keys                 148.0 us/key  (total 148 ms)\n\nReadString (linear first-match lookup):\n  ReadString in 1sec x 100key                     683.1 us/read  (total 341 ms)\n  ReadString in 10sec x 100key                    745.3 us/read  (total 372 ms)\n  ReadString in 1sec x 1000key                   1640.8 us/read  (total 820 ms)\n\nWriteString on a cached instance (no flush):\n  update-in-place (200 keys present)             1022.6 us/write  (total 204 ms)\n  append (new keys)                               622.1 us/write  (total 124 ms)\n\nUpdateFile (compose + tmp + mv + re-parse):\n  UpdateFile 100 keys                             385.8 us/key  (total 38 ms)\n  UpdateFile 1000 keys                            164.9 us/key  (total 164 ms)\n\ntyped accessors (parse overhead over ReadString):\n  ReadString baseline                             461.9 us/read  (total 230 ms)\n  ReadInteger (+val parse)                        578.7 us/read  (total 289 ms)\n  ReadBool (+cascade)                             577.3 us/read  (total 288 ms)\n\nT6 shape (relative gates — 800/200 appends < 10x, sec20/sec1 reads < 3x):\n  append 800 vs 200 (want < 10.0x)                516 ms vs 124 ms -> 4.1x\n  read in the 20th vs the 1st section (< 3.0x)    854 us vs 677 us -> 1.2x\n\nzero-fork check (in-memory paths under PATH=''):\n  in-memory Write*/Read*/DeleteKey need NO external commands (ok: v/42/1)\n\nnote: UpdateFile forks exactly once (mv), plus mkdir only when the target\n      directory is missing — by design; every other path is fork-free.\n"
+    },
+    "kcl/tpipe/bench.sh": {
+      "exit": 0,
+      "wall_ms": 12813,
+      "output": "tpipe micro-benchmark  (bash 5.3.15(2)-release, N=10000 records / ND=2000 dispatched calls)\n\ncallback dispatch cost (NOT TPipe — the price of the callback you choose):\n  plain function call                                  7.9 us/call  (total 15 ms)\n  kklass STATIC member (TBenchStatic.onLine)          24.0 us/call  (total 48 ms)\n  kklass INSTANCE member (r.onLine)                  185.0 us/call  (total 370 ms)\n  static/plain 3.0x, instance/plain 23.2x — that factor IS section (c) below\n\nstreaming 10000 records — TPipe.each vs a bare `while IFS= read -r` loop:\n  bare while IFS= read -r loop (baseline)            179.5 us/rec  (total 1795 ms)\n  TPipe.each + a no-op FUNCTION                      195.4 us/rec  (total 1954 ms)\n    gate: each + function vs the bare loop          1954 ms   ratio 1.08x  (gate 2.0x) PASS\n  TPipe.each + an INSTANCE member (r.onLine)         451.2 us/rec  (total 4512 ms)\n    published, NOT gated: instance-member callback    4512 ms   ratio 2.51x of the bare loop\n  (that ratio is the kklass instance dispatch of section (a), not TPipe's reader)\n\ncollecting 10000 records — TPipe.toArray vs a bare `mapfile`:\n  bare mapfile -t (baseline)                         179.9 us/rec  (total 1799 ms)\n  TPipe.toArray                                      184.5 us/rec  (total 1845 ms)\n    gate: toArray vs bare mapfile                   1845 ms   ratio 1.02x  (gate 1.5x) PASS\n\nlatency — TPipe.first on an INFINITE producer (close -> kill -TERM -> wait):\n    gate: TPipe.first -- yes                         115 ms   (gate 250 ms) PASS\n  first record 'y', lastRc 143 (141 SIGPIPE or 143 SIGTERM — a race, both correct)\n\nzero-fork check ($BASHPID inside the callback and around every sink):\n  BASHPID 1431086 unchanged across all seven members and all 10 callback/.Add invocations\n  the only fork per call is the producer: 5 records, one producer pid 1431122\n\nrecords delivered: each+fn 10000, each+r.onLine 10000, toArray 10000 (want 10000 each)\ngates: 3/3 PASS (each <= 2.0x, toArray <= 1.5x, first <= 250 ms)\n"
+    },
+    "kcl/tqueuestack/bench.sh": {
+      "exit": 0,
+      "wall_ms": 16641,
+      "output": "tqueuestack micro-benchmark  (bash 5.3.15(2)-release)\n\nTQueue per-op (fill then drain):\n  Enqueue n=1000                                    199.6 us/op  (total 199 ms)\n  Dequeue n=1000                                    263.3 us/op  (total 263 ms)\n  Enqueue n=5000                                    200.2 us/op  (total 1001 ms)\n  Dequeue n=5000                                    261.6 us/op  (total 1308 ms)\n\nTStack per-op (fill then drain):\n  Push n=1000                                       200.3 us/op  (total 200 ms)\n  Pop n=1000                                        265.2 us/op  (total 265 ms)\n  Push n=5000                                       211.8 us/op  (total 1059 ms)\n  Pop n=5000                                        275.3 us/op  (total 1376 ms)\n\ncompaction proof (10k enqueue + 10k dequeue, per-op must stay flat):\n  10k drain (amortized O(1) if flat vs n=1000)      279.1 us/op  (total 2791 ms)\n  ^ compare this us/op to Dequeue n=1000 above: near-equal => amortized flat\n\nreview-#2 (Clear of a 4000-element queue — mid-drain reindex cost):\n  Clear 4000 (one wasted O(n/2) copy at midpoint)     44.0 us/el  (total 176 ms)\n  ^ informational: the reindex adds ~one 2000-element array copy to Clear\n\nreview-#4 (non-owning TObjectQueue no-op Notify dispatch per op):\n  plain TQueue.Enqueue (gate skips dispatch)        208.2 us/op  (total 416 ms)\n  non-owning TObjectQueue.Enqueue (nhook dispatch)    956.9 us/op  (total 1913 ms)\n  ^ the delta is the no-op virtual Notify dispatch (S10 flip needs nhook armed)\n\nreference: tlist.Add (same kklass instance-method family):\n  TList.Add n=2000                                  308.3 us/op  (total 616 ms)\n\nzero-fork check (in-memory ops under PATH=''):\n  Enqueue/Dequeue/Peek/Push/Pop/ToArray/Clear need NO external commands (ok: a/b/x/1)\n"
+    },
+    "kcl/tregex/bench.sh": {
+      "exit": 0,
+      "wall_ms": 8362,
+      "output": "tregex micro-benchmark  (bash 5.3.15(2)-release, N=2000 dispatch / 200 scan)\n\nDispatch overhead (single match):\n  raw [[ =~ ]] inline                          7.2 us/call\n  TRegEx.isMatch (static-proc dispatch)      100.3 us/call\n  TRegEx.match (offset+groups)               118.4 us/call\n  TRegEx.escape (43-char string)              89.1 us/call\n\nmatches() scaling (per-occurrence scan cost):\n  matches, 10 occurrences  (per call)       1193.2 us/call\n  matches, 100 occurrences (per call)       9561.9 us/call\n  -> ~119 us per occurrence @10, ~95 us per occurrence @100 (≈linear)\n\nreplace throughput:\n  replace-all, 100 matches (per call)      14620.9 us/call\n  split, 100 pieces (per call)             11709.6 us/call\n\nPositioning summary:\n  API dispatch wrapper adds ~93.1 us over a raw [[ =~ ]] (7.2 us);\n  match (offset+group copy) ~118.4 us; matches/replace/split scale ~linearly per occurrence;\n  everything is fork-free — the engine is the bash [[ =~ ]] builtin, no external process.\n\nzero-fork check (every entry point with empty PATH):\n  OK — isMatch/match/escape/matches/split/replace/replaceCb spawned no external process\n"
+    },
+    "kcl/tsed/bench.sh": {
+      "exit": 0,
+      "wall_ms": 19268,
+      "output": "tsed micro-benchmark  (bash 5.3.15(2)-release, /usr/bin/sed (GNU sed) 4.9 at /usr/bin/sed)\ncorpus: big.txt = 10000 lines, one.txt = 1 line (every line has an `a`)\n        NR=21 interleaved runs, ND=300 calls\n\n(a) the argv model — typed options into a command line, running NOTHING:\n  buildArgv (the override, one extra scanned)            990.5 us/call  (total 297 ms)\n  argv NAME (buildArgv + validate + copy)               1687.7 us/call  (total 506 ms)\n  argv NAME copied                                   10 words: /usr/bin/sed --sandbox -E --posix -e s/a/A/ -e /^$/d -- /tmp/kbool_bench_tsed.HHNPof/big.txt\n  RUNS NOTHING: with cmd pointed at a counting function, 600 builds invoked it 0 times\n  FORK-FREE:    BASHPID 1431179 unchanged across all 1200 builds\n  buildArgv REFUSED (rc 2, -ni after -u --posix)         938.1 us/call  (total 281 ms)\n\n(b) the wrapper's FIXED delta — exactly what `TSed.edit` does around the\n    one fork (a fresh instance name per call, as edit uses):\n  new+addExpr+sandbox+argv+delete (edit delta)          4219.9 us/call  (total 1265 ms)\n  this is the WHOLE difference between `TSed.edit` and the bare tool below;\n  the constructor assigns ELEVEN properties and declares five arrays (tfind:\n  nine and one), the build scans the extras against the deny-list; it is paid\n  once per CALL, never per record, and it does not grow with the corpus —\n  the process start it is measured against does not either.\n\n(b2) the H1 statics — one line each (published, not gated):\n  TSed.quoteRe PROBE ere (no fork)                       140.9 us/call  (total 42 ms)\n  TSed.quoteRepl PROBE (no fork)                          76.8 us/call  (total 23 ms)\n  TSed.replace a A one.txt (stream)                  median     27.69 ms  mean     39.00 ms  (21 runs)\n  TSed.replaceInFile A a one_rf.txt (in place)       median     30.11 ms  mean     50.37 ms  (21 runs)\n\n(c) TSed.edit 's/a/A/' FILE vs a bare `sed --sandbox -e 's/a/A/' -- FILE` (INTERLEAVED, medians):\n  bare `sed --sandbox -e` big.txt, 10000 lines (baseline) median     24.70 ms  mean     27.62 ms  (21 runs)\n  TSed.edit big.txt, 10000 lines                     median     30.00 ms  mean     33.29 ms  (21 runs)\n    gate: edit vs bare sed, big.txt, 10000 lines     ratio 1.21x  (gate 1.5x) PASS\n  delta 5298 us per call; section (b) measured the wrapper at 4219 us\n  worst SINGLE pairing in this sample: 3.72x — one sample is not a measurement\n\n  bare `sed --sandbox -e` one.txt, 1 line (baseline) median     21.20 ms  mean     33.06 ms  (21 runs)\n  TSed.edit one.txt, 1 line                          median     27.11 ms  mean     30.10 ms  (21 runs)\n    gate: edit vs bare sed, one.txt, 1 line          ratio 1.27x  (gate 1.5x) PASS\n  delta 5903 us per call; section (b) measured the wrapper at 4219 us\n  worst SINGLE pairing in this sample: 1.46x — one sample is not a measurement\n\n(d) counting — the `count` sink vs `sed --sandbox -e … -- FILE | wc -l` (published, NOT gated):\n  `sed … | wc -l` (baseline)                       median     31.50 ms  mean     45.84 ms  (21 runs)\n  s.count (10000 records)                            median    357.55 ms  mean    360.75 ms  (21 runs)\n  the same sink over ONE record (the fixed half)     median     25.76 ms  mean     45.76 ms  (21 runs)\n    published: s.count vs the wc equivalent          ratio 11.34x of the shell equivalent\n  both answered 10000 / 10000 records\n  marginal cost of ONE record read into bash: ~33 us (10000-record row minus\n  the 1-record row, over 9999 records)\n  the sink is the SLOWER of the two: that per-record price is what having\n  the records in THIS shell costs, and when all you want is the number,\n  the pipeline is the right answer.\n\n(e) zero-fork check ($BASHPID around every TSed/TUtil member, three REFUSED\n    paths, `edit`, and inside the callback and `.Add`):\n  BASHPID 1431179 unchanged across all 31 member calls — twenty-seven members\n  and `edit`, plus the three rc 2 paths (a deny-list hit, an in-place\n  sink, a path-less `edit`) — and both callback/.Add invocations: the\n  only fork per call is sed itself, and a refused call does not even pay that\n\ngates: 2/2 PASS (TSed.edit <= 1.5x a bare `sed --sandbox -e`, medians of 21 interleaved runs)\n"
+    },
+    "kcl/tstopwatch/bench.sh": {
+      "exit": 0,
+      "wall_ms": 6624,
+      "output": "tstopwatch micro-benchmark  (bash 5.3.15(2)-release, N=300 dispatched / 10000 fast)\n\nClock primitives (plain functions, no kklass dispatch):\n  raw EPOCHREALTIME parse (inline)      7.3 us/call\n  TStopwatch.getTimeStamp              11.3 us/call\n\nObject API — FUNC forms (kklass dispatch, fork-free; use $RESULT):\n  Start+Stop pair                       570 us/call  (0.570 ms)\n  GetElapsedMicroseconds (stopped)      308 us/call  (0.308 ms)\n  GetElapsedMicroseconds (running)      311 us/call  (0.311 ms)\n  GetIsRunning                          305 us/call  (0.305 ms)\n\nObject API — PROPERTY forms. NO fork since kklass D1 (finding G3-11): for a\nRESULT-returning getter kklass_decl.sh now generates\n  RESULT=\"\"; $__inst__.call Getter\ninstead of the old capture, so the read runs in the caller's shell. It is\nstill slower than the func form — kk._prop_computed sits on top of the\nsame call — but it is a dispatch, not a 17 ms process:\n  elapsedMicroseconds (property)        757 us/call  (0.757 ms)\n  isRunning (property)                  746 us/call  (0.746 ms)\n\n  informational — $() capture adds a subshell fork per call:\n  elapsedMicroseconds via $()         16478 us/call  (16.478 ms)\n\nInstrument self-time — what an EMPTY Start;Stop bracket measures\n(the systematic bias the object API adds to a measured interval):\n  empty-bracket reading (avg of 300)     310 us\n\nPositioning summary:\n  dispatch-vs-raw delta: func getter 308 us vs raw 7.3 us (~x42); property read 757 us (~x103)\n  object API is for intervals  >> 310 us (empty-bracket bias);\n  Start+Stop instrumentation costs the CALLER ~570 us per bracket;\n  read results via FUNC forms + $RESULT (~308 us); property forms cost ~757 us;\n  tight loops: TStopwatch.getTimeStamp deltas (11.3 us/call, RESULT-only).\n\nzero-fork check (direct-call API with empty PATH):\n  OK — Start/Stop/getters/Restart/Reset/getTimeStamp spawned no external process\n"
+    },
+    "kcl/ttail/bench.sh": {
+      "exit": 0,
+      "wall_ms": 21337,
+      "output": "ttail micro-benchmark  (bash 5.3.15(2)-release, tail (GNU coreutils) 8.32)\ncorpus: 10000 lines in big.txt; NR=21 interleaved runs, ND=300 calls\n\n(a) the argv model — typed options into a command line, running NOTHING:\n  buildArgv (the override)                           601.4 us/call  (total 180 ms)\n  argv NAME (buildArgv + validate + copy)           1247.4 us/call  (total 374 ms)\n  argv NAME copied                               6 words: /usr/bin/tail -q -n 5000 -- /tmp/kbool_bench_ttail.xluKML/big.txt\n  RUNS NOTHING: with cmd pointed at a counting function, 300 builds invoked it 0 times\n  FORK-FREE:    BASHPID 1431801 unchanged across all 900 builds\n  and -f IS built even though toArray/count/toList refuse it: bench_counted -q -f -n 5000 -- /tmp/kbool_bench_ttail.xluKML/big.txt\n\n(b) the wrapper's FIXED delta — one instance, one build, one destruction:\n  new + argv + delete (the `take` delta)            3119.1 us/call  (total 935 ms)\n  this is the WHOLE difference between `take` and the bare tool below;\n  it is paid once per CALL, never per record, and it does not grow with\n  the corpus — the process start it is measured against does not either.\n\n(c) TTail.take N FILE vs a bare `tail -n N -- FILE` (INTERLEAVED, medians):\n  bare `tail -n 1 -- FILE` (baseline)            median     19.58 ms  mean     22.69 ms  (21 runs)\n  TTail.take 1 FILE                              median     24.66 ms  mean     36.60 ms  (21 runs)\n    gate: take vs bare tail, -n 1 (medians)      ratio 1.25x  (gate 1.5x) PASS\n  delta 5077 us per call; section (b) measured the wrapper at 3119 us\n\n  bare `tail -n 5000 -- FILE` (baseline)         median     20.59 ms  mean     23.66 ms  (21 runs)\n  TTail.take 5000 FILE                           median     26.13 ms  mean     44.06 ms  (21 runs)\n    gate: take vs bare tail, -n 5000 (medians)   ratio 1.26x  (gate 1.5x) PASS\n  delta 5534 us per call; section (b) measured the wrapper at 3119 us\n\n(d) counting — the `count` sink vs `tail -n 5000 | wc -l` (published, NOT gated):\n  `tail -n 5000 -- FILE | wc -l` (baseline)      median     30.54 ms  mean     42.71 ms  (21 runs)\n  t.lines = 5000; t.count                        median    652.67 ms  mean    663.00 ms  (21 runs)\n    published: t.count vs wc -l                  ratio 21.36x of the wc -l equivalent\n  both answered 5000 / 5000 records; the gap is one bash read per record,\n  which is what having the records in THIS shell costs (~124 us each)\n\n(e) zero-fork check ($BASHPID around every TTail member and in the callback):\n  BASHPID 1431801 unchanged across all 13 members, `take`, the three\n  follow = 1 refusals, and all four callback/.Add invocations —\n  the only fork per call is tail itself\n\ngates: 2/2 PASS (TTail.take <= 1.5x a bare `tail -n`, medians of 21 interleaved runs)\n"
+    },
+    "kcl/tutil/bench.sh": {
+      "exit": 0,
+      "wall_ms": 13365,
+      "output": "tutil micro-benchmark  (bash 5.3.15(2)-release, N=10000 records / ND=300 calls)\n\nthe argv model (buildArgv / argv) — builds a command line, runs NOTHING:\n  buildArgv (base: cmd + the extras)                 292.5 us/call  (total 87 ms)\n  argv NAME (buildArgv + validate + copy)            875.2 us/call  (total 262 ms)\n  argv NAME copied                               6 words, RESULT 6: bench_counted -i -e needle -- a file.txt\n  RUNS NOTHING: the cmd (a counting function) was invoked 0 times in 600 builds\n  FORK-FREE:    BASHPID 1432027 unchanged across all 600 calls\n\nrun on `true` — the per-CALL cost of the wrapper (paid once, never per record):\n  bare `true` (baseline)                               2.3 us/call  (total 0 ms)\n  `command true`                                       3.8 us/call  (total 1 ms)\n  u.run (buildArgv + command -v + exec + mapRc)     1150.1 us/call  (total 345 ms)\n  the wrapper adds 1147 us per CALL over a bare \"true\": two kklass dispatches\n  (buildArgv, mapRc) and one \"command -v\" — NOT a per-record cost, see (c)\n  lastRc after the loop: 0\n\nstreaming 10000 records — u.each vs TPipe.each called DIRECTLY on the same argv:\n  TPipe.each + no-op fn, DIRECT (baseline)           202.6 us/rec  (total 2026 ms)\n  u.each + the same no-op fn                         195.3 us/rec  (total 1953 ms)\n    gate: u.each vs TPipe.each direct               1953 ms   ratio 0.96x  (gate 1.1x) PASS\n\ncollecting 10000 records — u.toArray vs TPipe.toArray direct, same argv:\n  TPipe.toArray, DIRECT (baseline)                   176.8 us/rec  (total 1768 ms)\n  u.toArray                                          176.0 us/rec  (total 1760 ms)\n    published: u.toArray vs TPipe.toArray           1760 ms   ratio 0.99x of the direct call\n\nthe callback you choose (published, NOT gated — kklass's price):\n  u.each + an INSTANCE member (r.onLine)             464.2 us/rec  (total 4642 ms)\n    published: instance member vs a plain fn        4642 ms   ratio 2.37x of u.each + a function\n  (that ratio is the kklass instance dispatch, not tutil's and not TPipe's)\n  the callback object saw 10000 records\n\nzero-fork check ($BASHPID around every member and inside the callback):\n  BASHPID 1432027 unchanged across all 12 members and all 10 callback/.Add invocations\n  the only fork per SINK call is the producer: 5 records, one pid 1432065\n\nrecords delivered: each direct 10000, u.each 10000, toArray direct 10000, u.toArray 10000 (want 10000 each)\ngates: 1/1 PASS (u.each <= 1.1x TPipe.each direct on the same argv)\n"
+    }
+  }
+}

@@ -759,8 +759,9 @@
       "dep": [
         "L5.5"
       ],
-      "card": "draft",
-      "status": "planned"
+      "card": "scratchpad launch/L7.4/card.md",
+      "status": "DONE 2026-11-01 (Sonnet worker, SV review): tools/porting/benchrun.sh [--runs N] [--out FILE] -> docs/dev/launch/bench-ubuntu.json (kb-ubuntu VM, 4 vCPU, bash 5.2.21) and bench-windows-gitbash.json (host, Git-bash 5.3.15), same CPU (Ryzen 7 8845H). 14 headline figures, median of 3, each with runs + source command; raw output of all 19 benches. Windows stability: two runs within 1.34x. Headline e.g. Windows/Ubuntu: empty function call 5.0/7.0 us, $(true) 16009/750 us, source kbool.sh 33/13 ms, kk.uses tstringlist 172/152 ms, Pascal class build (15 methods) 24/23 ms, .new 127/256 us, method call 213/267 us, property read 35/46 us, TDictionary add 235/337 us, TRegEx.isMatch 107/142 us. BENCH_HEADS env for synced trees without .git.",
+      "done": "2026-11-01"
     },
     "L7.5": {
       "executor": "O",
@@ -943,6 +944,8 @@
     "L59-o2": "kcl/thttpserver also uses cygwin FIFOs (relay `<(exec cat fifo.N)`, batch mkfifo); ktests CI 41131709554 had two orphan `cat .../thttpserver.g...` for 878 s in a TIMEOUT cell. Same family, kcl code.",
     "L59-o3": "Option a1 (coproc) on every platform would make group starts ~3x cheaper there too (measured on Windows); a later, separate decision.",
     "L72K-o1": "L7.2-K critic risks: a cache compiled on Linux keeps raw CRs and loses them when sourced on MSYS (caches are per machine in practice); the kk._fn_text $( ) fallback may already drop CRs on MSYS2 (unverified); the helper's rc 1 is silent.",
-    "L72-o1": "README curl examples rely on NO_PROXY for localhost on machines that export HTTP_PROXY (notes_session.sh exports NO_PROXY; the thttpserver README has the same note)."
+    "L72-o1": "README curl examples rely on NO_PROXY for localhost on machines that export HTTP_PROXY (notes_session.sh exports NO_PROXY; the thttpserver README has the same note).",
+    "L74-o1": "kcl/thttpserver/bench.sh parts (b)-(d) SKIP on both platforms: tests/_ths_socket.sh calls kt_need_timeout, which the bench never loads (bench defect).",
+    "L74-o2": "Wrapper benches (tawk, tfind, tgrep, thead, tsed, ttail) print FAIL against their ratio gates on Linux (2.1x-7.4x vs 1.3-1.5x) while exiting 0: the gates were calibrated on Windows where the bare tool costs a 16 ms fork; on Linux the bare tool is cheap so the wrapper's fixed in-shell cost dominates. L7.5 must not quote them as passing; recalibrate or state per platform."
   }
 }
