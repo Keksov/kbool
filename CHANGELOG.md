@@ -1,12 +1,9 @@
 # Changelog — kbool
 
-> Draft: reviewed before the first release.
-
 kbool is a Free Pascal flavoured toolkit for bash: units with `uses`, classes
 with dot notation, and ports of FPC/Delphi classes. This repository is the
 umbrella: `kbool.sh` (the entry point), the master test runner, the lab and
-portability tooling, CI, and the four submodules. There is no tag or release yet;
-this file groups the whole history by phase, newest first, and tells the
+portability tooling, CI, and the four submodules. This file groups the whole history by phase, newest first, and tells the
 cross-repo story. Each component has its own changelog:
 
 * kcl (the class library): <https://github.com/Keksov/kcl/blob/main/CHANGELOG.md>
@@ -18,7 +15,7 @@ Phase names such as "launch L5.4" refer to
 [docs/dev/LAUNCH_PLAN.md](docs/dev/LAUNCH_PLAN.md). Commit hashes in parentheses
 point at the change for readers who want the diff.
 
-## Unreleased — first public release (draft)
+## 0.1.0 — 2026-11-01
 
 ### Documentation (2026-10-22 .. 2026-10-31, launch L6)
 
