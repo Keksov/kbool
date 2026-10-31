@@ -1,6 +1,6 @@
 # Changelog — kbool
 
-> Draft (launch L6.7): reviewed before the first release (L8).
+> Draft: reviewed before the first release.
 
 kbool is a Free Pascal flavoured toolkit for bash: units with `uses`, classes
 with dot notation, and ports of FPC/Delphi classes. This repository is the
@@ -19,6 +19,17 @@ Phase names such as "launch L5.4" refer to
 point at the change for readers who want the diff.
 
 ## Unreleased — first public release (draft)
+
+### Documentation (2026-10-22 .. 2026-10-31, launch L6)
+
+* README rewritten as the front door: the Pascal DSL first, requirements,
+  platforms, the portability layer, a comparison with other projects and how
+  kbool is built; the reference part moved to [docs/reference.md](docs/reference.md)
+  (bbfc86d, 2306958).
+* Internal plans, ledgers and reviews moved to `docs/dev/` in every repository
+  ([docs/dev/README.md](docs/dev/README.md)) (56180c6).
+* `tools/porting/mdlinks.sh` checks markdown links and anchors (bcdaf0f);
+  `numbers.sh` produces the project's numbers as data (14ae044).
 
 ### CI on 13 platforms (2026-10-29 .. 2026-10-30, launch L5)
 
@@ -92,15 +103,6 @@ point at the change for readers who want the diff.
 * A portability scanner, an external-tool table per unit and a bash-feature map by
   version ([tools/porting/README.md](tools/porting/README.md)), feeding the ranked
   hazard list in [docs/dev/PORTING.md](docs/dev/PORTING.md).
-
-### Documentation (2026-10-15 .. 2026-10-26, launch L6)
-
-* README rewritten: install, quick start, unit list, configuration, tests; the
-  reference part moved to [docs/reference.md](docs/reference.md).
-* Internal plans, ledgers and reviews moved to `docs/dev/` in every repository
-  ([docs/dev/README.md](docs/dev/README.md)).
-* `tools/porting/mdlinks.sh` checks markdown links and anchors; `numbers.sh` produces
-  the project's numbers as data.
 
 ### The test gate (2026-10-17 .. 2026-10-20)
 

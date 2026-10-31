@@ -3,8 +3,7 @@
 This project is a Bash OOP framework and class library. Its object model is a
 **code generator**: class/method bodies are stored as strings and materialized via
 `eval` and template substitution. That is by design (analogous to compilation).
-The hardening below (see [`optimization_ledger.json`](docs/dev/optimization_ledger.json))
-neutralizes paths where **untrusted input** could reach code execution, and
+The hardening below neutralizes paths where **untrusted input** could reach code execution, and
 documents the by-design string-eval APIs that must only receive trusted input.
 
 ## Trust boundaries — pass only trusted (developer-authored) input
@@ -37,8 +36,8 @@ documents the by-design string-eval APIs that must only receive trusted input.
   runner and fixtures (`printf %q`), so paths with quotes/spaces cannot break out.
 - **Secure temp files** — `tfile` encrypt/decrypt uses `mktemp` (unpredictable name,
   atomic replace) instead of a predictable `.$$` name.
-- **Class-build scratch file** — `kk._fn_text` (kklass round 5 / P14, the
-  fork-free `declare -f` capture) creates one file per shell under `$TMPDIR`,
+- **Class-build scratch file** — `kk._fn_text` (the fork-free `declare -f`
+  capture) creates one file per shell under `$TMPDIR`,
   named from `$SRANDOM` (not the seedable `$RANDOM`); a name where anything
   exists (`-e`/`-L`) is skipped and the new descriptor must be a regular file
   (noclobber refuses only an existing regular file). The file is deleted at
@@ -56,9 +55,23 @@ documents the by-design string-eval APIs that must only receive trusted input.
   indexed array (arrays never come from the environment) bound to `$BASHPID`.
 - **Legacy prototypes** that did not validate names and could override the hardened
   `defineClass` were moved to `kklass/experimental/` (never sourced in production)
-  and deleted in kklass round 6 / P16 (they remain in the git history only).
+  and later deleted (they remain in the git history only).
 
 ## Reporting
 
-These are internal libraries. If you find an input path that reaches code execution
-from untrusted data and is not listed as a trust boundary above, treat it as a bug.
+An input path that reaches code execution from untrusted data and is not listed as
+a trust boundary above is a vulnerability. Report it privately, never in a public
+issue: use the repository's **Security → Report a vulnerability**
+(<https://github.com/Keksov/kbool/security/advisories/new>); for a problem in one
+component (`kcl`, `kklass`, `kkore`, `ktests`), use that component's own repository
+and its Security tab.
+
+Include:
+
+- the kbool commit (and the component's, if it is not the one kbool points at),
+  the bash version and the platform;
+- the call and the input that reach code execution (or another effect they should
+  not have), as a minimal script that shows it;
+- what you expected instead.
+
+The maintainer answers in the private report on GitHub.

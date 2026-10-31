@@ -61,13 +61,11 @@ bash kcl/tregex/tests/003_Match.sh -v info     # one file directly, every assert
   brew coreutils' `gtimeout`). Without them those cases pass as `SKIP: <why>`.
 * The reference package lists: `.github/workflows/ci.yml`, `.github/ci/linux.sh`.
 * Windows: Git for Windows' bash or MSYS2. Never mix the two in one process
-  tree — run a bash with its own folder first on `PATH`; for both at once:
+  tree — run a bash with its own folder first on `PATH`; for both at once
+  (the paths here and below are the default install folders; adjust to your install):
   `KT_GATE_BASHES="C:/Program Files/Git/usr/bin/bash.exe;C:/msys64/usr/bin/bash.exe" bash ktests/tools/gate.sh all`.
 
 ## Running the tests by hand
-
-Moved verbatim from the README on 2026-10-31 (only "on this page" became "in
-README.md and docs/reference.md").
 
 ```bash
 bash tests/tests.sh                          # every suite of the tree (the master sweep)
@@ -83,7 +81,7 @@ and exit code; `--changed` picks the suites your uncommitted diff touches
 (name suites instead, or `all`) — [ktests/tools/README.md](ktests/tools/README.md#gatesh--the-phase-gate):
 
 ```bash
-bash ktests/tools/gate.sh --bash C:/bin/Git/usr/bin/bash.exe --bash C:/bin/msys64/usr/bin/bash.exe --changed
+bash ktests/tools/gate.sh --bash "C:/Program Files/Git/usr/bin/bash.exe" --bash C:/msys64/usr/bin/bash.exe --changed
 ```
 
 * Run suites **one at a time** (they share `tests/.ckk` and temp names), and

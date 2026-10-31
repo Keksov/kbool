@@ -2,13 +2,16 @@
 
 [![ci](https://github.com/Keksov/kbool/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Keksov/kbool/actions/workflows/ci.yml)
 
+**Status:** pre-release — no tagged version yet; the API may still change before the first release.
+
 kbool brings Free Pascal habits to bash: units you load by name with `uses`, classes written
 as `class … end` with real function bodies, and a class library of 29 units: ports of Free
 Pascal and Delphi classes (`TStringList`, `TDictionary`, `TIniFile`, `TRegEx`, …) and wrappers
-for command-line tools (`TGrep`, `TSed`, `TAwk`, …). It offers **one API across bash versions
-and platforms**. CI runs the full test suite on [13 platform rows](#platforms) for every push
-to `main` and every pull request: bash 5.1, 5.2 and 5.3 on Linux (glibc and musl), and the
-current bash on macOS, FreeBSD and Windows.
+for command-line tools (`TGrep`, `TSed`, `TAwk`, …). It is for scripts that have outgrown
+functions and globals but must stay bash; it is not for POSIX `sh` or bash older than 5.1. It
+offers **one API across bash versions and platforms**. CI runs the full test suite on
+[13 platform rows](#platforms) for every push to `main` and every pull request: bash 5.1,
+5.2 and 5.3 on Linux (glibc and musl), and the current bash on macOS, FreeBSD and Windows.
 
 ## A first look
 
@@ -44,6 +47,9 @@ echo "$(basket.Report)"               # => apples: 10
 basket.delete
 ```
 
+A `func` answers in `$RESULT` and prints only inside `$( )`; reading a property
+(`basket.Count`) prints it; inside a body the fields are plain variables (`Name`, `Count`).
+
 A class from the library, loaded by name:
 
 <!-- doctest -->
@@ -56,6 +62,7 @@ fruits.Add apple
 fruits.Sort
 fruits.Get 0; echo "$RESULT"                 # => apple
 fruits.delete
+# loading again is a no-op
 kk.uses tstringlist; echo "again: rc=$?"     # => again: rc=0
 ```
 
@@ -68,13 +75,14 @@ What a bash script gets from kbool that bash alone does not give it:
 
 * **Classes**: fields, properties with getters and setters, constructors and destructors,
   inheritance with `inherited`, static members, visibility sections. Building a class forks
-  nothing.
+  nothing (FreeBSD's pkg bash falls back to `$( )`).
 * **Units**: `kk.uses tlist tdictionary` loads each library once, by name, from a search
   path, with a configuration file and checked namespaces. There is no `source "$(dirname …)/…"`
   bookkeeping.
-* **A class library with one contract**: every kcl unit returns its value in `RESULT`
-  (never on stdout), answers with rc 0 / 1 / 2, works under `set -eu`, and avoids forks on
-  its hot paths ([the kcl contract](kcl/README.md#1-the-kcl-contract)).
+* **A class library with one contract**: every kcl unit returns its value in `RESULT`,
+  not on stdout (a `$( )` call prints it; exceptions are listed in the kcl table), answers
+  with rc 0 / 1 / 2, works under `set -eu`, and avoids forks on its hot paths
+  ([the kcl contract](kcl/README.md#1-the-kcl-contract)).
 * **A portability layer**: awk, sed, stat, regex word boundaries, netcat, decimal commas and
   `/dev/fd` differ between the systems in the matrix. kbool absorbs the differences or
   refuses with a clear message ([the zoo](#the-portability-layer-the-zoo)).
@@ -97,8 +105,8 @@ described in [Loading kbool](docs/reference.md#loading-kbool).
 **bash ≥ 5.1.** `kbool.sh` refuses an older bash (macOS's `/bin/bash` 3.2, for example) with
 exit 2 and one line on stderr. On macOS, use Homebrew's bash.
 
-What else a unit runs comes from the per-unit inventory of external commands
-([`docs/dev/launch/tools.tsv`](docs/dev/launch/tools.tsv)):
+What else a unit runs comes from the per-unit inventory of external commands (an internal
+development file: [`docs/dev/launch/tools.tsv`](docs/dev/launch/tools.tsv)):
 
 | units | external commands | which flavour |
 |---|---|---|
@@ -107,7 +115,7 @@ What else a unit runs comes from the per-unit inventory of external commands
 | `TGrep`, `TSed`, `TAwk`, `TFind`, `THead`, `TTail` | GNU `grep`, GNU `sed`, `gawk`, GNU findutils `find`, GNU coreutils `head` / `tail` | GNU only (uutils `head` / `tail` ≥ 0.2.2 are accepted too) |
 | `thttpserver` | GNU netcat 0.7.1 or socat ≥ 1.7.4 | other netcats are refused by name |
 
-The honest split:
+The split:
 
 * **The core needs no GNU tool.** kkore, kklass and every kcl unit except the wrappers and
   `thttpserver` use bash and the POSIX utilities every system in the matrix has. They give the same results
@@ -174,7 +182,7 @@ own README and repository say[^checked].
 
 | project | what it is | bash / platforms it states | last commit seen | how kbool differs |
 |---|---|---|---|---|
-| [niieani/bash-oo-framework](https://github.com/niieani/bash-oo-framework) ("Bash Infinity") | "a standard library and a boilerplate framework": exceptions and stack traces, named parameters, `import`, logging, unit tests, a type system with classes | "I test with bash 4"; some modules work on bash 3; references need ≥ 4.3; no platform list | 2020-08-01, no releases | Pascal-style `class … end`; needs bash ≥ 5.1; tested on 13 CI rows |
+| [niieani/bash-oo-framework](https://github.com/niieani/bash-oo-framework) ("Bash Infinity") | "a standard library and a boilerplate framework": exceptions and stack traces, named parameters, `import`, logging, unit tests, a type system with classes | "I test with bash 4"; some modules work on bash 3; references need ≥ 4.3; no platform list | 2020-08-01, last release 2.1 (2018-07-08) | Pascal-style `class … end`; needs bash ≥ 5.1; tested on 13 CI rows |
 | [tomas/skull](https://github.com/tomas/skull) | "Object-oriented-like Bash framework": `Array`, `Hash`, `String`, `Numeric`, `File` and more, created with `Class.new var` | "written purely in Bash"; no version stated; notes Mac/Linux tool differences | 2018-08-10, no releases | user-defined classes with inheritance; ports of FPC classes |
 | [Ad5001/BashOOP](https://github.com/Ad5001/BashOOP) | "OOP with constructors, properties and namespace system for bash": `.shc` class and `.shn` namespace files | none stated | 2022-01-07, no releases | classes declared in the script itself; units loaded by name |
 | [elibs/ebash](https://github.com/elibs/ebash) | "enhanced bash": implicit error detection, logging, testing | its compatibility page lists Alpine, Arch, CentOS 7, Debian, Fedora, Gentoo, Rocky, Ubuntu and macOS 15.0 releases; no bash version | 2026-07-09, release v3.0.22 | a class system and FPC class ports; FreeBSD and Windows in CI |
@@ -185,10 +193,12 @@ own README and repository say[^checked].
 
 ## How it was built
 
-kbool is developed with AI assistance, and we say so openly. The roles:
+kbool is developed with AI assistance. The roles:
 
-* **The owner** decides: the scope, every design question with more than one reasonable
-  answer, and what gets released. Only the owner merges into `main`.
+* **The maintainer (Keksov)** decides: the scope, every design question with more than one
+  reasonable answer, and what gets released. Every change reaches `main` only through the
+  maintainer (branch rules allow no one else to update it); commits written with Claude carry
+  a `Co-Authored-By: Claude …` trailer.
 * **A supervisor Claude session** plans each phase. For every step it writes a task card
   (goal, the files it may touch, the acceptance checks) and dispatches it to a worker model:
   Claude Opus for design, the core layers and prose, Claude Sonnet for well-specified tasks.
@@ -196,11 +206,12 @@ kbool is developed with AI assistance, and we say so openly. The roles:
 * **An independent critic**, a fresh session without the worker's context, reviews changes
   to the core.
 * **Every commit is gated** on two bash runtimes: Git-bash 5.3.15 and MSYS2 5.3.9 on
-  Windows. The gate behind the figures here ran 30 suites: 9694 tests on 5.3.15 and 9695 on
-  5.3.9, all passing (19389 in total). Since launch phase L5 every push to `main` and every pull
-  request also runs the 13 CI rows.
-* **The record is public**: the plans, every decision with its reason, and 27 JSON ledgers
-  of the phases are kept in the repositories under `docs/dev/`. The index is
+  Windows. The full gate of 2026-10-31 ran 30 suites: 9694 tests on 5.3.15 and 9695 on
+  5.3.9 (MSYS2 runs one test more: it has `setsid`, Git for Windows does not), all passing
+  (19389 in total). Since 2026-10-30 every push to `main` and every pull request also runs
+  the 13 CI rows.
+* **The record is public**: the plans, every decision with its reason, and 27 machine-readable
+  phase logs ("ledgers") are kept in the repositories under `docs/dev/`. The index is
   [docs/dev/README.md](docs/dev/README.md).
 
 ## Reference
@@ -211,12 +222,12 @@ kbool is developed with AI assistance, and we say so openly. The roles:
 | [`kkore/`](kkore/README.md) | the system units (loaded by `kbool.sh`): the unit loader `kk.unit` / `kk.uses` / `kk.project` / `kk.config` / `kk.defined` / `kk.namespace` (`kuse.sh`), output and argument helpers (`klib.sh`), the error trap (`kerr.sh`), frames and unique names (`kvar.sh`), a key/value store (`kcfg.sh`) | [kkore/README.md](kkore/README.md) |
 | [`kklass/`](kklass/docs/kklass_book.md) | classes: `defineClass`, the declarative API, the Pascal DSL (`class … end`), compiled caches, serialization | [the kklass book](kklass/docs/kklass_book.md), chapter [Units and uses](kklass/docs/kklass_book.md#units-and-uses) |
 | [`kcl/`](kcl/README.md) | 29 units in 26 folders: ports of FPC/Delphi classes (`TList`, `TStringList`, `TDictionary`, `TIniFile`, `TPath`, …) and CLI-tool wrappers (`TGrep`, `TSed`, `TAwk`, …) | [kcl/README.md](kcl/README.md) |
-| `ktests/` | the test framework and runner every suite uses | `ktests/ktest.sh` |
+| [`ktests/`](ktests/README.md) | the test framework and runner every suite uses | [ktests/docs/README.md](ktests/docs/README.md) |
 | `tests/tests.sh` | the master runner: every `*/tests/tests.sh` of the tree | [Running the tests](#running-the-tests) |
 | [`docs/dev/`](docs/dev/README.md) | the development history: plans, ledgers, reviews, coverage notes | [docs/dev/README.md](docs/dev/README.md) |
 
-The design of units and `uses` — every decision, with its reasons — is
-[kklass/USES_PLAN.md](kklass/docs/dev/USES_PLAN.md).
+The design of units and `uses` — every decision, with its reasons — is in the internal design
+notes [kklass/docs/dev/USES_PLAN.md](kklass/docs/dev/USES_PLAN.md).
 
 - [Loading kbool](docs/reference.md#loading-kbool)
 - [Units](docs/reference.md#units)
@@ -239,6 +250,19 @@ bash ktests/tools/gate.sh all
 
 More options (one suite, `--changed`, two runtimes at once, running a suite directly), what CI
 checks and the house rules: [CONTRIBUTING.md](CONTRIBUTING.md#run-the-tests--one-command).
+
+## In memory of Niklaus Wirth
+
+kbool is a tribute to Niklaus Wirth (1934–2024), the brilliant creator of Pascal, Modula-2 and
+Oberon, who is sadly no longer with us. A whole generation of IT people grew up on Pascal: it
+was the first language of countless school and university courses, and through Turbo Pascal
+and Delphi it became the first real tool of many more.
+
+Had Pascal and Oberon received as much corporate money as TypeScript, Java and C#, humanity
+would have colonized the Solar System long ago, if only on the time saved waiting for builds:
+a full rebuild of a large Pascal project takes seconds, while a project of the same size in
+those languages can keep its developers at the coffee machine for tens of minutes. Wirth
+warned us; his law says that software gets slower faster than hardware gets faster.
 
 ## License
 

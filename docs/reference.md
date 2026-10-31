@@ -1,6 +1,6 @@
 # kbool reference
 
-Moved verbatim from the README on 2026-10-22 (section "Loading kbool" on 2026-10-31); the entry page is [../README.md](../README.md).
+The entry page is [../README.md](../README.md).
 
 - [Loading kbool](#loading-kbool)
 - [Units](#units)
@@ -14,10 +14,8 @@ Moved verbatim from the README on 2026-10-22 (section "Loading kbool" on 2026-10
 ## Loading kbool
 
 Nothing is built or installed: scripts `source` `kbool.sh` from wherever the
-tree lives. Prerequisites: bash ≥ 5.1 (tested: 5.1.16 and 5.2.37 on Debian, 5.3.15
-under Git-bash and 5.3.9 under MSYS2, on Windows); for some kcl units the GNU tools they wrap or call —
-coreutils (`head`, `tail`, `stat`, `mktemp`), `grep`, `sed`, `gawk`,
-findutils `find` — and GNU netcat (`nc`) for `thttpserver`.
+tree lives. Prerequisites: bash ≥ 5.1 and the external commands listed in
+[README → Requirements](../README.md#requirements).
 
 `kbool.sh` must be **sourced** (executed it prints an error and exits 2). It
 loads the system units `kuse klib kerr kvar kcfg` — they are always there, like
