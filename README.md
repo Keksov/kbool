@@ -264,6 +264,11 @@ a full rebuild of a large Pascal project takes seconds, while a project of the s
 those languages can keep its developers at the coffee machine for tens of minutes. Wirth
 warned us; his law says that software gets slower faster than hardware gets faster.
 
+But humanity still has a chance to put things right. The [Free Pascal](https://www.freepascal.org/)
+project keeps patiently improving the language and its compiler, and it can use help to get
+even better: [the sources, the issue tracker and merge requests](https://gitlab.com/freepascal.org/fpc/source)
+are open to everyone.
+
 ## License
 
 MIT: see [LICENSE](LICENSE). Each submodule carries its own `LICENSE`.
