@@ -7,6 +7,7 @@
 # It starts notes.sh on a free port with a temporary data file, prints each
 # curl command before it runs it, and stops the server with POST /quit. The
 # temporary files are removed and no process is left behind.
+# NOTES_PAUSE=SECONDS (default 0) waits that long after each command and its output.
 
 EX_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK="$(mktemp -d)" || exit 1
@@ -82,11 +83,20 @@ run() {
         rc=0
         "$@" || rc=$?
         if (( rc != 7 )); then
+            if [[ "$PAUSE" != 0 ]]; then
+                sleep "$PAUSE"
+            fi
             return 0
         fi
         sleep 0.2
     done
 }
+
+# The pause between steps: a non-negative number, else 0.
+PAUSE="${NOTES_PAUSE:-0}"
+if [[ ! "$PAUSE" =~ ^([0-9]+\.?[0-9]*|\.[0-9]+)$ ]]; then
+    PAUSE=0
+fi
 
 start_server || exit $?
 cat "$WORK/out"

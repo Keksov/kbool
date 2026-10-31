@@ -71,6 +71,8 @@ whole DSL is in [the kklass book](kklass/docs/kklass_book.md#pascal-dsl-class--e
 
 A small HTTP service: [examples/](examples/README.md)
 
+![The notes demo: curl against a bash HTTP service](docs/media/notes.gif)
+
 ## Why
 
 What a bash script gets from kbool that bash alone does not give it:

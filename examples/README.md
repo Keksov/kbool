@@ -32,6 +32,12 @@ in the server's own shell, so the objects stay alive between requests.
 `bash examples/notes_session.sh` starts the service on a free port with a
 temporary file, prints and runs a short curl session (add, list, search,
 delete, quit), and leaves nothing behind.
+`NOTES_PAUSE=1.5 bash examples/notes_session.sh` pauses between steps (used for the recording).
+
+![The notes demo: curl against a bash HTTP service](../docs/media/notes.gif)
+
+The recording as an asciicast: play it with `asciinema play docs/media/notes.cast`
+([notes.cast](../docs/media/notes.cast)).
 
 ## Requirements
 bash 5.1 or newer, `curl`, and a listener for the server: GNU netcat 0.7.1
