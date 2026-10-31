@@ -1,7 +1,7 @@
 # examples
 ## notes.sh - a notes service in bash
 
-An HTTP service in about 170 lines of code, in the Pascal-style class syntax
+An HTTP service in about 175 lines of code, in the Pascal-style class syntax
 of kbool. Run it and talk to it with `curl`:
 
 ```bash

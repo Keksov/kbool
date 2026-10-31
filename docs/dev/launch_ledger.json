@@ -752,8 +752,9 @@
       "dep": [
         "L7.2"
       ],
-      "card": "draft",
-      "status": "planned"
+      "card": "scratchpad launch/L7.3/card.md",
+      "status": "DONE 2026-11-01 (Sonnet worker, SV review; kbool fc74834): docs/media/notes.cast + notes.gif (19 s, 140 KB) recorded in kb-ubuntu with asciinema 2.4.0 and agg v1.9.0 (sha256 f111e315... = release digest; OG18), NOTES_PAUSE=1.6; notes_session.sh gained NOTES_PAUSE (default 0); GIF embedded in README and examples/README.md.",
+      "done": "2026-11-01"
     },
     "L7.4": {
       "executor": "S",
@@ -819,8 +820,9 @@
       "dep": [
         "L8.2"
       ],
-      "card": null,
-      "status": "planned"
+      "card": "scratchpad launch/L8.5/card.md",
+      "status": "DONE 2026-11-01 (Opus worker, SV review): docs/dev/launch/announce/ - habr-ru.md (Russian, ~1900 words of prose), lazarus-forum.md, delphi-praxis.md (soft launch), show-hn.md (first person for the owner, AI assistance stated first), reddit-bash.md, reddit-commandline.md, lobsters.md (tags show/unix/programming; 'shell' does not exist), faq.md (8 answers), README.md (venues, sequencing, the owner's pre-post checklist incl. venue AI/self-promotion rules). Every figure from README/docs/numbers.json/bench JSON; snippets run. SV aligned the demo size to 'about 175 lines of code' in notes.sh and examples/README.md. Nothing posted (OG6 = owner).",
+      "done": "2026-11-01"
     },
     "L8.6": {
       "executor": "OW",

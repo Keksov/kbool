@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# notes.sh - a notes service in bash: an HTTP server of about 150 lines.
+# notes.sh - a notes service in bash: an HTTP server in about 175 lines of code.
 #
 #   bash examples/notes.sh [--port=N | -p N] [--address=A] [--data=FILE]
 #
