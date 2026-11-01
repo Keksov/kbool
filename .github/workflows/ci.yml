@@ -10,6 +10,8 @@
 #           (bash git curl perl5) and `gnu` (+ the GNU tool set of provision/pkg.sh).
 #   windows windows-latest: `git-bash` (Git for Windows' bash; GNU netcat from MSYS2 only
 #           through KCL_NC) and `msys2` (msys2/setup-msys2, MSYSTEM=MSYS).
+#   lint    ubuntu-latest: .github/ci/shellcheck.sh (ShellCheck 0.11.0, only the checks
+#           that are clean today; no gate).
 # Verdicts (.github/ci/verdict.sh): PASS = green; FLAKY (exit 4) and ENV (exit 3) are
 # green with a warning when the gate printed its __GATE__ line (DL11); FAIL, TIMEOUT,
 # STRAY, CRASH, usage errors, a platform setup failure (exit 5) and ENV/FLAKY without a
@@ -50,6 +52,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ShellCheck as a guard, not a lint: only checks that are clean today
+  # (.github/ci/shellcheck.sh says which and why); ShellCheck pinned by version and hash
+  lint:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ inputs.component != '' && 'Keksov/kbool' || github.repository }}
+          ref: ${{ inputs.component != '' && 'main' || '' }}
+          submodules: recursive
+          persist-credentials: false
+
+      - name: component checkout
+        if: inputs.component != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Keksov/${{ inputs.component }}
+          ref: ${{ inputs.component_ref }}
+          path: ${{ inputs.component }}
+          persist-credentials: false
+
+      - name: shellcheck 0.11.0
+        run: |
+          v=v0.11.0
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/sc.tar.xz" \
+            "https://github.com/koalaman/shellcheck/releases/download/$v/shellcheck-$v.linux.x86_64.tar.xz"
+          echo "8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  $RUNNER_TEMP/sc.tar.xz" | sha256sum -c -
+          tar -xJf "$RUNNER_TEMP/sc.tar.xz" -C "$RUNNER_TEMP"
+          echo "SHELLCHECK=$RUNNER_TEMP/shellcheck-$v/shellcheck" >> "$GITHUB_ENV"
+
+      - name: guard
+        run: bash .github/ci/shellcheck.sh
+
   linux:
     name: linux (${{ matrix.name }})
     runs-on: ubuntu-latest

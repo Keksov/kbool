@@ -121,6 +121,14 @@ bash ktests/tools/gate.sh --bash "C:/Program Files/Git/usr/bin/bash.exe" --bash 
 | `freebsd` | FreeBSD 15.1, pkg bash: `clean, pkg bash` (bash git curl perl5) and `gnu, pkg bash` (+ coreutils gsed gawk findutils gnugrep diffutils netcat socat) |
 | `windows` | `git-bash` (Git for Windows' bash) and `msys2` |
 
+One more job, `shellcheck`, runs [`.github/ci/shellcheck.sh`](.github/ci/shellcheck.sh)
+(ShellCheck 0.11.0). It is a guard, not a lint: it runs only the checks that are
+clean today, so a finding is new code bringing back a known bug pattern —
+`local x=$(cmd)` hiding the rc, `cd` without `|| return`, an unquoted `$@`,
+`for f in $(ls)`. The script's header lists the checks and where each applies;
+run it locally with `bash .github/ci/shellcheck.sh` (`SHELLCHECK=path` if it
+is not on `PATH`).
+
 A pull request to `kcl`, `kklass`, `kkore` or `ktests` runs the same 13 rows:
 that repo's `ci.yml` calls kbool's workflow, which checks out kbool `main` with
 every submodule at kbool's pointers and puts your PR in place of its repo. So a
