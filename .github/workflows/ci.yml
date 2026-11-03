@@ -9,7 +9,8 @@
 #   freebsd FreeBSD 15.1 VM (vmactions/freebsd-vm on ubuntu-latest) with pkg bash: `clean`
 #           (bash git curl perl5) and `gnu` (+ the GNU tool set of provision/pkg.sh).
 #   windows windows-latest: `git-bash` (Git for Windows' bash; GNU netcat from MSYS2 only
-#           through KCL_NC) and `msys2` (msys2/setup-msys2, MSYSTEM=MSYS).
+#           through KCL_NC), `msys2` (msys2/setup-msys2, MSYSTEM=MSYS) and `cygwin`
+#           (cygwin/cygwin-install-action, the Cygwin runtime itself: .github/ci/cygwin.sh).
 #   lint    ubuntu-latest: .github/ci/shellcheck.sh (ShellCheck 0.11.0, only the checks
 #           that are clean today; no gate).
 # Verdicts (.github/ci/verdict.sh): PASS = green; FLAKY (exit 4) and ENV (exit 3) are
@@ -469,6 +470,8 @@ jobs:
             slug: git-bash
           - name: msys2
             slug: msys2
+          - name: cygwin
+            slug: cygwin
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -584,6 +587,37 @@ jobs:
           set +e
           /usr/bin/bash ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 all
           rc=$?
+          sh .github/ci/verdict.sh "$OUT" "$rc" "$NAME"
+
+      # cygwin row: Cygwin's base packages + git, netcat (OpenBSD nc), openssl. Not on the
+      # system PATH: the Git-bash steps of this job must not pick up Cygwin's tools.
+      - name: Cygwin (cygwin row)
+        if: matrix.slug == 'cygwin'
+        id: cyg
+        uses: cygwin/cygwin-install-action@5a1b0cd107181fa6bb6bf3f90d500f4fb3132f18 # v7
+        with:
+          packages: git netcat openssl
+          add-to-path: false
+
+      # started from Git-bash (as on the maintainer's machine); cygwin.sh sets a Cygwin-only PATH
+      - name: gate (cygwin)
+        if: matrix.slug == 'cygwin'
+        shell: bash
+        env:
+          NAME: ${{ matrix.name }}
+          CYGROOT: ${{ steps.cyg.outputs.root }}
+        run: |
+          unset MSYSTEM
+          OUT="$(cygpath -u "$RUNNER_TEMP")/gate-out"
+          mkdir -p "$OUT"
+          CBASH="$(cygpath -u "$CYGROOT")/bin/bash.exe"
+          set +e
+          if [ -x "$CBASH" ]; then
+            "$CBASH" .github/ci/cygwin.sh "$(cygpath -m "$OUT")"
+            rc=$?
+          else
+            echo "::error::no bash.exe at $CBASH"; rc=5
+          fi
           sh .github/ci/verdict.sh "$OUT" "$rc" "$NAME"
 
       - name: OUT dir
