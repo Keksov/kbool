@@ -112,11 +112,11 @@ bash ktests/tools/gate.sh --bash "C:/Program Files/Git/usr/bin/bash.exe" --bash 
 ## What CI checks
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the gate (`--rerun-failed 1
---timeout 900 all`) on 13 rows, one job each:
+--timeout 900 all`) on 14 rows, one job each:
 
 | job | rows |
 |---|---|
-| `linux` | `ubuntu host, system bash`; containers `alpine, bash 5.1` / `5.2` / `5.3` (bash 5.1.16, 5.2.37, 5.3.20), `debian 13`, `ubuntu 24.04`, `fedora 44` — the gate runs as a non-root user |
+| `linux` | `ubuntu host, system bash`; containers `alpine, bash 5.1` / `5.2` / `5.3` (bash 5.1.16, 5.2.37, 5.3.20), `debian 13`, `ubuntu 22.04` (bash 5.1.16 on glibc), `ubuntu 24.04`, `fedora 44` — the gate runs as a non-root user |
 | `macos` | Homebrew bash with Apple's BSD tools (`bsd tools, brew bash`) and with the GNU tools (`gnu tools, brew bash`); the bsd row also checks that `/bin/bash` 3.2 is refused |
 | `freebsd` | FreeBSD 15.1, pkg bash: `clean, pkg bash` (bash git curl perl5) and `gnu, pkg bash` (+ coreutils gsed gawk findutils gnugrep diffutils netcat socat) |
 | `windows` | `git-bash` (Git for Windows' bash) and `msys2` |
@@ -129,7 +129,7 @@ clean today, so a finding is new code bringing back a known bug pattern —
 run it locally with `bash .github/ci/shellcheck.sh` (`SHELLCHECK=path` if it
 is not on `PATH`).
 
-A pull request to `kcl`, `kklass`, `kkore` or `ktests` runs the same 13 rows:
+A pull request to `kcl`, `kklass`, `kkore` or `ktests` runs the same 14 rows:
 that repo's `ci.yml` calls kbool's workflow, which checks out kbool `main` with
 every submodule at kbool's pointers and puts your PR in place of its repo. So a
 change that needs a change in another repo first waits for that one to land.
