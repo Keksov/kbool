@@ -2,8 +2,8 @@
 # suite, --rerun-failed 1) on a matrix of platforms. One job per platform, one
 # artifact per row (gate-<job>-<slug>, the gate's OUT dir):
 #   linux   ubuntu-latest host (system bash) and docker rows: bash 5.1.16 / 5.2.37 /
-#           5.3.20 on Alpine (official bash images), debian:13, ubuntu:24.04, fedora:44
-#           (system bash). Container rows run .github/ci/linux.sh as root, the gate as user kb.
+#           5.3.20 on Alpine (official bash images), debian:13, ubuntu:22.04 (bash 5.1.16 on
+#           glibc), ubuntu:24.04, fedora:44 (system bash). Container rows run .github/ci/linux.sh as root, the gate as user kb.
 #   macos   macos-latest with Homebrew bash: `bsd` (bash only, Apple's BSD tools) and
 #           `gnu` (+ coreutils gnu-sed gawk findutils grep diffutils netcat socat).
 #   freebsd FreeBSD 15.1 VM (vmactions/freebsd-vm on ubuntu-latest) with pkg bash: `clean`
@@ -110,6 +110,9 @@ jobs:
           - name: debian 13
             slug: debian-13
             image: debian:13
+          - name: ubuntu 22.04
+            slug: ubuntu-2204
+            image: ubuntu:22.04
           - name: ubuntu 24.04
             slug: ubuntu-2404
             image: ubuntu:24.04
