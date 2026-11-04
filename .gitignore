@@ -2,3 +2,6 @@
 .ckk
 .tmp
 /notes.ini
+
+# announcement texts: local only, never committed (owner, 2026-11-04)
+/docs/dev/launch/announce/
