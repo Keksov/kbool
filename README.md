@@ -161,6 +161,7 @@ their packages with [`.github/ci/linux.sh`](.github/ci/linux.sh).
 | `freebsd (gnu, pkg bash)` | FreeBSD 15.1 | + coreutils, gsed, gawk, findutils, gnugrep, diffutils, netcat, socat | pkg bash |
 | `windows (git-bash)` | Windows, `windows-latest` | Git for Windows (GNU); GNU netcat from MSYS2 | Git for Windows' bash |
 | `windows (msys2)` | Windows, `windows-latest` | MSYS2 (GNU) | MSYS2 bash |
+| `windows (cygwin)` | Windows, `windows-latest` | Cygwin (GNU; its own runtime, not MSYS2): base + git, OpenBSD nc, openssl | Cygwin bash |
 
 The `macos (bsd tools …)` row also checks that `/bin/bash` 3.2 is refused. On the rows without
 a GNU tool, each wrapper test case still passes, with a `SKIP: <reason>` text (visible with
@@ -194,7 +195,7 @@ own README and repository say[^checked].
 
 | project | what it is | bash / platforms it states | last commit seen | how kbool differs |
 |---|---|---|---|---|
-| [niieani/bash-oo-framework](https://github.com/niieani/bash-oo-framework) ("Bash Infinity") | "a standard library and a boilerplate framework": exceptions and stack traces, named parameters, `import`, logging, unit tests, a type system with classes | "I test with bash 4"; some modules work on bash 3; references need ≥ 4.3; no platform list | 2020-08-01, last release 2.1 (2018-07-08) | Pascal-style `class … end`; needs bash ≥ 5.1; tested on 14 CI rows |
+| [niieani/bash-oo-framework](https://github.com/niieani/bash-oo-framework) ("Bash Infinity") | "a standard library and a boilerplate framework": exceptions and stack traces, named parameters, `import`, logging, unit tests, a type system with classes | "I test with bash 4"; some modules work on bash 3; references need ≥ 4.3; no platform list | 2020-08-01, last release 2.1 (2018-07-08) | Pascal-style `class … end`; needs bash ≥ 5.1; tested on 15 CI rows |
 | [tomas/skull](https://github.com/tomas/skull) | "Object-oriented-like Bash framework": `Array`, `Hash`, `String`, `Numeric`, `File` and more, created with `Class.new var` | "written purely in Bash"; no version stated; notes Mac/Linux tool differences | 2018-08-10, no releases | user-defined classes with inheritance; ports of FPC classes |
 | [Ad5001/BashOOP](https://github.com/Ad5001/BashOOP) | "OOP with constructors, properties and namespace system for bash": `.shc` class and `.shn` namespace files | none stated | 2022-01-07, no releases | classes declared in the script itself; units loaded by name |
 | [elibs/ebash](https://github.com/elibs/ebash) | "enhanced bash": implicit error detection, logging, testing | its compatibility page lists Alpine, Arch, CentOS 7, Debian, Fedora, Gentoo, Rocky, Ubuntu and macOS 15.0 releases; no bash version | 2026-07-09, release v3.0.22 | a class system and FPC class ports; FreeBSD and Windows in CI |
@@ -221,7 +222,7 @@ kbool is developed with AI assistance. The roles:
   Windows. The full gate of 2026-10-31 ran 30 suites: 9694 tests on 5.3.15 and 9695 on
   5.3.9 (MSYS2 runs one test more: it has `setsid`, Git for Windows does not), all passing
   (19389 in total). Since 2026-10-30 every push to `main` and every pull request also runs
-  the 14 CI rows.
+  the 15 CI rows.
 * **The record is public**: the plans, every decision with its reason, and 27 machine-readable
   phase logs ("ledgers") are kept in the repositories under `docs/dev/`. The index is
   [docs/dev/README.md](docs/dev/README.md).
