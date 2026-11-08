@@ -1,0 +1,281 @@
+# kklass call-path benchmarks (tools/bench, the kklass speedup round K0) on GitHub
+# runners: Linux (host + containers: bash 5.1/5.2/5.3 on Alpine/musl, glibc distros),
+# macOS (Homebrew bash), Windows (Git-bash, MSYS2, Cygwin). FreeBSD is left out (its
+# VM adds noise and minutes; add a row when a result needs it).
+# Every row: tools/bench/prepare.sh builds the sides (kbool copies with kklass at the
+# refs of SIDES, optionally with a tools/bench/variants patch), tools/bench/bench.sh
+# measures them interleaved in fresh processes; the Markdown report goes to the step
+# summary and to the artifact bench-<group>-<slug>.
+# Runner timings are noisy (10-30% between machines): read the ratios between the
+# sides of ONE row, not absolute numbers across runs. Never a pass/fail verdict.
+# Triggers: a push to the work branch `perf` (settings from tools/bench/ci.conf) and,
+# once this file is on main, a manual run whose non-empty inputs override ci.conf.
+name: bench
+
+on:
+  push:
+    branches: [perf]
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "job groups (linux macos windows); empty: ci.conf"
+        required: false
+        default: ""
+      sides:
+        description: "NAME=REF[+PATCH] ... (REF pointer = kbool's kklass pointer); empty: ci.conf"
+        required: false
+        default: ""
+      suites:
+        description: "call drift; empty: ci.conf"
+        required: false
+        default: ""
+      rounds:
+        description: "rounds per measurement; empty: ci.conf"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bench-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      only: ${{ steps.conf.outputs.only }}
+      sides: ${{ steps.conf.outputs.sides }}
+      suites: ${{ steps.conf.outputs.suites }}
+      rounds: ${{ steps.conf.outputs.rounds }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: conf
+        env:
+          IN_ONLY: ${{ inputs.only }}
+          IN_SIDES: ${{ inputs.sides }}
+          IN_SUITES: ${{ inputs.suites }}
+          IN_ROUNDS: ${{ inputs.rounds }}
+        run: |
+          . tools/bench/ci.conf
+          {
+            echo "only=${IN_ONLY:-$ONLY}"
+            echo "sides=${IN_SIDES:-$SIDES}"
+            echo "suites=${IN_SUITES:-$SUITES}"
+            echo "rounds=${IN_ROUNDS:-$ROUNDS}"
+          } | tee -a "$GITHUB_OUTPUT"
+
+  linux:
+    name: linux (${{ matrix.name }})
+    needs: setup
+    if: contains(format(' {0} ', needs.setup.outputs.only), ' linux ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: ubuntu host, system bash, slug: ubuntu-host, image: "" }
+          - { name: "alpine, bash 5.1", slug: alpine-51, image: "bash:5.1.16-alpine3.22" }
+          - { name: "alpine, bash 5.2", slug: alpine-52, image: "bash:5.2.37-alpine3.22" }
+          - { name: "alpine, bash 5.3", slug: alpine-53, image: "bash:5.3.20-alpine3.24" }
+          - { name: debian 13, slug: debian-13, image: "debian:13" }
+          - { name: ubuntu 22.04, slug: ubuntu-2204, image: "ubuntu:22.04" }
+          - { name: fedora 44, slug: fedora-44, image: "fedora:44" }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - name: bench
+        env:
+          IMAGE: ${{ matrix.image }}
+          NAME: ${{ matrix.name }}
+          SIDES: ${{ needs.setup.outputs.sides }}
+          SUITES: ${{ needs.setup.outputs.suites }}
+          ROUNDS: ${{ needs.setup.outputs.rounds }}
+        run: |
+          B="$RUNNER_TEMP/bench"
+          # shellcheck disable=SC2086
+          bash tools/bench/prepare.sh "$B" $SIDES > "$RUNNER_TEMP/sides"
+          set +e
+          if [ -z "$IMAGE" ]; then
+            mapfile -t args < "$RUNNER_TEMP/sides"
+            # shellcheck disable=SC2086
+            bash tools/bench/bench.sh --rounds "$ROUNDS" --out "$B/report.md" --title "bench: $NAME" "${args[@]}" -- $SUITES
+          else
+            args=()
+            while IFS= read -r l; do args+=("${l%%=*}=/bench/${l%%=*}"); done < "$RUNNER_TEMP/sides"
+            chmod -R a+rwX "$B"
+            docker pull -q "$IMAGE" || docker pull -q "$IMAGE"
+            # shellcheck disable=SC2086
+            docker run --rm -v "$PWD:/src:ro" -v "$B:/bench" "$IMAGE" \
+              bash /src/tools/bench/bench.sh --rounds "$ROUNDS" --out /bench/report.md --title "bench: $NAME" "${args[@]}" -- $SUITES
+          fi
+          rc=$?
+          [ -f "$B/report.md" ] && cat "$B/report.md" >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - name: report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-linux-${{ matrix.slug }}
+          path: ${{ runner.temp }}/bench/report.md
+          retention-days: 30
+          if-no-files-found: warn
+
+  macos:
+    name: macos (brew bash)
+    needs: setup
+    if: contains(format(' {0} ', needs.setup.outputs.only), ' macos ')
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - name: brew install bash
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+        run: brew install bash || brew install bash
+      - name: bench
+        env:
+          SIDES: ${{ needs.setup.outputs.sides }}
+          SUITES: ${{ needs.setup.outputs.suites }}
+          ROUNDS: ${{ needs.setup.outputs.rounds }}
+        run: |
+          BASH5="$(brew --prefix)/bin/bash"
+          B="$RUNNER_TEMP/bench"
+          # shellcheck disable=SC2086
+          "$BASH5" tools/bench/prepare.sh "$B" $SIDES > "$RUNNER_TEMP/sides"
+          args=()
+          while IFS= read -r l; do args+=("$l"); done < "$RUNNER_TEMP/sides"
+          set +e
+          # shellcheck disable=SC2086
+          "$BASH5" tools/bench/bench.sh --rounds "$ROUNDS" --out "$B/report.md" --title "bench: macos, brew bash" "${args[@]}" -- $SUITES
+          rc=$?
+          [ -f "$B/report.md" ] && cat "$B/report.md" >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - name: report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-macos-brew
+          path: ${{ runner.temp }}/bench/report.md
+          retention-days: 30
+          if-no-files-found: warn
+
+  windows:
+    name: windows (${{ matrix.slug }})
+    needs: setup
+    if: contains(format(' {0} ', needs.setup.outputs.only), ' windows ')
+    runs-on: windows-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        slug: [git-bash, msys2, cygwin]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      # sides are built with Git-bash (git) for every row; paths go on as D:/... (bench.sh
+      # converts them with cygpath under MSYS2 and Cygwin)
+      - name: sides
+        shell: bash
+        env:
+          SIDES: ${{ needs.setup.outputs.sides }}
+        run: |
+          B="$(cygpath -m "$RUNNER_TEMP")/bench"
+          # shellcheck disable=SC2086
+          bash tools/bench/prepare.sh "$B" $SIDES > "$RUNNER_TEMP/sides.raw"
+          while IFS= read -r l; do echo "${l%%=*}=$(cygpath -m "${l#*=}")"; done < "$RUNNER_TEMP/sides.raw" > "$RUNNER_TEMP/sides"
+          cat "$RUNNER_TEMP/sides"
+
+      - name: bench (git-bash)
+        if: matrix.slug == 'git-bash'
+        shell: bash
+        env:
+          SUITES: ${{ needs.setup.outputs.suites }}
+          ROUNDS: ${{ needs.setup.outputs.rounds }}
+        run: |
+          B="$(cygpath -m "$RUNNER_TEMP")/bench"
+          mapfile -t args < "$RUNNER_TEMP/sides"
+          set +e
+          # shellcheck disable=SC2086
+          bash tools/bench/bench.sh --rounds "$ROUNDS" --out "$B/report.md" --title "bench: windows, git-bash" "${args[@]}" -- $SUITES
+          rc=$?
+          [ -f "$B/report.md" ] && cat "$B/report.md" >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - name: MSYS2 (msys2 row)
+        if: matrix.slug == 'msys2'
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: MSYS
+          update: false
+          path-type: minimal
+
+      - name: bench (msys2)
+        if: matrix.slug == 'msys2'
+        shell: msys2 {0}
+        env:
+          SUITES: ${{ needs.setup.outputs.suites }}
+          ROUNDS: ${{ needs.setup.outputs.rounds }}
+        run: |
+          T="$(cygpath -u "$RUNNER_TEMP")"
+          mapfile -t args < "$T/sides"
+          set +e
+          # shellcheck disable=SC2086
+          /usr/bin/bash tools/bench/bench.sh --rounds "$ROUNDS" --out "$T/bench/report.md" --title "bench: windows, msys2" "${args[@]}" -- $SUITES
+          rc=$?
+          [ -f "$T/bench/report.md" ] && cat "$T/bench/report.md" >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - name: Cygwin (cygwin row)
+        if: matrix.slug == 'cygwin'
+        id: cyg
+        uses: cygwin/cygwin-install-action@5a1b0cd107181fa6bb6bf3f90d500f4fb3132f18 # v7
+        with:
+          packages: ""
+          add-to-path: false
+
+      # started from Git-bash; Cygwin's bash runs with a Cygwin-only PATH (as cygwin.sh)
+      - name: bench (cygwin)
+        if: matrix.slug == 'cygwin'
+        shell: bash
+        env:
+          SUITES: ${{ needs.setup.outputs.suites }}
+          ROUNDS: ${{ needs.setup.outputs.rounds }}
+          CYGROOT: ${{ steps.cyg.outputs.root }}
+          MSYS_NO_PATHCONV: "1"
+          MSYS2_ARG_CONV_EXCL: "*"
+        run: |
+          unset MSYSTEM
+          B="$(cygpath -m "$RUNNER_TEMP")/bench"
+          CBASH="$(cygpath -u "$CYGROOT")/bin/bash.exe"
+          mapfile -t args < "$RUNNER_TEMP/sides"
+          set +e
+          # shellcheck disable=SC2016,SC2086
+          "$CBASH" -c 'PATH=/usr/local/bin:/usr/bin; export PATH; unset TMPDIR; exec bash "$0" "$@"' \
+            tools/bench/bench.sh --rounds "$ROUNDS" --out "$B/report.md" --title "bench: windows, cygwin" "${args[@]}" -- $SUITES
+          rc=$?
+          [ -f "$B/report.md" ] && cat "$B/report.md" >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - name: report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-windows-${{ matrix.slug }}
+          path: ${{ runner.temp }}/bench/report.md
+          retention-days: 30
+          if-no-files-found: warn
