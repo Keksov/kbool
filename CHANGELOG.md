@@ -15,6 +15,32 @@ Phase names such as "launch L5.4" refer to
 [docs/dev/LAUNCH_PLAN.md](docs/dev/LAUNCH_PLAN.md). Commit hashes in parentheses
 point at the change for readers who want the diff.
 
+## 0.1.1 — 2026-11-08
+
+### Faster method calls (2026-11-08, kklass round K)
+
+* **kklass method calls are about 1.8 times faster and `inherited` about 2.2
+  times** on every platform CI covers; property reads and `new`/`delete` are
+  unchanged. A call takes 61 µs instead of 103 on Debian (bash 5.2) and 105 µs
+  instead of 183 on Git-bash. What changed and what code can notice is in the
+  [kklass changelog](https://github.com/Keksov/kklass/blob/main/CHANGELOG.md).
+* `tools/bench/` measures kklass call paths: each case in a fresh process, two or
+  more kbool trees with different kklass commits measured interleaved, a Markdown
+  report with medians and ratios ([tools/bench/README.md](tools/bench/README.md)).
+  `.github/workflows/bench.yml` runs it on 11 rows: Linux with bash 5.1, 5.2 and
+  5.3 (musl and glibc), macOS, and Windows Git-bash, MSYS2 and Cygwin (c0b9ac0).
+
+### CI on 15 platforms (2026-11-01 .. 2026-11-04)
+
+* **Ubuntu 22.04**: bash 5.1.16 on glibc; the 5.1 floor was covered only on musl
+  before (5bdc031).
+* **Windows (Cygwin)**: the Cygwin runtime itself with its bash 5.2.21; the two
+  other Windows rows run MSYS2, a fork of it. The first run found two kcl bugs and
+  three test assumptions, all fixed (a6301e3).
+* **ShellCheck guard**: a CI job runs ShellCheck 0.11.0 with only the checks that
+  report nothing on today's tree, so a finding is new code bringing back a known
+  bug pattern (5eb6ddd).
+
 ## 0.1.0 — 2026-11-01
 
 ### Documentation (2026-10-22 .. 2026-10-31, launch L6)

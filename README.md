@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/Keksov/kbool/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Keksov/kbool/actions/workflows/ci.yml)
 
-**Status:** 0.1.0 — the API may still change between minor versions (0.x).
+**Status:** 0.1.1 — the API may still change between minor versions (0.x).
 
 kbool brings Free Pascal habits to bash: units you load by name with `uses`, classes written
 as `class … end` with real function bodies, and a class library of 29 units: ports of Free
