@@ -29,6 +29,13 @@ for spec in "$@"; do
     tar --exclude=.git -cf - . | (cd "$side" && tar -xf -)
     if [[ $ref == pointer ]]; then
         rev=$(git -C kklass log -1 --format='%h %s')
+    elif [[ $ref != */* ]] && git -C kklass rev-parse -q --verify "$ref^{commit}" >/dev/null; then
+        # a commit already present (a short sha, a local branch or tag): no fetch
+        # (a short sha is no remote ref; `origin/x` and remote names still fetch below)
+        rm -rf "$side/kklass"
+        mkdir -p "$side/kklass"
+        git -C kklass archive "$ref" | (cd "$side/kklass" && tar -xf -)
+        rev=$(git -C kklass log -1 --format='%h %s' "$ref")
     else
         # --depth only in a shallow clone (CI): in a full one it would make it shallow
         depth=()
