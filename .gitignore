@@ -8,3 +8,6 @@
 
 # termcheck logs written into the repo folder (tools/termcheck)
 /fv_termcheck_*.log
+
+# termcheck automatic runs (tools/termcheck/autodrive.ps1)
+/tools/termcheck/runs/

@@ -181,8 +181,131 @@ plain text file: open it in Notepad to see.
 | `--timeout SECONDS` | wait per request, default 10 (decimals allowed) |
 | `--out DIR` | write the log into `DIR` instead of the current folder |
 | `--with-dangerous` | also ask for Alt+F4 (closes most windows) |
+| `--list-items` | print the items (group, id, kind, expected) and exit |
 | `--help` | usage |
 
 For developers: `bash tools/termcheck/tests/selftest.sh` checks the program
 without a person (a pseudo-terminal part runs where `script(1)` exists: MSYS2,
 Cygwin, Linux).
+
+## Automatic run (Windows)
+
+`tools/termcheck/autodrive.ps1` runs the check in five Windows terminals one after
+another and presses the keys and the mouse for you. It uses real Windows input
+(the same path as a physical keyboard), so the terminals translate the keys
+exactly as they would for a person. The VS Code terminal is not automated: run it
+by hand as in section 3 above.
+
+Terminals, in this order: Windows Terminal (Git Bash), classic console (conhost,
+Git Bash), Git Bash window (mintty), MSYS2 window, Cygwin terminal.
+
+**It takes over the keyboard and the mouse for about 10-15 minutes** (about 2-3
+minutes per terminal). During that time:
+
+* do not touch the keyboard or the mouse (a key held by hand, even Shift or Ctrl,
+  stops the run);
+* do not open other windows. The driver checks before every key and every mouse
+  event that its terminal window is in front. It brings the window back to the
+  front only before the first item of each terminal; after that, if another
+  window comes to the front (a pop-up that takes the focus), the driver stops;
+* do not close the driver's PowerShell window: to stop, move the mouse.
+
+### Start it
+
+1. Save your work. Close nothing else; the driver does not touch other windows.
+2. Make sure the US English keyboard layout is installed (Settings > Time &
+   language > Language & region). The driver switches to it for the run. On this
+   PC the keyboard layout is shared by all windows, so during the run every window
+   is in English; the layout you had is put back at the end. If the end of the run
+   says `keyboard layout not restored - press Win+Space`, press Win+Space to get
+   your layout back.
+3. Open PowerShell 7 (Start menu: type `pwsh`, press Enter).
+4. Type and press Enter:
+
+       cd C:\projects\kkbot\kbool
+       pwsh -File tools\termcheck\autodrive.ps1 -Live
+
+5. Take your hands off the keyboard and the mouse. Windows open and close by
+   themselves, one terminal at a time.
+
+To try only one terminal or a few groups first:
+
+    pwsh -File tools\termcheck\autodrive.ps1 -Live -Terminals mintty-git -Groups arrows,keypad
+
+Without `-Live` nothing is opened and nothing is pressed: the driver prints what it
+would send (a dry run).
+
+### How to stop it
+
+* **Move the mouse.** This is the way to stop it. Or
+* **hold Right Shift and Right Ctrl together** for a moment.
+
+The driver then stops at once: it lets go of every key and mouse button, puts
+NumLock, CapsLock, the keyboard layout and the clipboard back, closes its own
+terminal window and writes what it has. (Ctrl+C stops it only when its PowerShell
+window has the keyboard focus, which it does not have during the run: move the
+mouse instead. Do not close the PowerShell window: the putting-back would not
+run.)
+
+It also stops by itself when a key is held by hand, when its terminal window is no
+longer in front after the first item, when a mouse point would land outside the
+text area of that window, and after 25 minutes in total (`-MaxMinutes`).
+
+If the driver was killed before it could put things back (the window was closed,
+the PC hung), run, in a new PowerShell 7 window:
+
+    cd C:\projects\kkbot\kbool
+    pwsh -File tools\termcheck\autodrive.ps1 -Restore tools\termcheck\runs\<date-time>
+
+It puts back NumLock, CapsLock, the keyboard layout and the clipboard text from
+`state.json` in that folder (it presses no key other than NumLock / CapsLock).
+`state.json` holds a copy of your clipboard text; it is deleted as soon as
+everything is put back.
+
+### What it does to your PC, and puts back
+
+* NumLock is switched on and off for the keypad items; CapsLock is turned off for
+  the run. Both are put back at the end.
+* The clipboard holds the text `termcheck-clip` during the run (Shift+Ins pastes
+  it). Your clipboard **text** is put back at the end; anything else on the
+  clipboard (pictures, files copied in Explorer, formatted text, any non-text
+  format) is lost.
+* It never presses the Windows key, the Menu key, Alt+Tab, Alt+F4, Alt+Esc,
+  Alt+Space, Ctrl+Esc, Ctrl+Shift+Esc or Ctrl+Alt+Del, and never the right-side
+  Shift, Ctrl or Alt keys.
+* In the mintty windows (Git Bash, MSYS2, Cygwin) Alt+F2, Alt+F3 and Alt+F8 are
+  skipped (they open a new window, a search bar, a reset dialog); the log shows
+  them as NONE with `note=skipped-by-driver`.
+* Key combinations that another program has taken as a global hotkey (for example
+  F12 or Alt+PgUp taken by a screenshot or media tool) are found at the start and
+  skipped, so the driver never triggers that program; the log shows
+  `note=skipped-by-driver:taken-hotkey` and `summary.txt` lists them. Programs
+  that watch the keyboard with a low-level hook cannot be detected this way; if
+  one reacts to a key, close it before the run.
+* After F11, Alt+F11, Alt+F10 and Alt+F12 the same key is pressed again when the
+  window changed (full screen, size).
+
+### Where the results are
+
+`C:\projects\kkbot\kbool\tools\termcheck\runs\<date-time>\`:
+
+* `summary.txt` - one line per terminal: OK / DIFF / NONE / INFO counts, whether
+  the terminal settings were put back (`stty-restored`), how termcheck ended;
+* `driver.log` - every key and mouse event sent, every check, any stop;
+* one folder per terminal (`wt`, `conhost`, `mintty-git`, `msys2`, `cygwin`) with
+  the termcheck log `fv_termcheck_*.log` and the sync file.
+
+Send the whole `<date-time>` folder.
+
+### For developers
+
+* Sync mode: with `TERMCHECK_SYNC=FILE` termcheck appends one line per state:
+  `ready <group> <id> [target X Y [X2 Y2]] [screen W H]` (after the prompt is
+  drawn and pending input dropped; keys sent earlier are dropped as stale),
+  `done <id> <result> [cell X Y [cell2 X Y]] [screen W H] [skipped]`,
+  `retry <id> DIFF cell X Y` (a mouse item that landed on the wrong cell is asked
+  once more, only the second attempt is logged), `finish-wait`,
+  `end <complete|incomplete|error> <status>`. `TERMCHECK_NONCE` sets the window
+  title `termcheck-<nonce>`; `TERMCHECK_SKIP=ID[:REASON],...` skips items (note `skipped-by-driver[:REASON]`).
+* Offline driver tests (no window, no input):
+  `pwsh -NoProfile -File tools/termcheck/tests/autodrive.Tests.ps1`.

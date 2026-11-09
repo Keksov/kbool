@@ -10,6 +10,16 @@
 # from FILE instead of a terminal: one line per item, printf %b escapes, an
 # empty line = nothing pressed. No terminal is opened or drawn on. The hidden
 # variable TERMCHECK_SCREEN_W sets the screen width in that mode (default 80).
+#
+# Sync mode (tools/termcheck/autodrive.ps1, README "Automatic run (Windows)"):
+# TERMCHECK_SYNC=FILE appends one line per state to FILE:
+#     ready <group> <item-id> [target X Y [X2 Y2]] [screen W H]
+#     done <item-id> <result> [cell X Y [cell2 X Y]] [screen W H] [skipped]
+#     finish-wait
+#     end <complete|incomplete|error> <exit status>
+# TERMCHECK_NONCE=WORD sets the window title to termcheck-WORD (OSC 2).
+# TERMCHECK_SKIP=ID[:REASON],... (sync mode only) logs these items as NONE with
+# note=skipped-by-driver[:REASON] without waiting. --list-items prints the item table.
 
 TERMCHECK_VERSION=1
 
@@ -37,6 +47,8 @@ Usage: bash tools/termcheck/termcheck.sh [options]
   --out DIR          write the log into DIR (default: the current directory)
   --with-dangerous   also ask for Alt+F4 (it closes most terminal windows)
   --feed FILE        test mode: take the keys from FILE, no terminal is used
+  --list-items       print the items (group, id, kind, expected) and exit;
+                     includes the wide-screen mouse item
   -h, --help         this text
 
 The screen must be at least 80 columns by 24 rows. Press Ctrl+C at the end (or
@@ -51,9 +63,11 @@ TC_TIMEOUT_TXT=10
 TC_OUT=.
 TC_DANGER=0
 TC_FEEDFILE=''
+TC_LIST=0
 while (( $# )); do
     case $1 in
         -h|--help) tc_usage; exit 0 ;;
+        --list-items) TC_LIST=1; shift ;;
         --only) [[ $# -ge 2 ]] || { echo "termcheck: --only needs a value" >&2; exit 2; }
             TC_ONLY=$2; shift 2 ;;
         --timeout) [[ $# -ge 2 ]] || { echo "termcheck: --timeout needs a value" >&2; exit 2; }
@@ -98,157 +112,6 @@ if [[ -n $TC_ONLY ]]; then
 else
     for tc_g in "${TC_GROUPS[@]}"; do TC_SEL[$tc_g]=1; done
 fi
-
-TC_FEED=0
-if [[ -n $TC_FEEDFILE ]]; then
-    TC_FEED=1
-    if [[ ! -r $TC_FEEDFILE ]]; then
-        echo "termcheck: cannot read the feed file '$TC_FEEDFILE'" >&2
-        exit 2
-    fi
-fi
-if [[ ! -d $TC_OUT || ! -w $TC_OUT ]]; then
-    echo "termcheck: the output folder '$TC_OUT' is not a writable directory" >&2
-    exit 2
-fi
-TC_OUT=$(cd "$TC_OUT" && pwd) || exit 2
-
-# ---- state -------------------------------------------------------------------
-TC_LOG=''
-TC_CUR=''           # group/item being run
-TC_FINISH=0         # 1 once the finish prompt was reached
-TC_DONE=0           # 1 once the summary was written
-TC_EOF=0
-TC_POLL=0.05
-TC_EXTRA_US=200000
-TC_LAST='-'
-TC_FEEDFD=''
-declare -A TC_CNT=()
-declare -A TC_GN=()
-
-tc_log() { if [[ -n $TC_LOG ]]; then printf '%s\n' "$1" >> "$TC_LOG"; fi; }
-
-tc_now() { TC_NOW=${EPOCHREALTIME/[.,]/}; }
-
-# TC_Q VALUE: TC_QV = printf %q of VALUE, byte-wise (C locale)
-tc_q() {
-    local LC_ALL=C
-    printf -v TC_QV '%q' "$1"
-}
-
-# ---- finishing: summary and the traps --------------------------------------
-tc_summary_text() {
-    local g r line total=0 n
-    for g in "${TC_GROUPS[@]}"; do
-        [[ -n ${TC_GN[$g]:-} ]] || continue
-        line="summary  $g"
-        for r in OK DIFF NONE INFO; do
-            n=${TC_CNT[$g/$r]:-0}
-            line+="  $r=$n"
-        done
-        printf '%s\n' "$line"
-    done
-    for r in OK DIFF NONE INFO; do
-        n=0
-        for g in "${TC_GROUPS[@]}"; do (( n += ${TC_CNT[$g/$r]:-0} )); done
-        total+="  $r=$n"
-    done
-    printf 'summary  total%s\n' "${total#0}"
-}
-
-tc_finalize() {
-    local line one wlog
-    if (( TC_DONE )); then return 0; fi
-    TC_DONE=1
-    if [[ -z $TC_LOG ]]; then return 0; fi
-    if [[ -n $TC_CUR && $TC_FINISH == 0 ]]; then
-        tc_log "incomplete at $TC_CUR"
-    else
-        tc_log "run complete"
-    fi
-    while IFS= read -r line; do tc_log "$line"; done < <(tc_summary_text)
-    one=$(tc_summary_text | tail -n 1)
-    printf 'termcheck: %s\n' "${one#summary  total  }"
-    printf 'termcheck: log written to %s\n' "$TC_LOG"
-    if command -v cygpath >/dev/null 2>&1; then
-        wlog=$(cygpath -w "$TC_LOG" 2>/dev/null)
-        if [[ -n $wlog ]]; then printf 'termcheck: (Windows path: %s)\n' "$wlog"; fi
-    fi
-    if (( ! TC_FEED )); then
-        printf 'termcheck: please send that file. If the terminal looks broken, type: reset\n'
-    fi
-}
-
-tc_on_exit() { tc_finalize; }
-
-tc_on_sig() {
-    case $1 in
-        int)  tc_log "ctrl-c: interrupt received, terminal restored by fv.video"; exit 130 ;;
-        hup)  tc_log "hup: hangup received, terminal restored by fv.video"; exit 129 ;;
-        term) tc_log "term: terminate received, terminal restored by fv.video"; exit 143 ;;
-    esac
-}
-
-# the script's own traps first; fv.video chains them (README fv.video, "Exit paths")
-trap 'tc_on_exit' EXIT
-trap 'tc_on_sig int' INT
-trap 'tc_on_sig hup' HUP
-trap 'tc_on_sig term' TERM
-
-# ---- the header data, collected BEFORE the terminal is touched ----------------
-
-tc_hdr_stty=''
-if (( ! TC_FEED )) && [[ -r /dev/tty ]]; then
-    tc_hdr_stty=$({ stty -a < /dev/tty; } 2>/dev/null) || tc_hdr_stty=''
-fi
-tc_git() {
-    local h
-    h=$(git -C "$1" rev-parse --short HEAD 2>/dev/null) || h=''
-    printf '%s' "${h:-unknown}"
-}
-TC_GIT_KBOOL=$(tc_git "$TC_ROOT")
-TC_GIT_KCL=$(tc_git "$TC_ROOT/kcl")
-TC_UNAME=$(uname -a 2>/dev/null) || TC_UNAME=unknown
-TC_PROCVER=''
-if [[ -r /proc/version ]]; then IFS= read -r TC_PROCVER < /proc/version || true; fi
-printf -v TC_DATE '%(%Y-%m-%d %H:%M:%S %z)T' -1
-printf -v TC_STAMP '%(%Y%m%d-%H%M%S)T' -1
-
-# the terminal guess for the file name (amendment A8)
-if [[ -n ${WT_SESSION-} ]]; then tc_g1=WT
-elif [[ -n ${TERM_PROGRAM-} ]]; then tc_g1=$TERM_PROGRAM
-else tc_g1=${TERM:-unknown}; fi
-tc_g2=${MSYSTEM:-${OSTYPE:-unknown}}
-TC_GUESS=${tc_g1}-${tc_g2}
-TC_GUESS=${TC_GUESS//[^A-Za-z0-9._-]/_}
-
-# ---- load the units ------------------------------------------------------------
-# shellcheck source=/dev/null
-source "$TC_ROOT/kbool.sh" || { echo "termcheck: cannot load $TC_ROOT/kbool.sh" >&2; exit 2; }
-kk.uses fv.drivers || { echo "termcheck: cannot load the fv.drivers unit" >&2; exit 2; }
-
-# ---- the terminal ------------------------------------------------------------
-if (( TC_FEED )); then
-    exec {TC_NULLFD}< /dev/null
-    exec {TC_FEEDFD}< "$TC_FEEDFILE"
-    FV_KEY_FD=$TC_NULLFD
-    FV_SCREEN_W=${TERMCHECK_SCREEN_W:-80}
-    FV_SCREEN_H=24
-else
-    if ! fv.video.initVideo; then
-        echo "termcheck: no terminal (run this from a terminal window, not from a pipe or a service)" >&2
-        exit 2
-    fi
-    fv.drivers.initEvents
-    if (( FV_SCREEN_W < 80 || FV_SCREEN_H < 24 )); then
-        tc_sw=$FV_SCREEN_W tc_sh=$FV_SCREEN_H
-        fv.video.doneVideo
-        echo "termcheck: the window is ${tc_sw}x${tc_sh}; enlarge the window to at least 80x24 and run it again" >&2
-        exit 2
-    fi
-fi
-
-tc_put() { if (( ! TC_FEED )); then printf '%s' "$1" >&"$FV_TTY_FD"; fi; }
 
 # ---- the item list -------------------------------------------------------------
 IT_GROUP=() IT_ID=() IT_HUMAN=() IT_EXP=() IT_KIND=() IT_HINT=()
@@ -354,6 +217,239 @@ tc_build_items() {
         (( TC_N++ ))
     fi
 }
+
+# ---- --list-items: the item table for tools/termcheck/autodrive.ps1 -----------------
+# one line per item: group TAB id TAB kind TAB expected (kind: key, mouse:MK, resize);
+# the screen is taken as 240 wide so the far-right mouse item is listed too
+if (( TC_LIST )); then
+    FV_SCREEN_W=240
+    tc_build_items
+    for (( tc_i = 0; tc_i < TC_N; tc_i++ )); do
+        tc_k=${IT_KIND[tc_i]}
+        if [[ $tc_k == mouse ]]; then tc_k=mouse:${IT_MK[tc_i]}; fi
+        printf '%s\t%s\t%s\t%s\n' "${IT_GROUP[tc_i]}" "${IT_ID[tc_i]}" "$tc_k" "${IT_EXP[tc_i]}"
+    done
+    exit 0
+fi
+
+# ---- sync mode (TERMCHECK_SYNC) ----------------------------------------------------
+TC_SYNC=${TERMCHECK_SYNC:-}
+TC_NONCE=${TERMCHECK_NONCE:-}
+TC_NONCE=${TC_NONCE//[^A-Za-z0-9_-]/}
+TC_CELL='' TC_CELL2='' TC_RSZ=''
+declare -A TC_SKIP=()
+if [[ -n $TC_SYNC ]]; then
+    if ! { : >> "$TC_SYNC"; } 2>/dev/null; then
+        echo "termcheck: cannot write the sync file '$TC_SYNC'" >&2
+        exit 2
+    fi
+    IFS=',' read -ra tc_w <<< "${TERMCHECK_SKIP:-}"
+    for tc_g in "${tc_w[@]}"; do
+        [[ -n $tc_g ]] || continue
+        # ID or ID:REASON (a word); the reason goes into the note
+        if [[ $tc_g == *:* ]]; then
+            tc_k=${tc_g#*:}
+            tc_k=${tc_k//[^A-Za-z0-9_-]/}
+            TC_SKIP[${tc_g%%:*}]=${tc_k:--}
+        else
+            TC_SKIP[$tc_g]=-
+        fi
+    done
+fi
+
+# tc_sync LINE: one line to the sync file (opened and closed per line = flushed)
+tc_sync() { if [[ -n $TC_SYNC ]]; then printf '%s\n' "$1" >> "$TC_SYNC"; fi; }
+
+# tc_sync_ready INDEX: the item waits for input from now on
+tc_sync_ready() {
+    local i=$1 l="ready ${IT_GROUP[$1]} ${IT_ID[$1]}"
+    [[ -n $TC_SYNC ]] || return 0
+    case ${IT_KIND[i]} in
+        mouse)
+            l+=" target ${IT_X[i]} ${IT_Y[i]}"
+            if [[ -n ${IT_X2[i]} ]]; then l+=" ${IT_X2[i]} ${IT_Y2[i]}"; fi
+            l+=" screen $FV_SCREEN_W $FV_SCREEN_H"
+            ;;
+        resize) l+=" screen $FV_SCREEN_W $FV_SCREEN_H" ;;
+    esac
+    tc_sync "$l"
+}
+
+# tc_sync_done INDEX: the item is judged (RES) and logged
+tc_sync_done() {
+    local i=$1 l="done ${IT_ID[$1]} $RES"
+    [[ -n $TC_SYNC ]] || return 0
+    case ${IT_KIND[i]} in
+        mouse)
+            if [[ -n $TC_CELL ]]; then l+=" cell $TC_CELL"; fi
+            if [[ -n $TC_CELL2 ]]; then l+=" cell2 $TC_CELL2"; fi
+            ;;
+        resize) if [[ -n $TC_RSZ ]]; then l+=" screen $TC_RSZ"; fi ;;
+    esac
+    tc_sync "$l"
+}
+
+TC_FEED=0
+if [[ -n $TC_FEEDFILE ]]; then
+    TC_FEED=1
+    if [[ ! -r $TC_FEEDFILE ]]; then
+        echo "termcheck: cannot read the feed file '$TC_FEEDFILE'" >&2
+        exit 2
+    fi
+fi
+if [[ ! -d $TC_OUT || ! -w $TC_OUT ]]; then
+    echo "termcheck: the output folder '$TC_OUT' is not a writable directory" >&2
+    exit 2
+fi
+TC_OUT=$(cd "$TC_OUT" && pwd) || exit 2
+
+# ---- state -------------------------------------------------------------------
+TC_LOG=''
+TC_CUR=''           # group/item being run
+TC_FINISH=0         # 1 once the finish prompt was reached
+TC_DONE=0           # 1 once the summary was written
+TC_EOF=0
+TC_POLL=0.05
+TC_EXTRA_US=200000
+TC_LAST='-'
+TC_FEEDFD=''
+declare -A TC_CNT=()
+declare -A TC_GN=()
+
+tc_log() { if [[ -n $TC_LOG ]]; then printf '%s\n' "$1" >> "$TC_LOG"; fi; }
+
+tc_now() { TC_NOW=${EPOCHREALTIME/[.,]/}; }
+
+# TC_Q VALUE: TC_QV = printf %q of VALUE, byte-wise (C locale)
+tc_q() {
+    local LC_ALL=C
+    printf -v TC_QV '%q' "$1"
+}
+
+# ---- finishing: summary and the traps --------------------------------------
+tc_summary_text() {
+    local g r line total=0 n
+    for g in "${TC_GROUPS[@]}"; do
+        [[ -n ${TC_GN[$g]:-} ]] || continue
+        line="summary  $g"
+        for r in OK DIFF NONE INFO; do
+            n=${TC_CNT[$g/$r]:-0}
+            line+="  $r=$n"
+        done
+        printf '%s\n' "$line"
+    done
+    for r in OK DIFF NONE INFO; do
+        n=0
+        for g in "${TC_GROUPS[@]}"; do (( n += ${TC_CNT[$g/$r]:-0} )); done
+        total+="  $r=$n"
+    done
+    printf 'summary  total%s\n' "${total#0}"
+}
+
+tc_finalize() {
+    local line one wlog
+    if (( TC_DONE )); then return 0; fi
+    TC_DONE=1
+    if [[ -z $TC_LOG ]]; then return 0; fi
+    if [[ -n $TC_CUR && $TC_FINISH == 0 ]]; then
+        tc_log "incomplete at $TC_CUR"
+    else
+        tc_log "run complete"
+    fi
+    while IFS= read -r line; do tc_log "$line"; done < <(tc_summary_text)
+    one=$(tc_summary_text | tail -n 1)
+    printf 'termcheck: %s\n' "${one#summary  total  }"
+    printf 'termcheck: log written to %s\n' "$TC_LOG"
+    if command -v cygpath >/dev/null 2>&1; then
+        wlog=$(cygpath -w "$TC_LOG" 2>/dev/null)
+        if [[ -n $wlog ]]; then printf 'termcheck: (Windows path: %s)\n' "$wlog"; fi
+    fi
+    if (( ! TC_FEED )); then
+        printf 'termcheck: please send that file. If the terminal looks broken, type: reset\n'
+    fi
+}
+
+tc_on_exit() {
+    local rc=$? st=complete
+    tc_finalize
+    if [[ -n $TC_SYNC ]]; then
+        if [[ -z $TC_LOG ]]; then st=error
+        elif [[ -n $TC_CUR && $TC_FINISH == 0 ]]; then st=incomplete; fi
+        tc_sync "end $st $rc"
+    fi
+}
+
+tc_on_sig() {
+    case $1 in
+        int)  tc_log "ctrl-c: interrupt received, terminal restored by fv.video"; exit 130 ;;
+        hup)  tc_log "hup: hangup received, terminal restored by fv.video"; exit 129 ;;
+        term) tc_log "term: terminate received, terminal restored by fv.video"; exit 143 ;;
+    esac
+}
+
+# the script's own traps first; fv.video chains them (README fv.video, "Exit paths")
+trap 'tc_on_exit' EXIT
+trap 'tc_on_sig int' INT
+trap 'tc_on_sig hup' HUP
+trap 'tc_on_sig term' TERM
+
+# ---- the header data, collected BEFORE the terminal is touched ----------------
+
+tc_hdr_stty=''
+if (( ! TC_FEED )) && [[ -r /dev/tty ]]; then
+    tc_hdr_stty=$({ stty -a < /dev/tty; } 2>/dev/null) || tc_hdr_stty=''
+fi
+tc_git() {
+    local h
+    h=$(git -C "$1" rev-parse --short HEAD 2>/dev/null) || h=''
+    printf '%s' "${h:-unknown}"
+}
+TC_GIT_KBOOL=$(tc_git "$TC_ROOT")
+TC_GIT_KCL=$(tc_git "$TC_ROOT/kcl")
+TC_UNAME=$(uname -a 2>/dev/null) || TC_UNAME=unknown
+TC_PROCVER=''
+if [[ -r /proc/version ]]; then IFS= read -r TC_PROCVER < /proc/version || true; fi
+printf -v TC_DATE '%(%Y-%m-%d %H:%M:%S %z)T' -1
+printf -v TC_STAMP '%(%Y%m%d-%H%M%S)T' -1
+
+# the terminal guess for the file name (amendment A8)
+if [[ -n ${WT_SESSION-} ]]; then tc_g1=WT
+elif [[ -n ${TERM_PROGRAM-} ]]; then tc_g1=$TERM_PROGRAM
+else tc_g1=${TERM:-unknown}; fi
+tc_g2=${MSYSTEM:-${OSTYPE:-unknown}}
+TC_GUESS=${tc_g1}-${tc_g2}
+TC_GUESS=${TC_GUESS//[^A-Za-z0-9._-]/_}
+
+# ---- load the units ------------------------------------------------------------
+# shellcheck source=/dev/null
+source "$TC_ROOT/kbool.sh" || { echo "termcheck: cannot load $TC_ROOT/kbool.sh" >&2; exit 2; }
+kk.uses fv.drivers || { echo "termcheck: cannot load the fv.drivers unit" >&2; exit 2; }
+
+# ---- the terminal ------------------------------------------------------------
+if (( TC_FEED )); then
+    exec {TC_NULLFD}< /dev/null
+    exec {TC_FEEDFD}< "$TC_FEEDFILE"
+    FV_KEY_FD=$TC_NULLFD
+    FV_SCREEN_W=${TERMCHECK_SCREEN_W:-80}
+    FV_SCREEN_H=24
+else
+    if ! fv.video.initVideo; then
+        echo "termcheck: no terminal (run this from a terminal window, not from a pipe or a service)" >&2
+        exit 2
+    fi
+    fv.drivers.initEvents
+    if (( FV_SCREEN_W < 80 || FV_SCREEN_H < 24 )); then
+        tc_sw=$FV_SCREEN_W tc_sh=$FV_SCREEN_H
+        fv.video.doneVideo
+        echo "termcheck: the window is ${tc_sw}x${tc_sh}; enlarge the window to at least 80x24 and run it again" >&2
+        exit 2
+    fi
+fi
+
+tc_put() { if (( ! TC_FEED )); then printf '%s' "$1" >&"$FV_TTY_FD"; fi; }
+
+# sync mode: the window title names the run, so the driver finds this window
+if [[ -n $TC_SYNC && -n $TC_NONCE ]]; then tc_put $'\e]2;termcheck-'"$TC_NONCE"$'\a'; fi
 
 # ---- drawing -------------------------------------------------------------------
 TC_S=''
@@ -640,6 +736,14 @@ tc_run_mouse() {
         esac
     done
     if (( target > 0 )); then EXTRA="(+$target wheel events)"; fi
+    # the cells really received, for the sync file (the driver calibrates on them)
+    TC_CELL='' TC_CELL2=''
+    if [[ $mk == wheel ]]; then
+        if [[ -n $g_wheel ]]; then TC_CELL="$w_x $w_y"; fi
+    elif (( downs > 0 )); then
+        TC_CELL="$d_x $d_y"
+        if [[ $mk == drag && -n $g_up ]]; then TC_CELL2="$u_x $u_y"; fi
+    fi
     # judge
     RES=NONE
     case $mk in
@@ -706,7 +810,9 @@ tc_run_resize() {
             evMouse*) tc_noise mouse ;;
         esac
     done
+    TC_RSZ=''
     if (( n > 0 )); then
+        TC_RSZ="$nw $nh"
         GOT="cmResizeApp ${ow}x${oh}->${nw}x${nh}"
         EXTRA="(events: $n)"
         if [[ $nw == "$ow" && $nh == "$oh" ]]; then RES=DIFF; NOTE='same-size'; else RES=OK; fi
@@ -761,29 +867,66 @@ done
 : > "$TC_LOG" || { TC_LOG=''; echo "termcheck: cannot write the log" >&2; (( TC_FEED )) || fv.video.doneVideo; exit 2; }
 tc_header
 
+# tc_feed_next INDEX: feed mode, queue the next line of the feed file as the input
+tc_feed_next() {
+    STALE=0 TC_EOF=0
+    tc_line=''
+    if [[ -n $TC_FEEDFD ]]; then IFS= read -r -u "$TC_FEEDFD" tc_line || tc_line=''; fi
+    printf -v tc_bytes '%b' "$tc_line"
+    fv.keyboard.flush
+    fv.drivers.doneEvents
+    fv.drivers.clearEvent
+    if [[ -n $tc_bytes ]]; then fv.keyboard.feed "$tc_bytes"; fi
+    tc_log "# prompt $(( $1 + 1 ))/$TC_N [${IT_GROUP[$1]}] ${IT_HUMAN[$1]}"
+}
+
 for (( tc_i = 0; tc_i < TC_N; tc_i++ )); do
     TC_CUR=${IT_GROUP[tc_i]}/${IT_ID[tc_i]}
     RES='' GOT='' CHARV='' RAW='' EXTRA='' NOTE='' NOISE='' NOISE_N=0
-    # input of this item: pending keys are dropped (STALE), or the feed line is queued
-    if (( TC_FEED )); then
-        STALE=0 TC_EOF=0
-        tc_line=''
-        if [[ -n $TC_FEEDFD ]]; then IFS= read -r -u "$TC_FEEDFD" tc_line || tc_line=''; fi
-        printf -v tc_bytes '%b' "$tc_line"
-        fv.keyboard.flush
-        fv.drivers.doneEvents
-        fv.drivers.clearEvent
-        if [[ -n $tc_bytes ]]; then fv.keyboard.feed "$tc_bytes"; fi
-        tc_log "# prompt $(( tc_i + 1 ))/$TC_N [${IT_GROUP[tc_i]}] ${IT_HUMAN[tc_i]}"
-    else
-        tc_drain
+    # input of this item: the feed line is queued (feed mode)
+    if (( TC_FEED )); then tc_feed_next "$tc_i"; fi
+    # sync mode: an item the driver asked to skip is logged without waiting
+    if [[ -n ${TC_SKIP[${IT_ID[tc_i]}]:-} ]]; then
+        tc_k=${TC_SKIP[${IT_ID[tc_i]}]}
+        RES=NONE NOTE=skipped-by-driver TC_CELL='' TC_CELL2='' TC_RSZ=''
+        if [[ $tc_k == - ]]; then tc_k=''; fi
+        if [[ -n $tc_k ]]; then NOTE+=":$tc_k"; fi
+        tc_record "$tc_i"
+        tc_sync "done ${IT_ID[tc_i]} NONE skipped${tc_k:+ $tc_k}"
+        STALE=0
+        continue
     fi
-    case ${IT_KIND[tc_i]} in
-        key) tc_draw_key "$tc_i"; tc_run_key "$tc_i" ;;
-        mouse) tc_draw_mouse "$tc_i"; tc_run_mouse "$tc_i" ;;
-        resize) tc_draw_resize "$tc_i"; tc_run_resize "$tc_i" ;;
-    esac
+    tc_attempt=1 tc_first=''
+    while :; do
+        # draw the prompt, drop pending input (STALE), then announce "ready" and wait
+        case ${IT_KIND[tc_i]} in
+            key) tc_draw_key "$tc_i" ;;
+            mouse) tc_draw_mouse "$tc_i" ;;
+            resize) tc_draw_resize "$tc_i" ;;
+        esac
+        tc_drain
+        tc_sync_ready "$tc_i"
+        case ${IT_KIND[tc_i]} in
+            key) tc_run_key "$tc_i" ;;
+            mouse) tc_run_mouse "$tc_i" ;;
+            resize) tc_run_resize "$tc_i" ;;
+        esac
+        # sync mode: a mouse item that landed on the wrong cell is asked once more,
+        # so the driver can calibrate; only the second attempt is logged
+        if [[ -n $TC_SYNC && ${IT_KIND[tc_i]} == mouse && $tc_attempt == 1 && $RES == DIFF && $NOTE == *'off('* ]] && (( ! TC_EOF )); then
+            tc_first="cell $TC_CELL${TC_CELL2:+ cell2 $TC_CELL2}"
+            tc_sync "retry ${IT_ID[tc_i]} DIFF $tc_first"
+            tc_attempt=2
+            tc_settle
+            RES='' GOT='' CHARV='' RAW='' EXTRA='' NOTE='' NOISE='' NOISE_N=0 STALE=0
+            if (( TC_FEED )); then tc_feed_next "$tc_i"; fi
+            continue
+        fi
+        break
+    done
+    if [[ -n $tc_first ]]; then NOTE+="${NOTE:+ }retried(first:${tc_first// /_})"; fi
     tc_record "$tc_i"
+    tc_sync_done "$tc_i"
     STALE=0
     if (( TC_EOF && ! TC_FEED )); then
         tc_log "eof: terminal input ended"
@@ -807,6 +950,7 @@ tc_at 10 4 "(the log file is written already; Ctrl+C puts the terminal back and 
 tc_at 22 2 "last: $TC_LAST"
 tc_put "$TC_S"
 tc_drain
+tc_sync finish-wait
 tc_now
 tc_end=$(( TC_NOW + 120000000 ))
 tc_why=timeout

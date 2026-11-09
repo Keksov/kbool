@@ -303,6 +303,107 @@ feed --only chars -- ''
 n=$(tr -cd '\r' < "$LOG" | wc -c)
 ok "log: no CR byte" eq "$((n + 0))" 0
 
+# --list-items: the item table for the Windows driver (autodrive.ps1)
+OUT=$(bash "$TC" --list-items 2>&1); RC=$?
+ok "--list-items: rc 0" eq "$RC" 0
+n=0; while IFS= read -r l; do [[ -n $l ]] && n=$(( n + 1 )); done <<< "$OUT"
+DETAIL="lines: $n"
+ok "--list-items: 117 items (the far-right mouse item included)" eq "$n" 117
+ok "--list-items: a key line is group TAB id TAB kind TAB expected" has "$OUT" $'arrows\tShift+Up\tkey\tkbShiftUp'
+ok "--list-items: a mouse line names the mouse kind" has "$OUT" $'mouse\tDrag\tmouse:drag\tb=1,m=0,down@10,16,up@60,18'
+ok "--list-items: the far-right item is listed" has "$OUT" $'mouse\tClick-Far-Right\tmouse:click'
+ok "--list-items: the resize line" has "$OUT" $'resize\tResize\tresize\tcmResizeApp'
+ok "--list-items: no Alt+F4 by default" not has "$OUT" $'\tAlt+F4\t'
+OUT=$(bash "$TC" --list-items --with-dangerous 2>&1)
+ok "--list-items --with-dangerous: Alt+F4 is listed" has "$OUT" $'fkeys\tAlt+F4\tkey\tkbAltF4'
+OUT=$(bash "$TC" --list-items --only keypad 2>&1)
+n=0; while IFS= read -r l; do [[ -n $l ]] && n=$(( n + 1 )); done <<< "$OUT"
+ok "--list-items --only keypad: 3 lines" eq "$n" 3
+
+# sync mode (TERMCHECK_SYNC) in --feed mode: ready/done lines, cells, skip, end
+SYNCF=$TMP/sync1.txt
+: > "$SYNCF"
+TERMCHECK_SYNC=$SYNCF TERMCHECK_NONCE=n1 TERMCHECK_SKIP='Click-Right,Wheel-Up' feed --only mouse,resize -- \
+    $'\\e[<0;13;7M\\e[<0;13;7m' \
+    '' \
+    $'\\e[<1;62;10M\\e[<1;62;10m' \
+    $'\\e[<1;61;11M\\e[<1;61;11m' \
+    '' \
+    $'\\e[<65;51;15M' \
+    $'\\e[<0;11;17M\\e[<32;30;17M\\e[<0;61;19m'
+SYNCTXT=$(<"$SYNCF")
+DETAIL=$SYNCTXT
+ok "sync: rc 0" eq "$RC" 0
+ok "sync: ready line of a click names the target and the screen" has "$SYNCTXT" 'ready mouse Click-Left target 12 6 screen 80 24'
+ok "sync: done line of a click names the received cell" has "$SYNCTXT" 'done Click-Left OK cell 12 6'
+ok "sync: a cell one off asks a retry with the received cell" has "$SYNCTXT" 'retry Click-Middle DIFF cell 61 9'
+ok "sync: the retry is announced with a second ready" has "$SYNCTXT" $'retry Click-Middle DIFF cell 61 9\nready mouse Click-Middle target 60 10 screen 80 24\ndone Click-Middle OK cell 60 10'
+want Click-Middle OK "x=60,y=10" "sync: only the second attempt is logged"
+row Click-Middle
+DETAIL=$ROW
+ok "sync: the log notes the first attempt" has "$ROW" 'retried(first:cell_61_9)'
+ok "sync: the wheel cell is reported" has "$SYNCTXT" 'done Wheel-Down OK cell 50 14'
+ok "sync: a drag has two target cells" has "$SYNCTXT" 'ready mouse Drag target 10 16 60 18 screen 80 24'
+ok "sync: a drag reports both ends" has "$SYNCTXT" 'done Drag OK cell 10 16 cell2 60 18'
+ok "sync: a skipped item has no ready line" not has "$SYNCTXT" 'ready mouse Click-Right'
+ok "sync: a skipped item is done NONE skipped" has "$SYNCTXT" 'done Click-Right NONE skipped'
+ok "sync: an item with no input is done NONE without a cell" has "$SYNCTXT" $'done Double-Click NONE\n'
+ok "sync: the resize ready line has the screen" has "$SYNCTXT" 'ready resize Resize screen 80 24'
+ok "sync: the last line is 'end complete 0'" re "$SYNCTXT" $'\nend complete 0$'
+ok "sync: no finish-wait line in feed mode" not has "$SYNCTXT" 'finish-wait'
+want Click-Right NONE "-" "sync: the skipped item is logged NONE"
+row Click-Right
+DETAIL=$ROW
+ok "sync: the skipped item has note=skipped-by-driver" has "$ROW" 'note=skipped-by-driver'
+n=0 bad=''
+while IFS= read -r l; do
+    case $l in
+        ready*) n=$(( n + 1 )); w=${l#ready * }; w=${w%% *} ;;
+        done*) x=${l#done }; x=${x%% *}
+            if [[ $l != *' skipped' && $x != "$w" ]]; then bad+="$x "; fi ;;
+    esac
+done <<< "$SYNCTXT"
+DETAIL="unpaired: $bad"
+ok "sync: every done follows the ready of the same item" eq "$bad" ''
+ok "sync: 10 ready lines (11 items, 2 skipped, 1 retried)" eq "$n" 10
+n=$(tr -cd '\r' < "$SYNCF" | wc -c)
+ok "sync: no CR byte in the sync file" eq "$((n + 0))" 0
+SYNCF=$TMP/sync4.txt
+: > "$SYNCF"
+TERMCHECK_SYNC=$SYNCF TERMCHECK_SKIP='Up:taken-hotkey,Down:,Left:a b!' feed --only arrows -- ''
+SYNCTXT=$(<"$SYNCF")
+DETAIL=$SYNCTXT
+ok "sync: a skip with a reason: done ... skipped REASON" has "$SYNCTXT" $'done Up NONE skipped taken-hotkey\n'
+row Up
+ok "sync: the reason is in the note" has "$ROW" 'note=skipped-by-driver:taken-hotkey'
+ok "sync: an empty reason still skips, with no reason" has "$SYNCTXT" $'done Down NONE skipped\n'
+ok "sync: the reason is reduced to one word" has "$SYNCTXT" $'done Left NONE skipped ab\n'
+SYNCF=$TMP/sync3.txt
+: > "$SYNCF"
+TERMCHECK_SYNC=$SYNCF feed --only mouse -- $'\\e[<0;14;7M\\e[<0;14;7m' $'\\e[<0;14;8M\\e[<0;14;8m'
+SYNCTXT=$(<"$SYNCF")
+DETAIL=$SYNCTXT
+ok "sync: a second miss is final (done DIFF with the cell)" has "$SYNCTXT" $'retry Click-Left DIFF cell 13 6\nready mouse Click-Left target 12 6 screen 80 24\ndone Click-Left DIFF cell 13 7'
+n=0; while IFS= read -r l; do [[ $l == retry* ]] && n=$(( n + 1 )); done <<< "$SYNCTXT"
+ok "sync: one retry per item at most" eq "$n" 1
+ok "sync: no retry for a NONE item" not has "$SYNCTXT" 'retry Click-Right'
+feed --only mouse -- $'\\e[<0;14;7M\\e[<0;14;7m'
+want Click-Left DIFF "x=13,y=6" "sync: no retry without TERMCHECK_SYNC (a person runs it)"
+TERMCHECK_SYNC=$TMP/no-such-dir/sync.txt feed --only resize -- ''
+ok "sync: an unwritable sync file: rc 2" eq "$RC" 2
+ok "sync: the message names the sync file" has "$OUT" 'cannot write the sync file'
+SYNCF=$TMP/sync2.txt
+: > "$SYNCF"
+TERMCHECK_SKIP='Up' feed --only arrows -- ''
+row Up
+ok "sync: TERMCHECK_SKIP without TERMCHECK_SYNC is ignored" not has "$ROW" 'skipped-by-driver'
+d=$TMP/noterm2
+mkdir -p "$d"
+OUT=$(cd "$d" && TERMCHECK_SYNC=$SYNCF FV_TTY=/nonexistent timeout -k 5 30 bash "$TC" --only arrows 2>&1 < /dev/null); RC=$?
+SYNCTXT=$(<"$SYNCF")
+DETAIL="rc=$RC sync=$SYNCTXT"
+ok "sync: no terminal writes 'end error 2'" eq "$SYNCTXT" 'end error 2'
+
 # ---- part 2: a pty ---------------------------------------------------------------
 printf '== part 2: pty (script(1)) ==\n'
 
