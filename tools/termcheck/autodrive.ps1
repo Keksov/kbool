@@ -23,9 +23,10 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('wt', 'conhost', 'mintty-git', 'msys2', 'cygwin')]
+    # lists: an array, or one comma string ("wt,conhost" is what pwsh -File passes); split and
+    # validated below (ConvertTo-ListParam), not by ValidateSet
     [string[]]$Terminals = @('wt', 'conhost', 'mintty-git', 'msys2', 'cygwin'),
-    [string]$Groups = '',
+    [string[]]$Groups = @(),
     [ValidateRange(2, 60)][int]$Timeout = 6,
     [ValidateRange(1, 240)][int]$MaxMinutes = 25,
     [string]$OutDir = '',
@@ -39,6 +40,25 @@ param(
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 [cultureinfo]::CurrentCulture = [cultureinfo]::InvariantCulture     # 9.5, not 9,5, in the logs
+
+# ConvertTo-ListParam VALUES ALLOWED NAME: "a,b" / @('a','b') / @('a,b','c') -> @('a','b','c'),
+# each checked against ALLOWED; duplicates dropped, order kept
+function ConvertTo-ListParam([string[]]$values, [string[]]$allowed, [string]$name) {
+    $out = [System.Collections.Generic.List[string]]::new()
+    foreach ($v in $values) {
+        foreach ($p in ($v -split '[,\s]+')) {
+            if (-not $p) { continue }
+            if ($allowed -notcontains $p) { throw "-${name}: '$p' is not one of: $($allowed -join ', ')" }
+            if (-not $out.Contains($p)) { $out.Add($p) }
+        }
+    }
+    , $out.ToArray()
+}
+$script:AllTerminals = @('wt', 'conhost', 'mintty-git', 'msys2', 'cygwin')
+$script:AllGroups = @('arrows', 'nav', 'fkeys', 'special', 'chars', 'keypad', 'mouse', 'resize')
+$Terminals = ConvertTo-ListParam $Terminals $script:AllTerminals 'Terminals'
+if ($Terminals.Count -eq 0) { throw '-Terminals: no terminal given' }
+$script:Only = (ConvertTo-ListParam $Groups $script:AllGroups 'Groups') -join ','     # termcheck --only form
 
 $script:TcRepo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $script:GitBash = 'C:\bin\Git\bin\bash.exe'
@@ -115,12 +135,15 @@ public static class W {
     public static uint Pid(IntPtr h) { uint p; GetWindowThreadProcessId(h, out p); return p; }
     public static uint Thread(IntPtr h) { uint p; return GetWindowThreadProcessId(h, out p); }
 
+    // the window title is the run's title; mintty pads a -t title with trailing spaces
+    public static bool TitleMatches(string text, string title) { return text != null && text.TrimEnd() == title; }
+
     // visible top-level windows with this exact title; cls / pid filter when given
     public static List<IntPtr> Find(string title, string cls, uint pid) {
         var found = new List<IntPtr>();
         EnumWindows((h, l) => {
             if (!IsWindowVisible(h)) return true;
-            if (Text(h) != title) return true;
+            if (!TitleMatches(Text(h), title)) return true;
             if (!string.IsNullOrEmpty(cls) && Cls(h) != cls) return true;
             if (pid != 0 && Pid(h) != pid) return true;
             found.Add(h);
@@ -578,7 +601,7 @@ $script:SkipList = @{
     'msys2'      = @('Alt+F2', 'Alt+F3', 'Alt+F8')
     'cygwin'     = @('Alt+F2', 'Alt+F3', 'Alt+F8')
     'wt'         = @()
-    'conhost'    = @()
+    'conhost'    = @('Shift+Click:conhost-selection')   # Shift+click starts conhost's selection mode, which freezes the console's output
 }
 # keys that may change the window (full screen, default size): sent again when the client
 # rectangle changed; Always = toggles with no size change (mintty Alt+F12 flip screen)
@@ -1021,7 +1044,7 @@ function New-Ctx([string]$terminal, $table, [IntPtr]$hwnd, $fakeClient) {
         SX = [System.Collections.Generic.List[object]]::new(); SY = [System.Collections.Generic.List[object]]::new()
         Pending = $null; Before = $null; HklBefore = $null; Counts = @{}; Failures = [System.Collections.Generic.List[string]]::new()
         State = 'run'; EndStatus = $null; EndRc = $null; CtrlC = 0; CtrlCAt = $null; ReadyAt = $null; Waiting = $null; Hkl = $null; UsHkl = $null
-        SawReady = $false }
+        SawReady = $false; DoneAt = $null; LastDone = $null }
 }
 
 function Get-CtxClient($ctx) { if ($ctx.Hwnd -ne [IntPtr]::Zero) { Get-ClientRect $ctx.Hwnd } else { $ctx.FakeClient } }
@@ -1038,7 +1061,7 @@ function Step-SyncLine($ctx, $rec) {
     $live = [TcAuto.Inj]::Live
     switch ($rec.Type) {
         'ready' {
-            $ctx.Waiting = $rec.Id; $ctx.ReadyAt = [DateTime]::UtcNow; $ctx.SawReady = $true
+            $ctx.Waiting = $rec.Id; $ctx.ReadyAt = [DateTime]::UtcNow; $ctx.SawReady = $true; $ctx.DoneAt = $null
             if (-not $ctx.Table.Contains($rec.Id)) { Write-DLog "WARN no table entry for '$($rec.Id)': nothing sent, termcheck times out"; return }
             $e = $ctx.Table[$rec.Id]
             if ($e.Kind -eq 'key' -and $e.NumLock) { Set-NumLock ($e.NumLock -eq 'on') }
@@ -1067,7 +1090,7 @@ function Step-SyncLine($ctx, $rec) {
             [TcAuto.Inj]::AllowFrontRecovery = $false
         }
         { $_ -in 'done', 'retry' } {
-            $ctx.Waiting = $null
+            $ctx.Waiting = $null; $ctx.DoneAt = [DateTime]::UtcNow; $ctx.LastDone = $rec.Id
             if ($ctx.Pending -and $ctx.Pending.Id -eq $rec.Id -and $rec.Cell) {
                 $ctx.SX.Add(@($ctx.Pending.Px, $rec.Cell[0])); $ctx.SY.Add(@($ctx.Pending.Py, $rec.Cell[1]))
                 if ($rec.Cell2 -and $null -ne $ctx.Pending.Qx) { $ctx.SX.Add(@($ctx.Pending.Qx, $rec.Cell2[0])); $ctx.SY.Add(@($ctx.Pending.Qy, $rec.Cell2[1])) }
@@ -1101,7 +1124,7 @@ function Step-SyncLine($ctx, $rec) {
             }
             if ($live -and $e) { Exit-MenuMode $ctx.Hwnd $rec.Id }     # after every item, mouse ones too
         }
-        'finish-wait' { $ctx.State = 'finish'; Send-CtrlC $ctx }
+        'finish-wait' { $ctx.DoneAt = $null; $ctx.State = 'finish'; Send-CtrlC $ctx }
         'end' { $ctx.State = 'end'; $ctx.EndStatus = $rec.Status; $ctx.EndRc = $rec.Rc }
         default { Write-DLog "WARN unknown sync line: $($rec.Raw)" }
     }
@@ -1121,14 +1144,32 @@ function Invoke-Resize($ctx, $rec) {
 
 # ---- the terminals ---------------------------------------------------------------------------
 $script:TermSpecs = @{
-    'wt'         = @{ Class = 'CASCADIA_HOSTING_WINDOW_CLASS'; Root = 'C:\bin\Git'; Shell = 'C:\bin\Git\usr\bin\bash.exe'; Drive = '/'; Msystem = $null }
-    'conhost'    = @{ Class = 'ConsoleWindowClass'; Root = 'C:\bin\Git'; Shell = 'C:\bin\Git\usr\bin\bash.exe'; Drive = '/'; Msystem = $null }
-    'mintty-git' = @{ Class = 'mintty'; Root = 'C:\bin\Git'; Shell = 'C:\bin\Git\usr\bin\bash.exe'; Drive = '/'; Msystem = $null }
+    'wt'         = @{ Class = 'CASCADIA_HOSTING_WINDOW_CLASS'; Root = 'C:\bin\Git'; Shell = 'C:\bin\Git\usr\bin\bash.exe'; Drive = '/'; Msystem = 'UCRT64' }
+    'conhost'    = @{ Class = 'ConsoleWindowClass'; Root = 'C:\bin\Git'; Shell = 'C:\bin\Git\usr\bin\bash.exe'; Drive = '/'; Msystem = 'UCRT64' }
+    'mintty-git' = @{ Class = 'mintty'; Root = 'C:\bin\Git'; Shell = 'C:\bin\Git\usr\bin\bash.exe'; Drive = '/'; Msystem = 'UCRT64' }
     'msys2'      = @{ Class = 'mintty'; Root = 'C:\bin\msys64'; Shell = 'C:\bin\msys64\usr\bin\bash.exe'; Drive = '/'; Msystem = 'MSYS' }
     'cygwin'     = @{ Class = 'mintty'; Root = 'C:\bin\cygwin64'; Shell = 'C:\bin\cygwin64\bin\bash.exe'; Drive = '/cygdrive/'; Msystem = $null }
 }
 
 $script:FirstReadySec = 30      # the first 'ready' must come within this (else the terminal is given up)
+
+# Test-Stall CTX NOW TERMSTART T: $null, or @{ Result; Why } when termcheck is overdue:
+# no first 'ready' within FirstReadySec; no 'done' within T+5 s of a 'ready'; no next 'ready'
+# (or 'finish-wait') within T+10 s of a 'done' / 'retry'
+function Test-Stall($ctx, [DateTime]$now, [DateTime]$termStart, [int]$timeout) {
+    if ($ctx.State -ne 'run') { return $null }
+    if (-not $ctx.SawReady -and -not $ctx.DoneAt) {
+        if (($now - $termStart).TotalSeconds -gt $script:FirstReadySec) { return @{ Result = 'NO-READY'; Why = "no 'ready' from termcheck within $($script:FirstReadySec) s" } }
+        return $null
+    }
+    if ($ctx.Waiting -and ($now - $ctx.ReadyAt).TotalSeconds -gt $timeout + 5) {
+        return @{ Result = 'STUCK'; Why = "item $($ctx.Waiting) stuck (no done within $($timeout + 5) s)" }
+    }
+    if (-not $ctx.Waiting -and $ctx.DoneAt -and ($now - $ctx.DoneAt).TotalSeconds -gt $timeout + 10) {
+        return @{ Result = 'STUCK'; Why = "no 'ready' within $($timeout + 10) s after 'done $($ctx.LastDone)'" }
+    }
+    $null
+}
 
 # NO-WINDOW for mintty / conhost: stop the process the driver launched, after checking it still is
 # that process (name and start time). Never for wt: wt.exe returns at once and its windows live in
@@ -1181,6 +1222,7 @@ printf '%s\n' "$$" > "$tc_run/bash.pid"
 cd "$tc_repo" || { printf 'stty-restored=no\nrc=cd-failed\n' > "$tc_run/stty.txt"; exit 1; }
 tc_stty0=$(stty -g 2>/dev/null)
 TERMCHECK_SYNC=$tc_run/sync.txt TERMCHECK_NONCE=@NONCE@ TERMCHECK_SKIP=@SKIP@ \
+TERMCHECK_LABEL=@TERM@ TERMCHECK_TRACE=$tc_run/trace.txt \
     "$BASH" tools/termcheck/termcheck.sh --timeout @TIMEOUT@ --out "$tc_run"@ONLY@
 tc_rc=$?
 tc_stty1=$(stty -g 2>/dev/null)
@@ -1294,7 +1336,7 @@ function Invoke-LiveTerminal([string]$t, [string]$root, $table, [int]$nItems, [D
     New-Item -ItemType Directory -Force -Path $runDir | Out-Null
     $nonce = [guid]::NewGuid().ToString('N').Substring(0, 12)
     $runSh = Join-Path $runDir 'run.sh'
-    Write-LfFile $runSh (New-RunScript $t $runDir $nonce $Timeout $Groups $taken)
+    Write-LfFile $runSh (New-RunScript $t $runDir $nonce $Timeout $script:Only $taken)
     Write-LfFile (Join-Path $runDir 'kill.sh') (New-KillScript $runDir)
     $cmd = Get-LaunchCommand $t $runSh $nonce
     $spec = $script:TermSpecs[$t]
@@ -1337,7 +1379,6 @@ function Invoke-LiveTerminal([string]$t, [string]$root, $table, [int]$nItems, [D
 
     $ctx = New-Ctx $t $table $hwnd $null
     $reader = [SyncReader]::new((Join-Path $runDir 'sync.txt'))
-    $itemLimit = [TimeSpan]::FromSeconds($Timeout + 5)
     $termStart = [DateTime]::UtcNow
     $termEnd = $termStart.AddSeconds($nItems * ($Timeout + 5) + 60)
     if ($termEnd -gt $globalEnd) { $termEnd = $globalEnd }
@@ -1345,14 +1386,12 @@ function Invoke-LiveTerminal([string]$t, [string]$root, $table, [int]$nItems, [D
         $now = [DateTime]::UtcNow
         if ($now -gt $globalEnd) { throw [TcAuto.AbortException]::new("the run is over -MaxMinutes $MaxMinutes") }
         if ($now -gt $termEnd) { Write-DLog "${t}: whole-terminal timeout"; $res.Result = 'TIMEOUT'; break }
-        if (-not $ctx.SawReady -and ($now - $termStart).TotalSeconds -gt $script:FirstReadySec) {
-            Write-DLog "${t}: no 'ready' from termcheck within $($script:FirstReadySec) s"; $res.Result = 'NO-READY'; break
-        }
         $lines = $reader.ReadLines()
         if ($lines.Count -eq 0) {
             $why = [TcAuto.Inj]::Idle()
             if ($why) { [TcAuto.Inj]::Note("ABORT: $why"); Sync-InjLog; throw [TcAuto.AbortException]::new($why) }
-            if ($ctx.Waiting -and ($now - $ctx.ReadyAt) -gt $itemLimit) { Write-DLog "${t}: item $($ctx.Waiting) stuck (no done within $($itemLimit.TotalSeconds) s)"; $res.Result = 'STUCK'; break }
+            $stall = Test-Stall $ctx $now $termStart $Timeout
+            if ($stall) { Write-DLog "${t}: $($stall.Why)"; $res.Result = $stall.Result; break }
             if ($ctx.State -eq 'finish' -and ($now - $ctx.CtrlCAt).TotalSeconds -gt 3) {
                 if ($ctx.CtrlC -ge 3) { Write-DLog "${t}: no 'end' after 3 Ctrl+C"; $res.Result = 'NO-END'; break }
                 Write-DLog "${t}: no 'end' 3 s after Ctrl+C; sending it again"
@@ -1382,13 +1421,13 @@ function Invoke-LiveTerminal([string]$t, [string]$root, $table, [int]$nItems, [D
 # New-SimulatedSync LISTLINES TERMINAL W H: the sync lines a clean run would write
 function New-SimulatedSync([string[]]$listLines, [string]$t, [int]$w = 80, [int]$h = 24) {
     $out = [System.Collections.Generic.List[string]]::new()
-    $skip = @($script:SkipList[$t])
+    $skip = @{}; foreach ($s in $script:SkipList[$t]) { $p = $s -split ":", 2; $skip[$p[0]] = $p.Count -gt 1 ? " $($p[1])" : "" }
     foreach ($l in $listLines) {
         if (-not $l) { continue }
         $f = $l -split "`t"
         $g = $f[0]; $id = $f[1]; $kind = $f[2]; $exp = $f[3]
         if ($id -eq 'Click-Far-Right' -and $w -lt 230) { continue }
-        if ($skip -contains $id) { $out.Add("done $id NONE skipped"); continue }
+        if ($skip.ContainsKey($id)) { $out.Add("done $id NONE skipped$($skip[$id])"); continue }
         if ($kind -like 'mouse:*') {
             if ($exp -match 'down@(\d+),(\d+),up@(\d+),(\d+)') {
                 $out.Add("ready $g $id target $($Matches[1]) $($Matches[2]) $($Matches[3]) $($Matches[4]) screen $w $h")
@@ -1417,7 +1456,7 @@ function Invoke-DryTerminal([string]$t, $table, [string[]]$syncLines, [string]$r
     [TcAuto.Inj]::Plan.Add("window: title termcheck-NONCE, class $($script:TermSpecs[$t].Class)")
     [TcAuto.Inj]::Plan.Add("skip-list (TERMCHECK_SKIP): " + (($script:SkipList[$t]) -join ',' ))
     [TcAuto.Inj]::Plan.Add("run.sh:")
-    foreach ($l in ((New-RunScript $t $runDir 'NONCE' $Timeout $Groups) -split "`n")) { [TcAuto.Inj]::Plan.Add("  | $l") }
+    foreach ($l in ((New-RunScript $t $runDir 'NONCE' $Timeout $script:Only) -split "`n")) { [TcAuto.Inj]::Plan.Add("  | $l") }
     # a made-up client rectangle: 9x18 px cells at (100,100) plus the terminal's padding
     $p = $script:Padding[$t]
     $fake = [TcAuto.RECT]@{ Left = 100; Top = 100; Right = 100 + 80 * 9 + $p[0] + $p[2]; Bottom = 100 + 24 * 18 + $p[1] + $p[3] }
@@ -1453,12 +1492,11 @@ function Invoke-Main {
         return
     }
     if ($Live -and $DryRun) { throw '-Live and -DryRun together: choose one' }
-    if ($Groups -and $Groups -notmatch '^[a-z]+(,[a-z]+)*$') { throw "-Groups '$Groups': a comma list of termcheck groups" }
     $table = Get-KeyTable
     $list = Get-ListItems
     $problems = Test-KeyTable $table $list
     if ($problems.Count) { throw ("the key table does not match termcheck --list-items:`n  " + ($problems -join "`n  ")) }
-    if ($Groups) { $want = $Groups -split ','; $list = @($list | Where-Object { $want -contains ($_ -split "`t")[0] }) }
+    if ($script:Only) { $want = $script:Only -split ','; $list = @($list | Where-Object { $want -contains ($_ -split "`t")[0] }) }
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 
     if (-not $Live) {
@@ -1487,7 +1525,7 @@ function Invoke-Main {
     $rows = [System.Collections.Generic.List[object]]::new()
     try {
         if ([TcAuto.W]::GetForegroundWindow() -eq [IntPtr]::Zero -or -not [Environment]::UserInteractive) { throw [TcAuto.AbortException]::new('no interactive desktop (no foreground window)') }
-        Write-DLog "autodrive LIVE: terminals $($Terminals -join ','), groups $(if ($Groups) { $Groups } else { 'all' }), item timeout $Timeout s, cap $MaxMinutes min, results in $root"
+        Write-DLog "autodrive LIVE: terminals $($Terminals -join ','), groups $(if ($script:Only) { $script:Only } else { 'all' }), item timeout $Timeout s, cap $MaxMinutes min, results in $root"
         Write-DLog 'abort: move the mouse, or hold Right Shift + Right Ctrl'
         # all modifiers up before anything is sent (5 s)
         $sw = [System.Diagnostics.Stopwatch]::StartNew()

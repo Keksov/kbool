@@ -368,6 +368,21 @@ ok "sync: every done follows the ready of the same item" eq "$bad" ''
 ok "sync: 10 ready lines (11 items, 2 skipped, 1 retried)" eq "$n" 10
 n=$(tr -cd '\r' < "$SYNCF" | wc -c)
 ok "sync: no CR byte in the sync file" eq "$((n + 0))" 0
+# TERMCHECK_TRACE: one line per loop turn; TERMCHECK_LABEL names the log
+TRACEF=$TMP/trace1.txt
+: > "$TRACEF"
+TERMCHECK_TRACE=$TRACEF TERMCHECK_LABEL='mintty git' feed --only keypad --timeout 0.3 -- $'\\e[E' '' ''
+TRTXT=$(<"$TRACEF")
+DETAIL="${TRTXT:0:300}"
+ok "trace: wait lines with the time, the event, the resize flag and the item" re "$TRTXT" '(^|'$'\n'')[0-9]+[.,][0-9]+ wait evKeyDown:kbCenter r=0 keypad/Keypad5-NumLockOff'
+ok "trace: the polls of an item with no input are traced too" has "$TRTXT" 'wait evNothing r=0 keypad/KeypadEnter'
+n=$(tr -cd '\r' < "$TRACEF" | wc -c)
+ok "trace: no CR byte" eq "$((n + 0))" 0
+DETAIL=$LOG
+ok "label: the log is named after TERMCHECK_LABEL (sanitized)" re "${LOG##*/}" '^fv_termcheck_[0-9]{8}-[0-9]{6}_mintty_git\.log$'
+ok "label: the header names it" has "$LOGTXT" '# label: mintty_git (TERMCHECK_LABEL)'
+TERMCHECK_TRACE=$TMP/no-such-dir/trace.txt feed --only resize -- ''
+ok "trace: an unwritable trace file: rc 2" eq "$RC" 2
 SYNCF=$TMP/sync4.txt
 : > "$SYNCF"
 TERMCHECK_SYNC=$SYNCF TERMCHECK_SKIP='Up:taken-hotkey,Down:,Left:a b!' feed --only arrows -- ''

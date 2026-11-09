@@ -260,6 +260,24 @@ fi
 # tc_sync LINE: one line to the sync file (opened and closed per line = flushed)
 tc_sync() { if [[ -n $TC_SYNC ]]; then printf '%s\n' "$1" >> "$TC_SYNC"; fi; }
 
+# TERMCHECK_TRACE=FILE: one line per loop turn of drain / settle / wait / finish:
+#     <epoch.us> <phase> <event>[:<key>] r=<FV_VIDEO_RESIZED> <group/item>
+TC_TRACE=${TERMCHECK_TRACE:-}
+if [[ -n $TC_TRACE ]] && ! { : >> "$TC_TRACE"; } 2>/dev/null; then
+    echo "termcheck: cannot write the trace file '$TC_TRACE'" >&2
+    exit 2
+fi
+tc_trace() {
+    if [[ -n $TC_TRACE ]]; then
+        printf '%s %s %s%s r=%s %s\n' "$EPOCHREALTIME" "$1" "${FV_EV_WHAT:--}" "${FV_EV_KEY:+:$FV_EV_KEY}" \
+            "${FV_VIDEO_RESIZED:-0}" "${TC_CUR:--}" >> "$TC_TRACE"
+    fi
+}
+
+# TERMCHECK_LABEL=WORD: the log file is named after it instead of the terminal guess
+TC_LABEL=${TERMCHECK_LABEL:-}
+TC_LABEL=${TC_LABEL//[^A-Za-z0-9._-]/_}
+
 # tc_sync_ready INDEX: the item waits for input from now on
 tc_sync_ready() {
     local i=$1 l="ready ${IT_GROUP[$1]} ${IT_ID[$1]}"
@@ -419,6 +437,7 @@ else tc_g1=${TERM:-unknown}; fi
 tc_g2=${MSYSTEM:-${OSTYPE:-unknown}}
 TC_GUESS=${tc_g1}-${tc_g2}
 TC_GUESS=${TC_GUESS//[^A-Za-z0-9._-]/_}
+if [[ -n $TC_LABEL ]]; then TC_GUESS=$TC_LABEL; fi
 
 # ---- load the units ------------------------------------------------------------
 # shellcheck source=/dev/null
@@ -505,30 +524,44 @@ tc_countdown() {
 }
 
 # ---- waiting for input ------------------------------------------------------
-# tc_drain: drop what is already pending; STALE counts the events
+# Resizes are coalesced while draining and settling: fv.drivers.getEvent runs
+# fv.video.updateSize (a `stty size` fork, ~13 ms) for every resize event, so
+# the flag is taken off before each call and the size is read once at the end.
+
+# tc_drain: drop what is already pending (STALE counts the events); at most ~0.3 s
 tc_drain() {
-    local n=0
+    local n=0 rsz=0 end
     if (( TC_FEED )); then return 0; fi
-    while fv.drivers.getEvent 0; do
+    tc_now
+    end=$(( TC_NOW + 300000 ))
+    while :; do
+        if (( FV_VIDEO_RESIZED )); then rsz=1; FV_VIDEO_RESIZED=0; fi
+        fv.drivers.getEvent 0 || break
+        tc_trace drain
         [[ $FV_EV_WHAT == evNothing ]] && break
         (( n++ ))
-        (( n >= 100000 )) && break
+        tc_now
+        if (( TC_NOW >= end )); then tc_trace drain-time-limit; break; fi
     done
+    if (( rsz || FV_VIDEO_RESIZED )); then fv.video.updateSize; tc_trace drain-resize; fi
     (( STALE += n ))
 }
 
 # tc_settle: show the result for ~0.4 s; events arriving meanwhile are stale
 tc_settle() {
-    local end
+    local end rsz=0
     if (( TC_FEED )); then return 0; fi
     tc_now
     end=$(( TC_NOW + 400000 ))
     while :; do
         tc_now
         (( TC_NOW >= end )) && break
+        if (( FV_VIDEO_RESIZED )); then rsz=1; FV_VIDEO_RESIZED=0; fi
         fv.drivers.getEvent 0.05 || break
+        tc_trace settle
         [[ $FV_EV_WHAT != evNothing ]] && (( STALE++ ))
     done
+    if (( rsz || FV_VIDEO_RESIZED )); then fv.video.updateSize; tc_trace settle-resize; fi
 }
 
 # ---- recording ------------------------------------------------------------------
@@ -597,7 +630,7 @@ tc_run_key() {
         (( TC_NOW >= deadline )) && break
         left=$(( (deadline - TC_NOW + 999999) / 1000000 ))
         if (( left != last_left )); then last_left=$left; tc_countdown "$left"; fi
-        fv.drivers.getEvent "$TC_POLL"; rc=$?
+        fv.drivers.getEvent "$TC_POLL"; rc=$?; tc_trace wait
         if (( rc == 1 )); then TC_EOF=1; break; fi
         if (( rc == 2 )); then NOTE='getEvent-rc2'; break; fi
         case $FV_EV_WHAT in
@@ -616,7 +649,7 @@ tc_run_key() {
         while :; do
             tc_now
             (( TC_NOW >= end )) && break
-            fv.drivers.getEvent "$TC_POLL"; rc=$?
+            fv.drivers.getEvent "$TC_POLL"; rc=$?; tc_trace wait
             (( rc == 1 )) && { TC_EOF=1; break; }
             (( rc == 2 )) && break
             case $FV_EV_WHAT in
@@ -671,7 +704,7 @@ tc_run_mouse() {
         (( TC_NOW >= deadline )) && break
         left=$(( (deadline - TC_NOW + 999999) / 1000000 ))
         if (( left != last_left )); then last_left=$left; tc_countdown "$left"; fi
-        fv.drivers.getEvent "$TC_POLL"; rc=$?
+        fv.drivers.getEvent "$TC_POLL"; rc=$?; tc_trace wait
         if (( rc == 1 )); then TC_EOF=1; break; fi
         if (( rc == 2 )); then NOTE='getEvent-rc2'; break; fi
         case $FV_EV_WHAT in
@@ -785,16 +818,17 @@ tc_run_mouse() {
 # ---- the resize item -----------------------------------------------------------------
 tc_run_resize() {
     local i=$1 rc left last_left=-1 n=0 ow=$FV_SCREEN_W oh=$FV_SCREEN_H quiet nw='' nh=''
-    local deadline
+    local deadline cap
     tc_now
     deadline=$(( TC_NOW + TC_TIMEOUT_US ))
+    cap=$(( TC_NOW + TC_TIMEOUT_US + 5000000 ))    # a resize storm cannot hold the item longer
     GOT='' CHARV='' RAW='' EXTRA=''
     while :; do
         tc_now
         (( TC_NOW >= deadline )) && break
         left=$(( (deadline - TC_NOW + 999999) / 1000000 ))
         if (( left != last_left )); then last_left=$left; tc_countdown "$left"; fi
-        fv.drivers.getEvent "$TC_POLL"; rc=$?
+        fv.drivers.getEvent "$TC_POLL"; rc=$?; tc_trace wait
         if (( rc == 1 )); then TC_EOF=1; break; fi
         if (( rc == 2 )); then break; fi
         case $FV_EV_WHAT in
@@ -803,7 +837,7 @@ tc_run_resize() {
                     (( n++ )); nw=$FV_EV_ID nh=$FV_EV_INFO
                     # a drag sends many sizes: wait until 0.6 s pass without a new one
                     tc_now; quiet=$(( TC_NOW + 600000 ))
-                    deadline=$quiet
+                    deadline=$(( quiet < cap ? quiet : cap ))
                 fi
                 ;;
             evKeyDown) tc_noise "key:$FV_EV_KEY" ;;
@@ -832,6 +866,7 @@ tc_header() {
     tc_log "# TERM_PROGRAM=${TERM_PROGRAM-<unset>} TERM_PROGRAM_VERSION=${TERM_PROGRAM_VERSION-<unset>}"
     tc_log "# WT_SESSION: $([[ -n ${WT_SESSION-} ]] && echo set || echo 'not set')"
     tc_log "# MSYSTEM=${MSYSTEM-<unset>} OSTYPE=${OSTYPE-<unset>} WSL_DISTRO_NAME=${WSL_DISTRO_NAME-<unset>}"
+    if [[ -n $TC_LABEL ]]; then tc_log "# label: $TC_LABEL (TERMCHECK_LABEL)"; fi
     tc_log "# ssh: $([[ -n ${SSH_CONNECTION-} ]] && echo yes || echo no)"
     tc_log "# uname: $TC_UNAME"
     tc_log "# /proc/version: ${TC_PROCVER:-<none>}"
@@ -958,6 +993,7 @@ while :; do
     tc_now
     (( TC_NOW >= tc_end )) && break
     if ! fv.drivers.getEvent 0.2; then tc_why=eof; break; fi
+    tc_trace finish
     if [[ $FV_EV_WHAT == evKeyDown ]]; then
         tc_put $'\e[12;4H\e[2K'"(that was ${FV_EV_KEY}; press Ctrl+C to finish)"
     fi

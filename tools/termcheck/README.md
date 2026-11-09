@@ -276,6 +276,10 @@ everything is put back.
 * In the mintty windows (Git Bash, MSYS2, Cygwin) Alt+F2, Alt+F3 and Alt+F8 are
   skipped (they open a new window, a search bar, a reset dialog); the log shows
   them as NONE with `note=skipped-by-driver`.
+* In the classic console (conhost) Shift+Click is skipped
+  (`note=skipped-by-driver:conhost-selection`): Shift+click starts conhost's
+  selection mode, which freezes the console's output, so termcheck cannot draw
+  the next screen and the run would hang. Try Shift+Click there by hand.
 * Key combinations that another program has taken as a global hotkey (for example
   F12 or Alt+PgUp taken by a screenshot or media tool) are found at the start and
   skipped, so the driver never triggers that program; the log shows
@@ -293,7 +297,13 @@ everything is put back.
   the terminal settings were put back (`stty-restored`), how termcheck ended;
 * `driver.log` - every key and mouse event sent, every check, any stop;
 * one folder per terminal (`wt`, `conhost`, `mintty-git`, `msys2`, `cygwin`) with
-  the termcheck log `fv_termcheck_*.log` and the sync file.
+  the termcheck log `fv_termcheck_<date-time>_<terminal>.log`, the sync file
+  `sync.txt` and `trace.txt` (one line per input poll, for diagnosing a hang).
+
+The Git terminals (`wt`, `conhost`, `mintty-git`) run with `MSYSTEM=UCRT64`,
+Git Bash's own default here; `msys2` with `MSYSTEM=MSYS`; `cygwin` without it.
+A terminal that stops answering (no next item within the item time plus 10 s) is
+marked `STUCK` in `summary.txt` and the run goes on with the next terminal.
 
 Send the whole `<date-time>` folder.
 
@@ -307,5 +317,12 @@ Send the whole `<date-time>` folder.
   once more, only the second attempt is logged), `finish-wait`,
   `end <complete|incomplete|error> <status>`. `TERMCHECK_NONCE` sets the window
   title `termcheck-<nonce>`; `TERMCHECK_SKIP=ID[:REASON],...` skips items (note `skipped-by-driver[:REASON]`).
+* `TERMCHECK_TRACE=FILE` appends `<epoch.us> <phase> <event>[:<key>] r=<FV_VIDEO_RESIZED> <group/item>`
+  per loop turn (phases drain, settle, wait, finish, and drain-time-limit /
+  drain-resize / settle-resize). `TERMCHECK_LABEL=WORD` names the log after WORD.
+  Draining pending input stops after 0.3 s, and resizes seen while draining or
+  settling are read once (one `stty size`), not once per event.
+* `-Terminals` and `-Groups` take an array or one comma string
+  (`-Terminals wt,conhost` through `pwsh -File`).
 * Offline driver tests (no window, no input):
   `pwsh -NoProfile -File tools/termcheck/tests/autodrive.Tests.ps1`.

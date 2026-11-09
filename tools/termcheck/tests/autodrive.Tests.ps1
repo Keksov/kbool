@@ -276,6 +276,49 @@ Ok 'calibration: a fit inside the client area is kept' ((Limit-Grid (New-Grid 12
 $out = & pwsh -NoProfile -File $driver -Restore (Join-Path $scratch 'no-such-run') 2>&1
 Ok '-Restore without state.json stops with a message (changes nothing)' (($out -join ' ') -match 'no state.json')
 
+# ---- round 3: titles, list parameters, stalls, skip reasons, labels -----------------------------
+Ok 'title: a mintty title padded with spaces matches' ([TcAuto.W]::TitleMatches('termcheck-abc   ', 'termcheck-abc'))
+Ok 'title: an exact title matches' ([TcAuto.W]::TitleMatches('termcheck-abc', 'termcheck-abc'))
+Ok 'title: another nonce or a prefix does not match' (-not [TcAuto.W]::TitleMatches('termcheck-abcd', 'termcheck-abc') -and -not [TcAuto.W]::TitleMatches('x termcheck-abc', 'termcheck-abc') -and -not [TcAuto.W]::TitleMatches($null, 'termcheck-abc'))
+Ok 'same window: a padded title is the same window' (Test-SameWindow $win @{ IsWindow = $true; Class = 'mintty'; Pid = 42; Title = 'termcheck-abc    ' })
+Ok 'list param: one comma string is split' (((ConvertTo-ListParam @('wt,conhost') $AllTerminals 'Terminals') -join '|') -eq 'wt|conhost')
+Ok 'list param: an array, mixed forms, duplicates dropped' (((ConvertTo-ListParam @('wt', 'conhost,msys2', 'wt') $AllTerminals 'Terminals') -join '|') -eq 'wt|conhost|msys2')
+$threw = $false; try { ConvertTo-ListParam @('wt,konsole') $AllTerminals 'Terminals' | Out-Null } catch { $threw = $_.Exception.Message -match "konsole" }
+Ok 'list param: an unknown name after the split is refused, named' $threw
+Ok 'list param: groups too' (((ConvertTo-ListParam @('arrows,keypad') $AllGroups 'Groups') -join ',') -eq 'arrows,keypad')
+$t0 = [DateTime]::UtcNow
+$c = New-Ctx 'wt' $table ([IntPtr]::Zero) $null
+Ok 'stall: nothing yet, within 30 s -> fine' ($null -eq (Test-Stall $c $t0.AddSeconds(29) $t0 6))
+Ok 'stall: no first ready within 30 s -> NO-READY' ((Test-Stall $c $t0.AddSeconds(31) $t0 6).Result -eq 'NO-READY')
+$c.SawReady = $true; $c.Waiting = 'F11'; $c.ReadyAt = $t0
+Ok 'stall: waiting for done within T+5 -> fine' ($null -eq (Test-Stall $c $t0.AddSeconds(10) $t0 6))
+Ok 'stall: no done within T+5 -> STUCK' ((Test-Stall $c $t0.AddSeconds(12) $t0 6).Result -eq 'STUCK')
+$c.Waiting = $null; $c.DoneAt = $t0; $c.LastDone = 'F11'
+Ok 'stall: next ready due within T+10 after done -> fine at 15 s' ($null -eq (Test-Stall $c $t0.AddSeconds(15) $t0 6))
+$s = Test-Stall $c $t0.AddSeconds(17) $t0 6
+Ok "stall: no ready within T+10 after 'done F11' -> STUCK (not a 21-minute wait)" ($s.Result -eq 'STUCK' -and $s.Why -match 'done F11') $s.Why
+$c.State = 'finish'
+Ok 'stall: in the finish phase the Ctrl+C logic decides, not the stall check' ($null -eq (Test-Stall $c $t0.AddSeconds(60) $t0 6))
+$c2 = New-Ctx 'wt' $table ([IntPtr]::Zero) $null
+[void](Step-SyncLine $c2 (ConvertFrom-SyncLine 'ready arrows Up'))
+[void](Step-SyncLine $c2 (ConvertFrom-SyncLine 'done Up OK'))
+Ok 'stall: Step-SyncLine sets DoneAt on done' ($null -ne $c2.DoneAt -and $c2.LastDone -eq 'Up' -and $null -eq $c2.Waiting)
+[void](Step-SyncLine $c2 (ConvertFrom-SyncLine 'ready arrows Shift+Up'))
+Ok 'stall: ... and clears it on the next ready' ($null -eq $c2.DoneAt)
+[TcAuto.Inj]::Plan.Clear()
+$rs = New-RunScript 'conhost' 'C:\x\r' 'n1' 6 ''
+Ok 'conhost: Shift+Click skipped with the reason conhost-selection' ($rs -match "TERMCHECK_SKIP='Shift\+Click:conhost-selection'")
+$sim = New-SimulatedSync $list 'conhost'
+Ok 'conhost: the simulated sync skips it with the reason' ($sim -contains 'done Shift+Click NONE skipped conhost-selection' -and -not ($sim -match '^ready mouse Shift\+Click'))
+$rs = New-RunScript 'mintty-git' 'C:\x\r' 'n1' 6 ''
+Ok 'run.sh: TERMCHECK_LABEL is the terminal, TERMCHECK_TRACE is trace.txt in its folder' ($rs -match 'TERMCHECK_LABEL=mintty-git TERMCHECK_TRACE=\$tc_run/trace.txt')
+Ok 'MSYSTEM: Git terminals UCRT64 (Git''s own default), msys2 MSYS, cygwin unset' ($TermSpecs['wt'].Msystem -eq 'UCRT64' -and $TermSpecs['conhost'].Msystem -eq 'UCRT64' -and $TermSpecs['mintty-git'].Msystem -eq 'UCRT64' -and $TermSpecs['msys2'].Msystem -eq 'MSYS' -and $null -eq $TermSpecs['cygwin'].Msystem)
+$out = & pwsh -NoProfile -File $driver -Terminals 'wt,conhost' -Groups 'arrows,keypad' 2>&1
+$txt = $out -join "`n"
+Ok 'pwsh -File with comma strings: both terminals planned, --only arrows,keypad' ($LASTEXITCODE -eq 0 -and $txt -match '=== wt \(dry run' -and $txt -match '=== conhost \(dry run' -and $txt -match '--only arrows,keypad') ($txt.Substring(0, [math]::Min(300, $txt.Length)))
+$out = & pwsh -NoProfile -File $driver -Terminals 'wt,xterm' 2>&1
+Ok 'pwsh -File with an unknown terminal in the comma string: refused' ($LASTEXITCODE -ne 0 -and ($out -join ' ') -match 'xterm')
+
 # ---- kill.sh against a real process tree (Git-bash; everything reaped) ----------------------------
 $kd = Join-Path $scratch 'kill'; $dd = Join-Path $scratch 'decoy'
 New-Item -ItemType Directory -Force -Path $kd, $dd | Out-Null
