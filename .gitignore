@@ -5,3 +5,6 @@
 
 # announcement texts: local only, never committed (owner, 2026-11-04)
 /docs/dev/launch/announce/
+
+# termcheck logs written into the repo folder (tools/termcheck)
+/fv_termcheck_*.log
