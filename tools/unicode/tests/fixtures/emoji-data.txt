@@ -1,0 +1,17 @@
+# emoji-data.txt
+# a fixture for tools/unicode/tests/selftest.sh (not Unicode data)
+# Version: 1.2
+
+00A9          ; Emoji                # E0.6   [1] (©️)       copyright
+231A..231B    ; Emoji                # E0.6   [2] (⌚..⌛)    watch..hourglass done
+2764          ; Emoji                # E0.6   [1] (❤️)       red heart
+231A..231B    ; Emoji_Presentation   # E0.6   [2] (⌚..⌛)    watch..hourglass done
+1F1E6..1F1FF  ; Emoji_Presentation   # E0.0  [26] (🇦..🇿)    regional indicator symbol letter a..z
+1F600..1F64F  ; Emoji_Presentation   # E0.6  [80] (😀..🙏)    grinning face..folded hands
+1F3FB..1F3FF  ; Emoji_Modifier       # E1.0   [5] (🏻..🏿)    light skin tone..dark skin tone
+1F3FB..1F3FF  ; Emoji_Component      # E1.0   [5] (🏻..🏿)    light skin tone..dark skin tone
+00A9          ; Extended_Pictographic# E0.6   [1] (©️)       copyright
+231A..231B    ; Extended_Pictographic# E0.6   [2] (⌚..⌛)    watch..hourglass done
+2764          ; Extended_Pictographic# E0.6   [1] (❤️)       red heart
+1F600..1F64F  ; Extended_Pictographic# E0.6  [80] (😀..🙏)    grinning face..folded hands
+1FC00..1FFFD  ; Extended_Pictographic# E0.0[1022] (🰀️..🿽️)    <reserved-1FC00>..<reserved-1FFFD>

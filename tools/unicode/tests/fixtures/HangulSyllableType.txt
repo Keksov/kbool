@@ -1,0 +1,9 @@
+# HangulSyllableType-1.2.3.txt
+# a fixture for tools/unicode/tests/selftest.sh (not Unicode data)
+# @missing: 0000..10FFFF; Not_Applicable
+
+1100..115F    ; L # Lo  [96] HANGUL CHOSEONG KIYEOK..HANGUL CHOSEONG FILLER
+1160..11A7    ; V # Lo  [72] HANGUL JUNGSEONG FILLER..HANGUL JUNGSEONG O-YAE
+11A8..11FF    ; T # Lo  [88] HANGUL JONGSEONG KIYEOK..HANGUL JONGSEONG SSANGNIEUN
+AC00          ; LV # Lo       HANGUL SYLLABLE GA
+AC01..AC1B    ; LVT # Lo  [27] HANGUL SYLLABLE GAG..HANGUL SYLLABLE GAH

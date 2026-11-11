@@ -1,0 +1,16 @@
+# DerivedCoreProperties-1.2.3.txt
+# a fixture for tools/unicode/tests/selftest.sh (not Unicode data)
+
+# @missing: 0000..10FFFF; InCB; None
+
+0041..005A    ; Alphabetic # L&  [26] LATIN CAPITAL LETTER A..LATIN CAPITAL LETTER Z
+
+# Derived Property: Default_Ignorable_Code_Point
+00AD          ; Default_Ignorable_Code_Point # Cf       SOFT HYPHEN
+115F..1160    ; Default_Ignorable_Code_Point # Lo   [2] HANGUL CHOSEONG FILLER..HANGUL JUNGSEONG FILLER
+200B..200F    ; Default_Ignorable_Code_Point # Cf   [5] ZERO WIDTH SPACE..RIGHT-TO-LEFT MARK
+3164          ; Default_Ignorable_Code_Point # Lo       HANGUL FILLER
+FE00..FE0F    ; Default_Ignorable_Code_Point # Mn  [16] VARIATION SELECTOR-1..VARIATION SELECTOR-16
+E0000..E0FFF  ; Default_Ignorable_Code_Point # Cn [4096] <reserved-E0000>..<reserved-E0FFF>
+
+0041          ; InCB; Consonant # not a binary property line: ignored
