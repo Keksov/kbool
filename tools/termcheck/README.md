@@ -114,11 +114,75 @@ In every case, check that `ls tools/termcheck` shows `termcheck.sh`. If it says
   right; click it too. (A narrow window skips it.)
 * **Resize:** near the end you are asked to resize the window: drag a corner and
   let go. Keep it at 80x24 or bigger.
+* **Widths:** the last 13 screens need nothing from you. Each prints a
+  character (Chinese, an emoji, a flag...) and the terminal reports how wide it
+  drew it. About half a second each. See "The widths group" below.
 * At the end: **Press Ctrl+C to finish.** Press Ctrl+C. That is also a test.
 
 To repeat only a part: `bash tools/termcheck/termcheck.sh --only arrows,mouse`.
 Groups are `arrows`, `nav`, `fkeys`, `special`, `chars`, `keypad`, `mouse`,
-`resize`. A shorter wait per request: `--timeout 5`.
+`resize`, `widths`. A shorter wait per request: `--timeout 5`.
+
+## The widths group
+
+Characters can take one or two columns ("cells") on the screen. Terminals do
+not always agree on which characters take two: emoji, flags, characters added in
+new Unicode versions. fv (the screen library this repository builds) has its own
+table of widths, `fv.video.strWidth`, which follows Unicode 16. The widths group
+compares that table with what your terminal really does.
+
+For each sample the program prints the character at the start of row 14 (a
+ruler `1234567890` is drawn above it). Then it asks the terminal where the
+cursor is now (the cursor position report, `ESC [ 6 n`). The terminal answers
+`ESC [ 14 ; C R`, where C is the cursor column. The character took C - 1 cells.
+You press nothing. The answer comes from the terminal itself. The next sample
+goes to row 15, the one after it to row 14 again, and so on. An answer that
+comes too late for one sample names the other row, so the next sample ignores
+it instead of taking it as its own.
+
+**Windows Terminal and the classic console (conhost):** these terminals run
+through Windows' ConPTY layer. There the answer to `ESC [ 6 n` may come from
+conhost's own model of the screen and not from what the window really drew.
+This is not verified yet; the live runs will show it. Compare these results
+with mintty (Git Bash, MSYS2, Cygwin windows) before drawing conclusions.
+
+The samples: a CJK ideograph (中), a fullwidth letter (Ａ), an emoji (😀), a heart
+with the emoji selector (❤️), a keycap (1️⃣), a family joined with zero-width
+joiners (👨‍👩‍👧), a flag (🇺🇳), `e` plus a combining accent (é), a Hangul syllable
+(한), an East Asian "ambiguous" sign (±), a watch (⌚), a symbol that became wide in
+Unicode 16 (☰, U+2630), and U+1FAEA, which is wide only from Unicode 17 on.
+
+How to read a line of the log:
+
+    widths  Keycap  table=2  got=1 table=2  INFO  char=...  raw=$'\E[14;2R'  extra=-  note=differs  wait=3ms
+
+* `table=M`: the width in fv's table.
+* `got=N`: the width the terminal drew (from its answer, shown in `raw=`).
+* `note=same` or `note=differs`: whether the two agree.
+* `wait=`: how long the answer took.
+* `extra=skipped=K:...`: bytes that came before the answer and were not part of
+  it (a key pressed meanwhile, for example). They were ignored.
+* The result is always `INFO` (an answer came) or `NONE` (no answer within 2
+  seconds, `note=no-reply`, or the question was not asked). Widths are never OK
+  or DIFF: there is no right answer, only what this terminal does.
+* `note=skipped: no reader`: on Git Bash, MSYS2 and Cygwin the program asks only
+  when fv's terminal reader is running. The reader runs by default. It is off
+  when `FV_TTY_READER=0` is set, and missing when it failed to start; the header
+  line `# input:` says which. Without the reader, waiting for the answer could
+  hang the console, so nothing is asked.
+  This is not only a widths matter. Without the reader every group waits for
+  keys with a timed read of the console. In a Windows console window (Windows
+  Terminal, conhost) such a read can hang, for example when the window is
+  resized. Use `FV_TTY_READER=0` there only to compare, never for a normal run.
+
+**What a difference means.** `differs` is not an error in the terminal or in fv.
+It means that this terminal and fv's table disagree about that character, so
+text after it may not land where fv expects. fv handles this already: after
+every wide character, emoji or joined sequence it moves the cursor to the exact
+column with an explicit cursor command (resync, design decision D15). A row
+stays aligned whatever width the terminal chose. The character itself may look
+squeezed or have a gap after it. The log tells which characters need a
+different table entry for this terminal, if it ever matters.
 
 ## After Ctrl+C - look at the terminal
 
@@ -178,7 +242,7 @@ plain text file: open it in Notepad to see.
 | Option | Meaning |
 |---|---|
 | `--only GROUPS` | run only these groups (comma list) |
-| `--timeout SECONDS` | wait per request, default 10 (decimals allowed) |
+| `--timeout SECONDS` | wait per request, default 10 (decimals allowed); a widths item waits for the terminal's answer at most 2 s (less if the timeout is shorter) |
 | `--out DIR` | write the log into `DIR` instead of the current folder |
 | `--with-dangerous` | also ask for Alt+F4 (closes most windows) |
 | `--list-items` | print the items (group, id, kind, expected) and exit |
@@ -312,7 +376,9 @@ Send the whole `<date-time>` folder.
 * Sync mode: with `TERMCHECK_SYNC=FILE` termcheck appends one line per state:
   `ready <group> <id> [target X Y [X2 Y2]] [screen W H]` (after the prompt is
   drawn and pending input dropped; keys sent earlier are dropped as stale),
-  `done <id> <result> [cell X Y [cell2 X Y]] [screen W H] [skipped]`,
+  `done <id> <result> [cell X Y [cell2 X Y]] [screen W H] [skipped]`
+  (a widths item: `done <id> INFO got N table M`, `done <id> NONE table M`
+  when no answer came, `done <id> NONE no-reader table M` when not asked),
   `retry <id> DIFF cell X Y` (a mouse item that landed on the wrong cell is asked
   once more, only the second attempt is logged), `finish-wait`,
   `end <complete|incomplete|error> <status>`. `TERMCHECK_NONCE` sets the window
@@ -322,6 +388,11 @@ Send the whole `<date-time>` folder.
   drain-resize / settle-resize). `TERMCHECK_LABEL=WORD` names the log after WORD.
   Draining pending input stops after 0.3 s, and resizes seen while draining or
   settling are read once (one `stty size`), not once per event.
+* Widths items have kind `info` in `--list-items`. The driver needs no key
+  table entry for them and sends nothing. It waits for their `done` like any
+  item (within the item time plus 5 s). In feed mode (`--feed`) a widths
+  item's line is the terminal's answer; it goes into a fifo after the question
+  and is read the same way as a real one.
 * `-Terminals` and `-Groups` take an array or one comma string
   (`-Terminals wt,conhost` through `pwsh -File`).
 * Offline driver tests (no window, no input):

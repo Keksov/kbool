@@ -55,7 +55,10 @@ function ConvertTo-ListParam([string[]]$values, [string[]]$allowed, [string]$nam
     , $out.ToArray()
 }
 $script:AllTerminals = @('wt', 'conhost', 'mintty-git', 'msys2', 'cygwin')
-$script:AllGroups = @('arrows', 'nav', 'fkeys', 'special', 'chars', 'keypad', 'mouse', 'resize')
+$script:AllGroups = @('arrows', 'nav', 'fkeys', 'special', 'chars', 'keypad', 'mouse', 'resize', 'widths')
+# items of kind info (termcheck --list-items; the widths group): nothing is injected, termcheck
+# asks the terminal by itself; filled by Invoke-Main (Set-InfoIds), read by Step-SyncLine
+$script:InfoIds = @{}
 $Terminals = ConvertTo-ListParam $Terminals $script:AllTerminals 'Terminals'
 if ($Terminals.Count -eq 0) { throw '-Terminals: no terminal given' }
 $script:Only = (ConvertTo-ListParam $Groups $script:AllGroups 'Groups') -join ','     # termcheck --only form
@@ -616,6 +619,7 @@ function Test-KeyTable($table, [string[]]$listLines) {
         if (-not $l) { continue }
         $f = $l -split "`t"
         if ($f.Count -lt 4) { $problems.Add("bad --list-items line: $l"); continue }
+        if ($f[2] -eq 'info') { continue }      # nothing to inject: no table entry needed
         $ids[$f[1]] = $f[0]
         if (-not $table.Contains($f[1])) { $problems.Add("no table entry for item '$($f[1])' ($($f[0]))"); continue }
         $e = $table[$f[1]]
@@ -627,6 +631,15 @@ function Test-KeyTable($table, [string[]]$listLines) {
     foreach ($k in $table.Keys) { if (-not $ids.ContainsKey($k)) { $problems.Add("table entry '$k' is not a termcheck item") } }
     if ($table.Contains('Alt+F4')) { $problems.Add('the table has Alt+F4') }
     , $problems.ToArray()
+}
+
+# Set-InfoIds LISTLINES: $script:InfoIds = the ids of the kind-info items
+function Set-InfoIds([string[]]$listLines) {
+    $script:InfoIds = @{}
+    foreach ($l in $listLines) {
+        $f = @($l -split "`t")
+        if ($f.Count -ge 3 -and $f[2] -eq 'info') { $script:InfoIds[$f[1]] = $f[0] }
+    }
 }
 
 function Get-ListItems {
@@ -641,7 +654,8 @@ function Get-ListItems {
 function ConvertFrom-SyncLine([string]$line) {
     $w = @($line -split ' ' | Where-Object { $_ -ne '' })
     if ($w.Count -eq 0) { return $null }
-    $r = @{ Type = $w[0]; Raw = $line; Group = $null; Id = $null; Result = $null; Target = $null; Screen = $null; Cell = $null; Cell2 = $null; Skipped = $false; Reason = $null; Status = $null; Rc = $null }
+    $r = @{ Type = $w[0]; Raw = $line; Group = $null; Id = $null; Result = $null; Target = $null; Screen = $null; Cell = $null; Cell2 = $null; Skipped = $false; Reason = $null; Status = $null; Rc = $null
+        Got = $null; TableW = $null; NoReader = $false }
     $i = 1
     switch ($w[0]) {
         'ready' { $r.Group = $w[1]; $r.Id = $w[2]; $i = 3 }
@@ -660,6 +674,9 @@ function ConvertFrom-SyncLine([string]$line) {
             'screen' { $r.Screen = @([int]$w[$i + 1], [int]$w[$i + 2]); $i += 3; continue }
             'cell' { $r.Cell = @([int]$w[$i + 1], [int]$w[$i + 2]); $i += 3; continue }
             'cell2' { $r.Cell2 = @([int]$w[$i + 1], [int]$w[$i + 2]); $i += 3; continue }
+            'got' { $r.Got = [int]$w[$i + 1]; $i += 2; continue }           # widths items
+            'table' { $r.TableW = [int]$w[$i + 1]; $i += 2; continue }
+            'no-reader' { $r.NoReader = $true; $i++; continue }
             'skipped' {
                 $r.Skipped = $true; $i++
                 if ($i -lt $w.Count) { $r.Reason = $w[$i]; $i++ }
@@ -1062,6 +1079,13 @@ function Step-SyncLine($ctx, $rec) {
     switch ($rec.Type) {
         'ready' {
             $ctx.Waiting = $rec.Id; $ctx.ReadyAt = [DateTime]::UtcNow; $ctx.SawReady = $true; $ctx.DoneAt = $null
+            if ($script:InfoIds.ContainsKey($rec.Id)) {
+                # kind info: termcheck asks the terminal itself (cursor report); nothing is sent,
+                # the driver only waits for 'done' (Test-Stall: within Timeout + 5 s)
+                if (-not $live) { [TcAuto.Inj]::Plan.Add("  [$($rec.Id)] info item: nothing sent, termcheck measures by itself") }
+                [TcAuto.Inj]::AllowFrontRecovery = $false       # as after any item: from now on a lost foreground aborts
+                return
+            }
             if (-not $ctx.Table.Contains($rec.Id)) { Write-DLog "WARN no table entry for '$($rec.Id)': nothing sent, termcheck times out"; return }
             $e = $ctx.Table[$rec.Id]
             if ($e.Kind -eq 'key' -and $e.NumLock) { Set-NumLock ($e.NumLock -eq 'on') }
@@ -1103,6 +1127,11 @@ function Step-SyncLine($ctx, $rec) {
             $r = $rec.Skipped ? 'SKIPPED' : $rec.Result
             $ctx.Counts[$r] = 1 + ($ctx.Counts[$r] ?? 0)
             if ($rec.Skipped) { Write-DLog "$($rec.Id): SKIPPED ($($rec.Reason ?? 'terminal skip-list'))"; return }
+            if ($script:InfoIds.ContainsKey($rec.Id)) {
+                $how = $rec.NoReader ? 'not asked (no terminal reader)' : ($null -ne $rec.Got ? "terminal $($rec.Got) cell(s)" : 'no reply')
+                Write-DLog "$($rec.Id): $($rec.Result) width: $how, fv table $($rec.TableW ?? '?')"
+                return
+            }
             $e = $ctx.Table[$rec.Id]
             if ($e -and $e.Kind -eq 'key' -and $e.Layout -and $live) {
                 $after = Get-TargetHkl $ctx.Hwnd
@@ -1438,6 +1467,8 @@ function New-SimulatedSync([string[]]$listLines, [string]$t, [int]$w = 80, [int]
             }
         } elseif ($kind -eq 'resize') {
             $out.Add("ready $g $id screen $w $h"); $out.Add("done $id OK screen $($w + 3) $($h + 2)")
+        } elseif ($kind -eq 'info') {
+            $out.Add("ready $g $id"); $out.Add("done $id INFO got 2 table 2")
         } else {
             $out.Add("ready $g $id"); $out.Add("done $id OK")
         }
@@ -1496,6 +1527,7 @@ function Invoke-Main {
     $list = Get-ListItems
     $problems = Test-KeyTable $table $list
     if ($problems.Count) { throw ("the key table does not match termcheck --list-items:`n  " + ($problems -join "`n  ")) }
+    Set-InfoIds $list
     if ($script:Only) { $want = $script:Only -split ','; $list = @($list | Where-Object { $want -contains ($_ -split "`t")[0] }) }
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 

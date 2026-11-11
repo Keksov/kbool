@@ -8,13 +8,17 @@
 #
 # Test mode (tools/termcheck/tests/selftest.sh):  --feed FILE reads the keys
 # from FILE instead of a terminal: one line per item, printf %b escapes, an
-# empty line = nothing pressed. No terminal is opened or drawn on. The hidden
+# empty line = nothing pressed; for a widths item the line is the terminal's
+# cursor report (ESC [ ROW ; COL R, ROW 14, 15, 14, ... per widths item), written
+# into a fifo after the question, and
+# an empty line = no reply. No terminal is opened or drawn on. The hidden
 # variable TERMCHECK_SCREEN_W sets the screen width in that mode (default 80).
 #
 # Sync mode (tools/termcheck/autodrive.ps1, README "Automatic run (Windows)"):
 # TERMCHECK_SYNC=FILE appends one line per state to FILE:
 #     ready <group> <item-id> [target X Y [X2 Y2]] [screen W H]
 #     done <item-id> <result> [cell X Y [cell2 X Y]] [screen W H] [skipped]
+#          [no-reader] [got N] [table M]     (the last three: widths items)
 #     finish-wait
 #     end <complete|incomplete|error> <exit status>
 # TERMCHECK_NONCE=WORD sets the window title to termcheck-WORD (OSC 2).
@@ -32,7 +36,7 @@ TC_SELF=${BASH_SOURCE[0]}
 if [[ $TC_SELF == */* ]]; then TC_DIR=${TC_SELF%/*}; else TC_DIR=.; fi
 TC_ROOT=$(cd "$TC_DIR/../.." && pwd) || exit 2
 
-TC_GROUPS=(arrows nav fkeys special chars keypad mouse resize)
+TC_GROUPS=(arrows nav fkeys special chars keypad mouse resize widths)
 
 tc_usage() {
     cat <<'EOF'
@@ -41,9 +45,12 @@ termcheck.sh -- terminal key and mouse check; writes a log file to send back.
 Usage: bash tools/termcheck/termcheck.sh [options]
 
   --only GROUPS      run only these groups (comma list). Groups:
-                     arrows nav fkeys special chars keypad mouse resize
+                     arrows nav fkeys special chars keypad mouse resize widths
+                     (widths needs no key: the terminal reports how wide it
+                     draws some characters; the results are INFO)
   --timeout SECONDS  how long to wait for each item (default 10; decimals
-                     allowed, at most 6 digits after the point)
+                     allowed, at most 6 digits after the point); a widths
+                     item waits for the terminal's reply at most 2 s
   --out DIR          write the log into DIR (default: the current directory)
   --with-dangerous   also ask for Alt+F4 (it closes most terminal windows)
   --feed FILE        test mode: take the keys from FILE, no terminal is used
@@ -115,7 +122,9 @@ fi
 
 # ---- the item list -------------------------------------------------------------
 IT_GROUP=() IT_ID=() IT_HUMAN=() IT_EXP=() IT_KIND=() IT_HINT=()
-IT_MK=() IT_B=() IT_M=() IT_X=() IT_Y=() IT_X2=() IT_Y2=()
+IT_MK=() IT_B=() IT_M=() IT_X=() IT_Y=() IT_X2=() IT_Y2=() IT_S=() IT_R=()
+TC_WN=0             # widths items added so far (their rows alternate)
+TC_WROW=14          # widths: the first sample row (1-based); the next item uses TC_WROW + 1
 TC_N=0
 
 # tc_add GROUP ID HUMAN EXPECTED [HINT] -- a key item
@@ -137,6 +146,17 @@ tc_add_mouse() {
         drag) IT_EXP[TC_N]="b=$4,m=$5,down@$6,$7,up@$8,$9" ;;
     esac
     (( TC_N++ ))
+}
+
+# tc_add_width ID HUMAN CODEPOINTS SAMPLE -- a widths item (kind info): nothing to
+# press; the terminal's cursor report says how many cells SAMPLE took. The sample
+# row alternates 14, 15, 14, ...: a report that comes too late for one item names
+# the other row and is skipped by the next item instead of answering it
+tc_add_width() {
+    [[ -n ${TC_SEL[widths]:-} ]] || return 0
+    IT_GROUP[TC_N]=widths IT_ID[TC_N]=$1 IT_HUMAN[TC_N]="$2 ($3)" IT_EXP[TC_N]=$3 IT_KIND[TC_N]=info
+    IT_S[TC_N]=$4 IT_HINT[TC_N]='' IT_R[TC_N]=$(( TC_WROW + TC_WN % 2 ))
+    (( TC_WN++, TC_N++ ))
 }
 
 tc_build_items() {
@@ -216,10 +236,29 @@ tc_build_items() {
             IT_EXP[TC_N]=cmResizeApp IT_KIND[TC_N]=resize IT_HINT[TC_N]="(stay at 80x24 or larger)"
         (( TC_N++ ))
     fi
+    TC_WN=0
+    # widths: tc_add_width ID HUMAN CODEPOINTS SAMPLE; the samples are UTF-8 bytes
+    # (\x, not \u: \u depends on the locale the script is parsed in); fv's table
+    # width (fv.video.strWidth, Unicode 16) in brackets
+    tc_add_width CJK "a CJK ideograph" U+4E2D $'\xe4\xb8\xad'                                  # [2]
+    tc_add_width Fullwidth "a fullwidth Latin letter" U+FF21 $'\xef\xbc\xa1'                    # [2]
+    tc_add_width Emoji "an emoji (Emoji_Presentation)" U+1F600 $'\xf0\x9f\x98\x80'              # [2]
+    tc_add_width Heart-VS16 "a text symbol + VS16" U+2764,U+FE0F $'\xe2\x9d\xa4\xef\xb8\x8f'    # [2]
+    tc_add_width Keycap "a keycap" U+0031,U+FE0F,U+20E3 $'1\xef\xb8\x8f\xe2\x83\xa3'            # [2]
+    tc_add_width ZWJ-Family "a ZWJ family" U+1F468,U+200D,U+1F469,U+200D,U+1F467 \
+        $'\xf0\x9f\x91\xa8\xe2\x80\x8d\xf0\x9f\x91\xa9\xe2\x80\x8d\xf0\x9f\x91\xa7'               # [2]
+    tc_add_width Flag "a flag" U+1F1FA,U+1F1F3 $'\xf0\x9f\x87\xba\xf0\x9f\x87\xb3'              # [2]
+    tc_add_width Combining "e + a combining acute" U+0065,U+0301 $'e\xcc\x81'                   # [1]
+    tc_add_width Hangul "a Hangul syllable" U+D55C $'\xed\x95\x9c'                              # [2]
+    tc_add_width Ambiguous "an East Asian Ambiguous sign" U+00B1 $'\xc2\xb1'                    # [1]
+    tc_add_width Watch "a BMP pictograph" U+231A $'\xe2\x8c\x9a'                                # [2]
+    tc_add_width Trigram-U16 "a symbol wide since Unicode 16" U+2630 $'\xe2\x98\xb0'            # [2]
+    tc_add_width U17-1FAEA "a symbol wide only in Unicode 17" U+1FAEA $'\xf0\x9f\xab\xaa'       # [1]
 }
 
 # ---- --list-items: the item table for tools/termcheck/autodrive.ps1 -----------------
-# one line per item: group TAB id TAB kind TAB expected (kind: key, mouse:MK, resize);
+# one line per item: group TAB id TAB kind TAB expected (kind: key, mouse:MK, resize,
+# info = nothing to send: a widths item, its expected column lists the code points);
 # the screen is taken as 240 wide so the far-right mouse item is listed too
 if (( TC_LIST )); then
     FV_SCREEN_W=240
@@ -236,7 +275,7 @@ fi
 TC_SYNC=${TERMCHECK_SYNC:-}
 TC_NONCE=${TERMCHECK_NONCE:-}
 TC_NONCE=${TC_NONCE//[^A-Za-z0-9_-]/}
-TC_CELL='' TC_CELL2='' TC_RSZ=''
+TC_CELL='' TC_CELL2='' TC_RSZ='' TC_WSYNC='' TC_WGOT='' TC_WTAB=''
 declare -A TC_SKIP=()
 if [[ -n $TC_SYNC ]]; then
     if ! { : >> "$TC_SYNC"; } 2>/dev/null; then
@@ -303,6 +342,11 @@ tc_sync_done() {
             if [[ -n $TC_CELL2 ]]; then l+=" cell2 $TC_CELL2"; fi
             ;;
         resize) if [[ -n $TC_RSZ ]]; then l+=" screen $TC_RSZ"; fi ;;
+        info)
+            if [[ -n $TC_WSYNC ]]; then l+=" $TC_WSYNC"; fi
+            if [[ -n $TC_WGOT ]]; then l+=" got $TC_WGOT"; fi
+            if [[ -n $TC_WTAB ]]; then l+=" table $TC_WTAB"; fi
+            ;;
     esac
     tc_sync "$l"
 }
@@ -331,6 +375,10 @@ TC_POLL=0.05
 TC_EXTRA_US=200000
 TC_LAST='-'
 TC_FEEDFD=''
+# widths: the reply wait (at most 2 s), feed mode's reply fifo (its folder, fd) and
+# the reply bytes queued for the item; the sample rows: TC_WROW, IT_R
+TC_CPR_TO=$(( TC_TIMEOUT_US < 2000000 ? TC_TIMEOUT_US : 2000000 ))
+TC_WDIR='' TC_WFD='' TC_WFEED=''
 declare -A TC_CNT=()
 declare -A TC_GN=()
 
@@ -390,6 +438,8 @@ tc_finalize() {
 tc_on_exit() {
     local rc=$? st=complete
     tc_finalize
+    if [[ -n $TC_WFD ]]; then exec {TC_WFD}<&-; TC_WFD=''; fi
+    if [[ -n $TC_WDIR ]]; then rm -rf "$TC_WDIR"; TC_WDIR=''; fi
     if [[ -n $TC_SYNC ]]; then
         if [[ -z $TC_LOG ]]; then st=error
         elif [[ -n $TC_CUR && $TC_FINISH == 0 ]]; then st=incomplete; fi
@@ -451,6 +501,14 @@ if (( TC_FEED )); then
     FV_KEY_FD=$TC_NULLFD
     FV_SCREEN_W=${TERMCHECK_SCREEN_W:-80}
     FV_SCREEN_H=24
+    # widths: a fifo stands in for the terminal's reply (opened read-write: no
+    # blocking open, no end of file); the item writes its feed line into it
+    if [[ -n ${TC_SEL[widths]:-} ]]; then
+        if ! { TC_WDIR=$(mktemp -d) && mkfifo "$TC_WDIR/reply" && exec {TC_WFD}<>"$TC_WDIR/reply"; } 2>/dev/null; then
+            echo "termcheck: cannot make the reply fifo for the widths items in feed mode" >&2
+            exit 2
+        fi
+    fi
 else
     if ! fv.video.initVideo; then
         echo "termcheck: no terminal (run this from a terminal window, not from a pipe or a service)" >&2
@@ -518,6 +576,21 @@ tc_draw_resize() {
     tc_put "$TC_S"
 }
 
+# a widths item: the sample itself goes to row IT_R later (tc_run_width), under a ruler
+tc_draw_width() {
+    tc_title "$1"
+    tc_at 8 4 "Measuring the width of ${IT_HUMAN[$1]}"
+    tc_at 10 4 "(nothing to press: the terminal answers by itself)"
+    tc_at $(( ${IT_R[$1]} - 1 )) 1 "1234567890"
+    tc_put "$TC_S"
+}
+
+# tc_noreader_why: TC_WHY = why the terminal reader is not running (msys/cygwin)
+tc_noreader_why() {
+    if [[ ${FV_TTY_READER-} == 0 ]]; then TC_WHY='the terminal reader is off (FV_TTY_READER=0)'
+    else TC_WHY='the terminal reader did not start'; fi
+}
+
 # tc_countdown SECONDS-LEFT
 tc_countdown() {
     tc_put $'\e[21;4H\e[2K'"time left: $1 s   (nothing happens = skipped)"
@@ -567,6 +640,7 @@ tc_settle() {
 # ---- recording ------------------------------------------------------------------
 RES='' GOT='' CHARV='' RAW='' EXTRA='' NOTE='' NOISE='' STALE=0
 NOISE_N=0
+EXPV='' WAITMS=''   # widths: the expected column of the log (table=M), the reply wait
 
 tc_noise() { # WHAT
     (( NOISE_N++ ))
@@ -583,7 +657,8 @@ tc_record() { # INDEX
         if (( NOISE_N > 8 )); then tl+="(+$(( NOISE_N - 8 )) more)"; fi
     fi
     if [[ -n $NOTE ]]; then tl+=$'\t'"note=$NOTE"; fi
-    tc_log "$g"$'\t'"${IT_ID[$i]}"$'\t'"${IT_EXP[$i]}"$'\t'"${GOT:--}"$'\t'"$RES"$'\t'"char=$cq"$'\t'"raw=${RAW:--}"$'\t'"extra=${EXTRA:--}$tl"
+    if [[ -n $WAITMS ]]; then tl+=$'\t'"wait=${WAITMS}ms"; fi
+    tc_log "$g"$'\t'"${IT_ID[$i]}"$'\t'"${EXPV:-${IT_EXP[$i]}}"$'\t'"${GOT:--}"$'\t'"$RES"$'\t'"char=$cq"$'\t'"raw=${RAW:--}"$'\t'"extra=${EXTRA:--}$tl"
     TC_CNT[$g/$RES]=$(( ${TC_CNT[$g/$RES]:-0} + 1 ))
     TC_GN[$g]=1
     TC_LAST="$RES  ${IT_ID[$i]}${GOT:+ -> $GOT}"
@@ -855,6 +930,115 @@ tc_run_resize() {
     fi
 }
 
+# ---- a widths item ---------------------------------------------------------------------
+# The sample is printed at column 1 of row IT_R (autowrap is off), then the
+# cursor position is asked (ESC [ 6 n); the reply ESC [ ROW ; COL R gives the
+# cells the terminal drew: COL - 1. The reply is read here, byte by byte, not by
+# fv.keyboard (which would decode it as a modified F3). Results are INFO (a reply)
+# or NONE (no reply in time, or not asked); there is no pass or fail.
+
+# tc_cpr_skip BYTES [COUNT]: BYTES were not part of the reply
+tc_cpr_skip() {
+    (( TC_CPR_NSKIP += ${2:-${#1}} ))
+    if (( ${#TC_CPR_SKIP} < 32 )); then TC_CPR_SKIP+=$1; fi
+}
+
+# tc_cpr_read FD ROW MICROSECONDS: read the reply for ROW from FD within the time,
+# one byte per read; whatever comes before it or does not match (a key, a reply for
+# another row) is skipped. Out: TC_CPR_COL (COL; '' = no reply), TC_CPR_RAW (its
+# bytes), TC_CPR_SKIP (the first skipped bytes), TC_CPR_NSKIP, TC_CPR_US (time spent)
+tc_cpr_read() {
+    local LC_ALL=C fd=$1 row=$2 c rc st=0 seq='' r='' col='' left t0 end secs got=0
+    TC_CPR_COL='' TC_CPR_RAW='' TC_CPR_SKIP='' TC_CPR_NSKIP=0
+    tc_now; t0=$TC_NOW; end=$(( TC_NOW + $3 ))
+    while (( ! got )); do
+        tc_now
+        left=$(( end - TC_NOW ))
+        (( left > 0 )) || break
+        printf -v secs '%d.%06d' $(( left / 1000000 )) $(( left % 1000000 ))
+        c='' rc=0
+        IFS= read -r -n1 -d '' -t "$secs" -u "$fd" c || rc=$?
+        if [[ -z $c ]]; then
+            if (( rc > 128 )); then continue; fi      # timed out: the loop ends at the deadline
+            if (( rc != 0 )); then break; fi          # end of file
+            tc_cpr_skip "$seq"; seq='' st=0           # a NUL byte
+            tc_cpr_skip '<NUL>' 1
+            continue
+        fi
+        while :; do
+            case $st in
+                0) if [[ $c == $'\e' ]]; then st=1 seq=$c; else tc_cpr_skip "$c"; fi
+                   break ;;
+                1) if [[ $c == '[' ]]; then st=2 seq+=$c r=''; break; fi ;;
+                2) if [[ $c == [0-9] && ${#r} -lt 5 ]]; then r+=$c seq+=$c; break
+                   elif [[ $c == ';' && -n $r ]]; then st=3 seq+=$c col=''; break; fi ;;
+                3) if [[ $c == [0-9] && ${#col} -lt 5 ]]; then col+=$c seq+=$c; break
+                   elif [[ $c == R && -n $col ]]; then
+                       seq+=$c
+                       if (( 10#$r == row )); then TC_CPR_COL=$(( 10#$col )) TC_CPR_RAW=$seq got=1; break; fi
+                       tc_cpr_skip "$seq"; seq='' st=0       # another row (Shift+F3 is ESC [ 1 ; 2 R)
+                       break
+                   fi ;;
+            esac
+            # no match: what was collected is skipped, the byte is looked at again from the start
+            tc_cpr_skip "$seq"; seq='' st=0
+        done
+    done
+    if (( ! got )) && [[ -n $seq ]]; then tc_cpr_skip "$seq"; fi
+    tc_now
+    TC_CPR_US=$(( TC_NOW - t0 ))
+}
+
+# tc_raw_drain FD: drop the bytes already waiting on FD (at most 4096) into STALE;
+# `read -t 0` only polls (never a timed read; on msys/cygwin FD is the reader's pipe)
+tc_raw_drain() {
+    local LC_ALL=C c n=0
+    while (( n < 4096 )) && read -t 0 -u "$1"; do
+        IFS= read -r -n1 -d '' -u "$1" c || break
+        (( n++ ))
+    done
+    (( STALE += n ))
+}
+
+tc_run_width() {
+    local i=$1 s=${IT_S[$1]} row=${IT_R[$1]} tw fd
+    GOT='' CHARV=$s RAW='' EXTRA='' TC_WGOT='' TC_WSYNC=''
+    fv.video.strWidth "$s"; tw=$RESULT
+    EXPV="table=$tw" TC_WTAB=$tw
+    if (( TC_FEED )); then
+        fd=$TC_WFD
+    elif [[ $OSTYPE == msys* || $OSTYPE == cygwin* ]] && { (( ${__FV_VI_RMODE:-0} != 1 )) || [[ $FV_KEY_FD == "$FV_TTY_FD" ]]; }; then
+        # D13a: no timed read of a console terminal here; without the reader nothing is asked
+        RES=NONE NOTE='skipped: no reader' TC_WSYNC=no-reader
+        tc_noreader_why
+        tc_put $'\e['"$(( TC_WROW + 3 ));4H""skipped: $TC_WHY"
+        return 0
+    else
+        fd=$FV_KEY_FD
+    fi
+    # what is pending is dropped first: fv.keyboard's queue, then the bytes on the fd
+    fv.keyboard.flush
+    tc_raw_drain "$fd"
+    if (( TC_FEED )); then
+        if [[ -n $TC_WFEED ]]; then printf '%s' "$TC_WFEED" >&"$fd"; fi
+    else
+        tc_put $'\e['"$row;1H"$'\e[2K'"$s"$'\e[6n'
+    fi
+    tc_cpr_read "$fd" "$row" "$TC_CPR_TO"
+    WAITMS=$(( TC_CPR_US / 1000 ))
+    if (( TC_CPR_NSKIP )); then tc_q "$TC_CPR_SKIP"; EXTRA="skipped=$TC_CPR_NSKIP:$TC_QV"; fi
+    if [[ -n $TC_CPR_COL ]]; then
+        TC_WGOT=$(( TC_CPR_COL - 1 ))
+        tc_q "$TC_CPR_RAW"; RAW=$TC_QV
+        GOT="got=$TC_WGOT table=$tw" RES=INFO
+        if (( TC_WGOT == tw )); then NOTE=same; else NOTE=differs; fi
+        tc_put $'\e['"$(( TC_WROW + 3 ));4H""the terminal drew $TC_WGOT cell(s); fv's table says $tw ($NOTE)"
+    else
+        RES=NONE NOTE=no-reply
+        tc_put $'\e['"$(( TC_WROW + 3 ));4H""no reply from the terminal within $(( TC_CPR_TO / 1000 )) ms; fv's table says $tw"
+    fi
+}
+
 # ---- the log header ---------------------------------------------------------------------
 tc_header() {
     local line
@@ -875,13 +1059,21 @@ tc_header() {
     tc_log "# FV_ESC_TIMEOUT: ${FV_ESC_TIMEOUT:-<unset, default 0.02>}"
     tc_log "# screen: ${FV_SCREEN_W}x${FV_SCREEN_H}"
     tc_log "# item timeout: $TC_TIMEOUT_TXT s   groups: ${TC_ONLY:-all}   dangerous: $TC_DANGER   items: $TC_N"
-    if (( TC_FEED )); then tc_log "# mode: feed ($TC_FEEDFILE), no terminal"; fi
+    if (( TC_FEED )); then tc_log "# mode: feed ($TC_FEEDFILE), no terminal"
+    elif (( ${__FV_VI_RMODE:-0} == 1 )); then tc_log "# input: through the terminal reader (FV_TTY_READER=${FV_TTY_READER-<unset>})"
+    elif [[ $OSTYPE == msys* || $OSTYPE == cygwin* ]]; then
+        tc_noreader_why
+        tc_log "# input: the terminal directly (FV_TTY_READER=${FV_TTY_READER-<unset>}): $TC_WHY"
+    else tc_log "# input: the terminal directly (FV_TTY_READER=${FV_TTY_READER-<unset>})"; fi
+    if [[ -n ${TC_SEL[widths]:-} ]]; then
+        tc_log "# widths: samples at column 1 of rows $TC_WROW and $(( TC_WROW + 1 )) in turn, cursor report ESC[6n, reply wait $(( TC_CPR_TO / 1000 )) ms; table = fv.video.strWidth"
+    fi
     if [[ -n $tc_hdr_stty ]]; then
         while IFS= read -r line; do tc_log "# stty: $line"; done <<< "$tc_hdr_stty"
     else
         tc_log "# stty: <not available>"
     fi
-    tc_log "# columns: group  item  expected  got  result  char=  raw=  extra=  [stale= noise= note=]   (TAB separated)"
+    tc_log "# columns: group  item  expected  got  result  char=  raw=  extra=  [stale= noise= note= wait=]   (TAB separated)"
 }
 
 # ---- main ------------------------------------------------------------------------------------
@@ -911,13 +1103,16 @@ tc_feed_next() {
     fv.keyboard.flush
     fv.drivers.doneEvents
     fv.drivers.clearEvent
-    if [[ -n $tc_bytes ]]; then fv.keyboard.feed "$tc_bytes"; fi
+    # a widths item: the line is the terminal's reply, written after the query
+    if [[ ${IT_KIND[$1]} == info ]]; then TC_WFEED=$tc_bytes
+    elif [[ -n $tc_bytes ]]; then fv.keyboard.feed "$tc_bytes"; fi
     tc_log "# prompt $(( $1 + 1 ))/$TC_N [${IT_GROUP[$1]}] ${IT_HUMAN[$1]}"
 }
 
 for (( tc_i = 0; tc_i < TC_N; tc_i++ )); do
     TC_CUR=${IT_GROUP[tc_i]}/${IT_ID[tc_i]}
     RES='' GOT='' CHARV='' RAW='' EXTRA='' NOTE='' NOISE='' NOISE_N=0
+    EXPV='' WAITMS='' TC_WFEED='' TC_WGOT='' TC_WTAB='' TC_WSYNC=''
     # input of this item: the feed line is queued (feed mode)
     if (( TC_FEED )); then tc_feed_next "$tc_i"; fi
     # sync mode: an item the driver asked to skip is logged without waiting
@@ -938,6 +1133,7 @@ for (( tc_i = 0; tc_i < TC_N; tc_i++ )); do
             key) tc_draw_key "$tc_i" ;;
             mouse) tc_draw_mouse "$tc_i" ;;
             resize) tc_draw_resize "$tc_i" ;;
+            info) tc_draw_width "$tc_i" ;;
         esac
         tc_drain
         tc_sync_ready "$tc_i"
@@ -945,6 +1141,7 @@ for (( tc_i = 0; tc_i < TC_N; tc_i++ )); do
             key) tc_run_key "$tc_i" ;;
             mouse) tc_run_mouse "$tc_i" ;;
             resize) tc_run_resize "$tc_i" ;;
+            info) tc_run_width "$tc_i" ;;
         esac
         # sync mode: a mouse item that landed on the wrong cell is asked once more,
         # so the driver can calibrate; only the second attempt is logged

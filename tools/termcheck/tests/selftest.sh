@@ -39,11 +39,14 @@ fail() { FAIL=$(( FAIL + 1 )); printf 'FAIL: %s%s\n' "$1" "${2:+  -- $2}"; }
 skip() { SKIP=$(( SKIP + 1 )); printf 'SKIP: %s\n' "$1"; }
 
 # predicates; ok TITLE PREDICATE ARGS... passes when the predicate is true
-has() { [[ $1 == *"$2"* ]]; }
+# (bytes, not characters: a log line may hold bytes that are not valid UTF-8 -
+# bash 5.2's printf %q leaves some high bytes raw - and a regex or a pattern
+# under a UTF-8 locale does not match across them)
+has() { local LC_ALL=C; [[ $1 == *"$2"* ]]; }
 not() { ! "$@"; }
-eq2() { [[ $1 == "$2" || $1 == "$3" ]]; }
-eq() { [[ $1 == "$2" ]]; }
-re() { [[ $1 =~ $2 ]]; }
+eq2() { local LC_ALL=C; [[ $1 == "$2" || $1 == "$3" ]]; }
+eq() { local LC_ALL=C; [[ $1 == "$2" ]]; }
+re() { local LC_ALL=C; [[ $1 =~ $2 ]]; }
 ok() {
     local t=$1
     shift
@@ -265,6 +268,96 @@ feed --only resize,keypad -- '' '' ''
 want Resize NONE "-" "resize: no resize event in feed mode is NONE"
 ok "resize+keypad: 4 items" has "$LOGTXT" 'items: 4'
 
+# widths (kind info): a feed line is the terminal's cursor report, written into a
+# fifo after the query; the reply is ESC [ ROW ; COL R, the sample rows alternate
+# 14 (CJK), 15 (Fullwidth), 14 (Emoji), 15, ...
+mkdir -p "$TMP/wtmp"
+t0=${EPOCHREALTIME/[.,]/}
+TMPDIR=$TMP/wtmp feed --only widths --timeout 0.5 -- \
+    $'\\e[14;3R' \
+    $'x\\e[1;2R\\e[15;2R' \
+    '' \
+    $'\\e\\e[15;\\e[15;3R' \
+    $'\\e[14;3' \
+    $'\\e[15;3R\\e[15;5R' \
+    '' \
+    $'\\e[14;2R\\e[15;2R' \
+    $'\\e[15;2R'
+t1=${EPOCHREALTIME/[.,]/}
+DETAIL=$OUT
+ok "widths feed run: rc 0" eq "$RC" 0
+want CJK INFO "got=2 table=2" "widths: a correct reply gives got=2 table=2, INFO"
+rowfield CJK 3
+ok "widths: the expected column is the table width" eq "$FIELD" 'table=2'
+row CJK
+DETAIL=$ROW
+ok "widths: same width is noted 'same'" has "$ROW" $'\tnote=same'
+ok "widths: the reply is logged byte-exact" has "$ROW" "raw=\$'\\E[14;3R'"
+rowfield CJK 6
+v=${FIELD#char=}
+eval "v=$v" 2>/dev/null || v=''
+DETAIL=$FIELD
+# (printf %q spells high bytes differently per runtime; the value is compared)
+ok "widths: the sample is in the char column" eq "$v" $'\xe4\xb8\xad'
+ok "widths: the wait is logged" re "$ROW" $'\twait=[0-9]+ms$'
+want Fullwidth INFO "got=1 table=2" "widths: an unrelated byte and a Shift+F3-like report before the reply are skipped"
+row Fullwidth
+DETAIL=$ROW
+ok "widths: a different width is noted 'differs'" has "$ROW" $'\tnote=differs'
+ok "widths: the skipped bytes are counted and shown" has "$ROW" "extra=skipped=7:\$'x\\E[1;2R'"
+want Emoji NONE "-" "widths: no reply is NONE"
+row Emoji
+DETAIL=$ROW
+ok "widths: no reply is noted" has "$ROW" $'\tnote=no-reply'
+w=${ROW##*wait=}; w=${w%ms}
+DETAIL="wait=$w ms"
+ok "widths: no reply waits the timeout (0.5 s) and not much longer ($w ms)" re "$w" '^(49[5-9]|[5-9][0-9][0-9]|1[0-4][0-9][0-9])$'
+want Heart-VS16 INFO "got=2 table=2" "widths: a lone ESC and a cut report before the reply: the reply is still found"
+row Heart-VS16
+DETAIL=$ROW
+ok "widths: the ESC and the cut report are skipped (6 bytes)" has "$ROW" 'extra=skipped=6:'
+want Keycap NONE "-" "widths: an unfinished report is NONE"
+row Keycap
+DETAIL=$ROW
+ok "widths: the unfinished report is counted as skipped" has "$ROW" 'extra=skipped=6:'
+want ZWJ-Family INFO "got=2 table=2" "widths: the first report is taken"
+want Flag NONE "-" "widths: a late second report does not answer the next item"
+row Flag
+DETAIL=$ROW
+ok "widths: the late report (7 bytes) is dropped before the query (stale=7)" has "$ROW" $'\tstale=7'
+want Combining INFO "got=1 table=1" "widths: a late report for the previous item's row (14) before the reply: the reply (row 15) is taken"
+row Combining
+DETAIL=$ROW
+ok "widths: the previous row's report is skipped (7 bytes)" has "$ROW" "extra=skipped=7:\$'\\E[14;2R'"
+want Hangul NONE "-" "widths: only a late report for the previous row (15) does not answer this item (row 14)"
+row Hangul
+DETAIL=$ROW
+ok "widths: ... it is skipped, and the item is no-reply" has "$ROW" "extra=skipped=7:\$'\\E[15;2R'"
+ok "widths: ... no-reply noted" has "$ROW" $'\tnote=no-reply'
+want U17-1FAEA NONE "-" "widths: lines missing at the end are NONE"
+rowfield U17-1FAEA 3
+ok "widths: U+1FAEA is narrow in fv's table (Unicode 16)" eq "$FIELD" 'table=1'
+rowfield Trigram-U16 3
+ok "widths: U+2630 is wide in fv's table (Unicode 16)" eq "$FIELD" 'table=2'
+rowfield Combining 3
+ok "widths: e + combining acute is one cell in fv's table" eq "$FIELD" 'table=1'
+ok "widths: the summary line" has "$LOGTXT" 'summary  widths  OK=0  DIFF=0  NONE=8  INFO=5'
+ok "widths: the header names the rows and the reply wait" has "$LOGTXT" '# widths: samples at column 1 of rows 14 and 15 in turn, cursor report ESC[6n, reply wait 500 ms'
+DETAIL="$(( (t1 - t0) / 1000 )) ms"
+ok "widths: 8 unanswered items at 0.5 s end in time ($DETAIL)" re "$(( (t1 - t0) / 1000000 ))" '^([4-9]|1[0-9])$'
+n=0; for f in "$TMP/wtmp"/*; do [[ -e $f ]] && n=$(( n + 1 )); done
+ok "widths: the reply fifo's folder is removed at exit" eq "$n" 0
+SYNCF=$TMP/sync5.txt
+: > "$SYNCF"
+TERMCHECK_SYNC=$SYNCF TERMCHECK_SKIP='Emoji' feed --only widths --timeout 0.2 -- $'\\e[14;3R' ''
+SYNCTXT=$(<"$SYNCF")
+DETAIL=$SYNCTXT
+ok "widths sync: the ready line names the group" has "$SYNCTXT" $'ready widths CJK\n'
+ok "widths sync: the done line carries got and table" has "$SYNCTXT" $'done CJK INFO got 2 table 2\n'
+ok "widths sync: no reply: done NONE with the table" has "$SYNCTXT" $'done Fullwidth NONE table 2\n'
+ok "widths sync: a skipped widths item" has "$SYNCTXT" $'done Emoji NONE skipped\n'
+ok "widths sync: the last line is 'end complete 0'" re "$SYNCTXT" $'\nend complete 0$'
+
 # --only and --with-dangerous count the items
 feed --only fkeys -- ''
 ok "fkeys: 47 items (Alt+F4 left out)" has "$LOGTXT" 'items: 47'
@@ -276,7 +369,7 @@ feed --only arrows,nav --timeout 0.25 -- ''
 DETAIL=$OUT
 ok "arrows+nav with --timeout 0.25: rc 0" eq "$RC" 0
 ok "arrows+nav: 40 items" has "$LOGTXT" 'items: 40'
-feed -- ''
+feed --timeout 0.2 -- ''
 n=${LOGTXT#*items: }; n=${n%%$'\n'*}
 DETAIL="items: $n"
 ok "all groups: the item count is 100..140 ($n)" re "$n" '^(1[0-3][0-9]|140)$'
@@ -308,7 +401,7 @@ OUT=$(bash "$TC" --list-items 2>&1); RC=$?
 ok "--list-items: rc 0" eq "$RC" 0
 n=0; while IFS= read -r l; do [[ -n $l ]] && n=$(( n + 1 )); done <<< "$OUT"
 DETAIL="lines: $n"
-ok "--list-items: 117 items (the far-right mouse item included)" eq "$n" 117
+ok "--list-items: 130 items (the far-right mouse item included)" eq "$n" 130
 ok "--list-items: a key line is group TAB id TAB kind TAB expected" has "$OUT" $'arrows\tShift+Up\tkey\tkbShiftUp'
 ok "--list-items: a mouse line names the mouse kind" has "$OUT" $'mouse\tDrag\tmouse:drag\tb=1,m=0,down@10,16,up@60,18'
 ok "--list-items: the far-right item is listed" has "$OUT" $'mouse\tClick-Far-Right\tmouse:click'
@@ -319,6 +412,10 @@ ok "--list-items --with-dangerous: Alt+F4 is listed" has "$OUT" $'fkeys\tAlt+F4\
 OUT=$(bash "$TC" --list-items --only keypad 2>&1)
 n=0; while IFS= read -r l; do [[ -n $l ]] && n=$(( n + 1 )); done <<< "$OUT"
 ok "--list-items --only keypad: 3 lines" eq "$n" 3
+OUT=$(bash "$TC" --list-items --only widths 2>&1)
+n=0; while IFS= read -r l; do [[ -n $l ]] && n=$(( n + 1 )); done <<< "$OUT"
+ok "--list-items --only widths: 13 lines" eq "$n" 13
+ok "--list-items: a widths line has kind info and the code points" has "$OUT" $'widths\tHeart-VS16\tinfo\tU+2764,U+FE0F'
 
 # sync mode (TERMCHECK_SYNC) in --feed mode: ready/done lines, cells, skip, end
 SYNCF=$TMP/sync1.txt
@@ -545,6 +642,41 @@ else
     DETAIL=$PTYTXT
     ok "pty SIGHUP: the hup line" has "$PTYTXT" 'hup: hangup received'
     ok "pty SIGHUP: incomplete at the item" has "$PTYTXT" 'incomplete at arrows/Up'
+
+    # widths: the feeder answers the cursor report once it sees the sample and ESC[6n
+    # (through the reader's pipe on MSYS2/Cygwin, the pty itself on Linux); the third
+    # item gets no reply (NONE after 2 s), Ctrl+C at the fourth
+    pty_case widths --only widths --timeout 2
+    pty_run widths \
+        "text:"$'\xe4\xb8\xad\e[6n' 'type:\e[14;3R' \
+        "text:"$'\xef\xbc\xa1\e[6n' 'type:q\e[15;2R' \
+        "text:"$'\xf0\x9f\x98\x80\e[6n' \
+        "text:"$'\xe2\x9d\xa4\xef\xb8\x8f\e[6n' 'sleep:0.3' 'type:\x03'
+    pty_check widths "pty widths run" 130
+    DETAIL=$PTYTXT
+    ok "pty widths: the CJK reply is INFO got=2 same" re "$PTYTXT" $'\tCJK\ttable=2\tgot=2 table=2\tINFO\t[^\n]*\tnote=same'
+    ok "pty widths: the unrelated byte is skipped, got=1 differs" re "$PTYTXT" $'\tFullwidth\ttable=2\tgot=1 table=2\tINFO\t[^\n]*extra=skipped=1:q[^\n]*\tnote=differs'
+    ok "pty widths: no reply is NONE" re "$PTYTXT" $'\tEmoji\ttable=2\t-\tNONE\t[^\n]*\tnote=no-reply'
+    ok "pty widths: incomplete at the fourth item" has "$PTYTXT" 'incomplete at widths/Heart-VS16'
+    fvp_ts widths
+    ok "pty widths: the sample is printed at row 14, column 1, then the query" has "$REPLY" $'\e[14;1H\e[2K\xe4\xb8\xad\e[6n'
+    ok "pty widths: the next sample goes to row 15" has "$REPLY" $'\e[15;1H\e[2K\xef\xbc\xa1\e[6n'
+    if [[ $OSTYPE == msys* || $OSTYPE == cygwin* ]]; then
+        ok "pty widths: the header says input comes through the reader" has "$PTYTXT" '# input: through the terminal reader'
+        # D13a: without the reader no cursor report is asked (no timed read of the terminal)
+        fvp_case noreader "FV_TTY_READER=0 exec '$BASH' '$TC' --out \"\$D\" --only widths --timeout 2"
+        pty_run noreader 'text:Press Ctrl+C to finish' 'sleep:0.3' 'type:\x03'
+        pty_check noreader "pty widths without the reader" 130
+        DETAIL=$PTYTXT
+        n=0; while IFS= read -r l; do [[ $l == widths$'\t'*$'\tNONE\t'*$'\tnote=skipped: no reader' ]] && n=$(( n + 1 )); done <<< "$PTYTXT"
+        ok "pty widths without the reader: 13 items 'skipped: no reader'" eq "$n" 13
+        ok "pty widths without the reader: the header says the terminal is read directly" has "$PTYTXT" '# input: the terminal directly (FV_TTY_READER=0)'
+        fvp_ts noreader
+        DETAIL=''
+        ok "pty widths without the reader: no ESC[6n was sent" not has "$REPLY" $'\e[6n'
+    else
+        skip "pty widths without the reader: the D13a rule is for MSYS2 / Cygwin only"
+    fi
 fi
 
 printf '== %d PASS, %d FAIL, %d SKIP ==\n' "$PASS" "$FAIL" "$SKIP"

@@ -26,7 +26,7 @@ if ([TcAuto.Inj]::Live) { Write-Output 'refusing to go on with Live set'; exit 1
 # ---- key table vs termcheck --list-items --------------------------------------------
 $table = Get-KeyTable
 $list = Get-ListItems
-Ok "--list-items gives 117 lines ($($list.Count))" ($list.Count -eq 117)
+Ok "--list-items gives 130 lines ($($list.Count))" ($list.Count -eq 130)
 $p = Test-KeyTable $table $list
 Ok 'every termcheck item has a table entry and every entry is an item' ($p.Count -eq 0) ($p -join '; ')
 Ok 'the table has no Alt+F4' (-not $table.Contains('Alt+F4'))
@@ -318,6 +318,38 @@ $txt = $out -join "`n"
 Ok 'pwsh -File with comma strings: both terminals planned, --only arrows,keypad' ($LASTEXITCODE -eq 0 -and $txt -match '=== wt \(dry run' -and $txt -match '=== conhost \(dry run' -and $txt -match '--only arrows,keypad') ($txt.Substring(0, [math]::Min(300, $txt.Length)))
 $out = & pwsh -NoProfile -File $driver -Terminals 'wt,xterm' 2>&1
 Ok 'pwsh -File with an unknown terminal in the comma string: refused' ($LASTEXITCODE -ne 0 -and ($out -join ' ') -match 'xterm')
+
+# ---- widths (kind info): nothing injected, the driver only waits for done -------------------------
+$info = @($list | Where-Object { ($_ -split "`t")[2] -eq 'info' })
+Ok "widths: 13 info items in --list-items ($($info.Count)), all in the widths group" ($info.Count -eq 13 -and @($info | Where-Object { ($_ -split "`t")[0] -ne 'widths' }).Count -eq 0)
+Ok 'widths: the group is known to -Groups' ($AllGroups -contains 'widths')
+$p = Test-KeyTable $table (@($list) + "widths`tNew-Sample`tinfo`tU+0041")
+Ok 'widths: an info item needs no table entry (no "no table entry" report)' ($p.Count -eq 0) ($p -join '; ')
+Set-InfoIds $list
+Ok "widths: Set-InfoIds finds the 13 info ids ($($InfoIds.Count))" ($InfoIds.Count -eq 13 -and $InfoIds.ContainsKey('Heart-VS16') -and -not $InfoIds.ContainsKey('Up'))
+$r = ConvertFrom-SyncLine 'done CJK INFO got 2 table 1'
+Ok 'sync: a widths done line: got and table' ($r.Result -eq 'INFO' -and $r.Got -eq 2 -and $r.TableW -eq 1 -and -not $r.NoReader -and -not $r.Skipped)
+$r = ConvertFrom-SyncLine 'done Emoji NONE no-reader table 2'
+Ok 'sync: a widths done line without the reader' ($r.Result -eq 'NONE' -and $r.NoReader -and $null -eq $r.Got -and $r.TableW -eq 2 -and -not $r.Skipped)
+[TcAuto.Inj]::Plan.Clear()
+$c3 = New-Ctx 'wt' $table ([IntPtr]::Zero) $null
+$t3 = [DateTime]::UtcNow
+[void](Step-SyncLine $c3 (ConvertFrom-SyncLine 'ready widths CJK'))
+$plan = @([TcAuto.Inj]::Plan) -join "`n"
+Ok 'widths: a ready line sends nothing and warns about nothing' ($plan -notmatch 'SendInput|WARN') $plan
+Ok 'widths: the plan says termcheck measures by itself' ($plan -match '\[CJK\] info item: nothing sent')
+Ok 'widths: the driver waits for done (Waiting set, the stall check counts from ready)' ($c3.Waiting -eq 'CJK' -and $null -ne $c3.ReadyAt -and $null -eq (Test-Stall $c3 $t3.AddSeconds(10) $t3 6) -and (Test-Stall $c3 $t3.AddSeconds(12) $t3 6).Result -eq 'STUCK')
+[void](Step-SyncLine $c3 (ConvertFrom-SyncLine 'done CJK INFO got 1 table 2'))
+$plan = @([TcAuto.Inj]::Plan) -join "`n"
+Ok 'widths: done is counted INFO and logged with both widths' ($c3.Counts['INFO'] -eq 1 -and $null -eq $c3.Waiting -and $plan -match 'CJK: INFO width: terminal 1 cell\(s\), fv table 2') $plan
+$sim = New-SimulatedSync $info 'wt'
+Ok 'widths: the simulated sync has ready + done INFO per item' ($sim.Count -eq 28 -and $sim -contains 'ready widths Keycap' -and $sim -contains 'done Keycap INFO got 2 table 2')
+$out = & pwsh -NoProfile -File $driver -Terminals mintty-git -Groups widths 2>&1
+$txt = $out -join "`n"
+Ok 'widths dry run: rc 0, --only widths' ($LASTEXITCODE -eq 0 -and $txt -match '--only widths') ($txt.Substring(0, [math]::Min(400, $txt.Length)))
+Ok 'widths dry run: 13 info items, nothing sent but Ctrl+C at the finish' (([regex]::Matches($txt, 'info item: nothing sent')).Count -eq 13 -and ([regex]::Matches($txt, '(?m)^SendInput\[')).Count -eq 1 -and $txt -match '\[finish\] Ctrl\+C #1') $txt
+Ok 'widths dry run: no "no table entry" warning' ($txt -notmatch 'no table entry')
+Ok 'widths dry run: results INFO=13' ($txt -match 'results: INFO=13; end: complete 130') $txt
 
 # ---- kill.sh against a real process tree (Git-bash; everything reaped) ----------------------------
 $kd = Join-Path $scratch 'kill'; $dd = Join-Path $scratch 'decoy'
