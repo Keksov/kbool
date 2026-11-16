@@ -1,25 +1,33 @@
 #!/usr/bin/env bash
-# tools/bench/bench.sh -- kklass call-path benchmarks, one or more kbool trees
-# side by side (A/B), every measurement in a fresh process (cases.sh).
+# tools/bench/bench.sh -- kklass call-path and kcl fv screen benchmarks, one or
+# more kbool trees side by side (A/B), every measurement in a fresh process
+# (cases.sh, fvcases.sh).
 #
 #   bash tools/bench/bench.sh [--rounds R] [--n N] [--out FILE] [--title T] \
 #        NAME=ROOT [NAME=ROOT...] -- SUITE...
 #
 # NAME=ROOT  a side: a label and a kbool tree (its kbool.sh is sourced; a
-#            `.bench_rev` file in ROOT, written by prepare.sh, names its kklass).
+#            `.bench_rev` file in ROOT, written by prepare.sh, names its kklass
+#            and its kcl).
 # SUITE      call  -- the call cases of cases.sh: per case and side the median
 #                     of R rounds (min-max), and every side's ratio to the first
 #            drift -- the drift cases: per case and side the median over R rounds
 #                     of the s.Short time before and after the stressor batches,
 #                     and their ratio (1.00 = no drift)
+#            fv    -- the screen actions of fvcases.sh (kcl/fv.video): per action
+#                     and side the median of R rounds in ms (min-max), and every
+#                     side's ratio to the first
+# --n N      calls (call, drift) or actions (fv) per measurement; default 2000
+#            for call and drift, 10 for fv.
 # Rounds interleave the sides (A B A B ...), so machine noise hits all sides alike.
 # Output: a Markdown report on stdout and in FILE. Plain bash, no tools but uname.
 set -u
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-ROUNDS=5 N=2000 OUT="" TITLE="kklass bench"
+ROUNDS=5 N="" OUT="" TITLE=""
 CALL_CASES=(plain call1 call14 long inherited nested prop newdel)
 DRIFT_CASES=(drift-short drift-helper drift-nest drift-up drift-newdel)
+FV_CASES=(fv-80 fv-200 fv-resize fv-wide-80 fv-wide-200)
 
 die() { echo "bench.sh: $*" >&2; exit 2; }
 
@@ -56,7 +64,7 @@ say() { REPORT+="$*"$'\n'; printf '%s\n' "$*"; }
 median() {
     local -a v=() s=()
     local x i j t
-    for x in "$@"; do v+=("${x/./}"); done
+    for x in "$@"; do v+=("$(( 10#${x/./} ))"); done
     s=("${v[@]}")
     for (( i = 1; i < ${#s[@]}; i++ )); do
         t=${s[i]}
@@ -79,50 +87,105 @@ if [[ -r /proc/cpuinfo ]]; then
         [[ $line == "model name"* ]] && { cpu=${line#*: }; break; }
     done < /proc/cpuinfo
 fi
+has_kk=0 has_fv=0
+for suite in "${SUITES[@]}"; do
+    case $suite in
+        call|drift) has_kk=1 ;;
+        fv) has_fv=1 ;;
+        *) die "unknown suite '$suite'" ;;
+    esac
+done
+if [[ -z $TITLE ]]; then
+    TITLE="kklass bench"
+    (( has_fv )) && TITLE="fv bench"
+    (( has_fv && has_kk )) && TITLE="kklass + fv bench"
+fi
 say "## $TITLE"
 say ""
 say '```'
 say "bash     $BASH_VERSION ($BASH)"
 say "system   $(uname -srm 2>/dev/null)"
 [[ -n $cpu ]] && say "cpu      $cpu"
-say "rounds   $ROUNDS, N=$N calls per measurement"
+(( has_kk )) && say "rounds   $ROUNDS, N=${N:-2000} calls per measurement"
+if (( has_fv && has_kk )); then say "fv       N=${N:-10} actions per measurement"
+elif (( has_fv )); then say "rounds   $ROUNDS, N=${N:-10} actions per measurement"; fi
 for (( k = 0; k < ${#NAMES[@]}; k++ )); do
-    rev="?"
-    [[ -r ${ROOTS[k]}/.bench_rev ]] && { IFS= read -r rev < "${ROOTS[k]}/.bench_rev" || true; }
-    say "side ${NAMES[k]}   kklass $rev"
+    revs=()
+    [[ -r ${ROOTS[k]}/.bench_rev ]] && { mapfile -t revs < "${ROOTS[k]}/.bench_rev" || true; }
+    # line 1: kklass; the lines after it name the other pinned submodules ("kcl ...")
+    say "side ${NAMES[k]}   kklass ${revs[0]:-?}"
+    for line in "${revs[@]:1}"; do say "side ${NAMES[k]}   $line"; done
 done
 say '```'
 
 declare -A VAL=()   # [case|side|label] = "v1 v2 ..."
+declare -A NOTE=()  # [side|text] = 1: the `# text` lines of fvcases.sh
+LABELS=()           # "case|label" in the order first seen (the fv table's rows)
+declare -A SEEN=()
 
-run_case() {  # SIDE-INDEX CASE
+run_case() {  # SIDE-INDEX CASE SCRIPT N
     local k=$1 c=$2 line out rc
-    out=$("$BASH" "$HERE/cases.sh" "${ROOTS[k]}" "$c" "$N" 2>&1)
+    out=$("$BASH" "$HERE/$3" "${ROOTS[k]}" "$c" "$4" 2>&1)
     rc=$?
     if (( rc != 0 )); then
         say "!! side ${NAMES[k]} case $c: rc $rc: ${out//$'\n'/ | }"
         return 1
     fi
     while IFS= read -r line; do
+        if [[ $line == '# '* ]]; then NOTE["${NAMES[k]}: ${line#\# }"]=1; continue; fi
         [[ $line == *' '[0-9]*.[0-9] ]] || continue
         VAL["$c|$k|${line% *}"]+="${line##* } "
+        if [[ -z ${SEEN["$c|${line% *}"]-} ]]; then SEEN["$c|${line% *}"]=1; LABELS+=("$c|${line% *}"); fi
     done <<< "$out"
 }
+# ms TENTHS-OF-US -> RESULT = milliseconds with two decimals
+ms() { printf -v RESULT '%d.%02d' $(( $1 / 10000 )) $(( $1 / 100 % 100 )); }
 
 for suite in "${SUITES[@]}"; do
     case $suite in
-        call)  cases=("${CALL_CASES[@]}") ;;
-        drift) cases=("${DRIFT_CASES[@]}") ;;
-        *) die "unknown suite '$suite'" ;;
+        call)  cases=("${CALL_CASES[@]}") script=cases.sh n=${N:-2000} ;;
+        drift) cases=("${DRIFT_CASES[@]}") script=cases.sh n=${N:-2000} ;;
+        fv)    cases=("${FV_CASES[@]}") script=fvcases.sh n=${N:-10} ;;
     esac
     for (( r = 1; r <= ROUNDS; r++ )); do
         for c in "${cases[@]}"; do
-            for (( k = 0; k < ${#NAMES[@]}; k++ )); do run_case "$k" "$c"; done
+            for (( k = 0; k < ${#NAMES[@]}; k++ )); do run_case "$k" "$c" "$script" "$n"; done
         done
     done
 
     say ""
-    if [[ $suite == call ]]; then
+    if [[ $suite == fv ]]; then
+        say "### fv: ms per action, median of $ROUNDS (min-max)"
+        say ""
+        hdr="| action |" sep="|---|"
+        for (( k = 0; k < ${#NAMES[@]}; k++ )); do hdr+=" ${NAMES[k]} |"; sep+="---|"; done
+        for (( k = 1; k < ${#NAMES[@]}; k++ )); do hdr+=" ${NAMES[k]}/${NAMES[0]} |"; sep+="---|"; done
+        say "$hdr"; say "$sep"
+        for key in "${LABELS[@]}"; do
+            c=${key%%|*}
+            [[ " ${cases[*]} " == *" $c "* ]] || continue
+            row="| ${key#*|} |"; meds=()
+            for (( k = 0; k < ${#NAMES[@]}; k++ )); do
+                # shellcheck disable=SC2086
+                set -- ${VAL[$c|$k|${key#*|}]-}
+                if (( $# )); then
+                    median "$@"; meds[k]=$RESULT
+                    ms "$RESULT"; m=$RESULT; ms "$MIN"; lo=$RESULT; ms "$MAX"; hi=$RESULT
+                    row+=" $m ($lo-$hi) |"
+                else row+=" - |"; meds[k]=0
+                fi
+            done
+            for (( k = 1; k < ${#NAMES[@]}; k++ )); do
+                if (( meds[k] )); then ratio "${meds[0]}" "${meds[k]}"; else RESULT="-"; fi
+                row+=" $RESULT |"
+            done
+            say "$row"
+        done
+        if (( ${#NOTE[@]} )); then
+            say ""
+            for key in "${!NOTE[@]}"; do say "- side $key"; done
+        fi
+    elif [[ $suite == call ]]; then
         say "### call: microseconds per call, median of $ROUNDS (min-max)"
         say ""
         hdr="| case |" sep="|---|"

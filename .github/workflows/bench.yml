@@ -1,8 +1,8 @@
-# kklass call-path benchmarks (tools/bench, the kklass speedup round K0) on GitHub
+# kklass call-path and kcl fv screen benchmarks (tools/bench) on GitHub
 # runners: Linux (host + containers: bash 5.1/5.2/5.3 on Alpine/musl, glibc distros),
 # macOS (Homebrew bash), Windows (Git-bash, MSYS2, Cygwin). FreeBSD is left out (its
 # VM adds noise and minutes; add a row when a result needs it).
-# Every row: tools/bench/prepare.sh builds the sides (kbool copies with kklass at the
+# Every row: tools/bench/prepare.sh builds the sides (kbool copies with kklass and/or kcl at the
 # refs of SIDES, optionally with a tools/bench/variants patch), tools/bench/bench.sh
 # measures them interleaved in fresh processes; the Markdown report goes to the step
 # summary and to the artifact bench-<group>-<slug>.
@@ -22,11 +22,11 @@ on:
         required: false
         default: ""
       sides:
-        description: "NAME=REF[+PATCH] ... (REF pointer = kbool's kklass pointer); empty: ci.conf"
+        description: "NAME=[SUB@]REF[+PATCH][,...] ... (SUB kklass or kcl; REF pointer = kbool's pointer); empty: ci.conf"
         required: false
         default: ""
       suites:
-        description: "call drift; empty: ci.conf"
+        description: "call drift fv; empty: ci.conf"
         required: false
         default: ""
       rounds:
