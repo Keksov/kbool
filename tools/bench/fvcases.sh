@@ -187,10 +187,13 @@ timed() {
 # cold: empty the caches initScreen keeps -- fv.video PRIVATE state, reached
 # into on purpose so that every timed paint is a first paint of the process:
 # the per-character class cache of the width walk (__FV_VS_CC) and the
-# 256 -> 16 colour map (__FV_VS_N16). Names a fv.video does not have are skipped.
+# 256 -> 16 colour map (__FV_VS_N16), and the default palette initScreen keeps
+# per process since fv P2 stage 2a (__FV_VS_CPAL / CSG16 / CSG256). Names a
+# fv.video does not have are skipped.
 cold() {
     if declare -p __FV_VS_CC >/dev/null 2>&1; then __FV_VS_CC=(); fi
     if declare -p __FV_VS_N16 >/dev/null 2>&1; then __FV_VS_N16=(); fi
+    if declare -p __FV_VS_CPAL >/dev/null 2>&1; then __FV_VS_CPAL='' __FV_VS_CSG16='' __FV_VS_CSG256=''; fi
 }
 # timed_cold LABEL COUNT CMD... : timed, with cold before each run (outside
 # the timed window)

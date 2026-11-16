@@ -63,7 +63,7 @@ selected row, and a status line (`writeCStr`).
 
 | action | what is timed (mean of N, one process) |
 |---|---|
-| `W.paint` | cold first paint: `initScreen` + the whole scene + `updateScreen`; initScreen empties the text caches, and before each run (untimed) the bench also empties the caches initScreen keeps — fv.video's private class cache `__FV_VS_CC` and 16-colour map `__FV_VS_N16` |
+| `W.paint` | cold first paint: `initScreen` + the whole scene + `updateScreen`; initScreen empties the text caches, and before each run (untimed) the bench also empties the caches initScreen keeps — fv.video's private class cache `__FV_VS_CC`, 16-colour map `__FV_VS_N16` and stored default palette `__FV_VS_CPAL` / `CSG16` / `CSG256` |
 | `W.down` | the selection one row down: 2 `writeBuf` + `updateScreen` (partial) |
 | `W.scroll` | the selection on the last row, the list moves one name: every row of the panel written again + `updateScreen` |
 | `W.tab` | the selection to the other panel: 2 `writeBuf` + `updateScreen` |
