@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tools/bench/bench.sh -- kklass call-path and kcl fv screen benchmarks, one or
 # more kbool trees side by side (A/B), every measurement in a fresh process
-# (cases.sh, fvcases.sh).
+# (cases.sh, fvcases.sh, fvviewcases.sh).
 #
 #   bash tools/bench/bench.sh [--rounds R] [--n N] [--out FILE] [--title T] \
 #        NAME=ROOT [NAME=ROOT...] -- SUITE...
@@ -17,8 +17,12 @@
 #            fv    -- the screen actions of fvcases.sh (kcl/fv.video): per action
 #                     and side the median of R rounds in ms (min-max), and every
 #                     side's ratio to the first
-# --n N      calls (call, drift) or actions (fv) per measurement; default 2000
-#            for call and drift, 10 for fv.
+#            fvviews -- the application actions of fvviewcases.sh (kcl fv.views,
+#                     fv.menus, fv.app: every action inside app.Run, keys from a
+#                     file), reported as fv; its `# calls` / `# writes` notes
+#                     follow the table
+# --n N      calls (call, drift) or actions (fv, fvviews) per measurement;
+#            default 2000 for call and drift, 10 for fv and fvviews.
 # Rounds interleave the sides (A B A B ...), so machine noise hits all sides alike.
 # Output: a Markdown report on stdout and in FILE. Plain bash, no tools but uname.
 set -u
@@ -28,6 +32,7 @@ ROUNDS=5 N="" OUT="" TITLE=""
 CALL_CASES=(plain call1 call14 long inherited nested prop newdel)
 DRIFT_CASES=(drift-short drift-helper drift-nest drift-up drift-newdel)
 FV_CASES=(fv-80 fv-200 fv-resize fv-wide-80 fv-wide-200)
+FVV_CASES=(views-80 views-200 views-overlap-80 views-resize views-p2-80)
 
 die() { echo "bench.sh: $*" >&2; exit 2; }
 
@@ -91,7 +96,7 @@ has_kk=0 has_fv=0
 for suite in "${SUITES[@]}"; do
     case $suite in
         call|drift) has_kk=1 ;;
-        fv) has_fv=1 ;;
+        fv|fvviews) has_fv=1 ;;
         *) die "unknown suite '$suite'" ;;
     esac
 done
@@ -119,7 +124,8 @@ done
 say '```'
 
 declare -A VAL=()   # [case|side|label] = "v1 v2 ..."
-declare -A NOTE=()  # [side|text] = 1: the `# text` lines of fvcases.sh
+declare -A NOTE=()  # [side: text] = 1: the `# text` lines of fvcases.sh / fvviewcases.sh
+NOTEL=()            # the same in the order first seen (per suite)
 LABELS=()           # "case|label" in the order first seen (the fv table's rows)
 declare -A SEEN=()
 
@@ -132,7 +138,10 @@ run_case() {  # SIDE-INDEX CASE SCRIPT N
         return 1
     fi
     while IFS= read -r line; do
-        if [[ $line == '# '* ]]; then NOTE["${NAMES[k]}: ${line#\# }"]=1; continue; fi
+        if [[ $line == '# '* ]]; then
+            if [[ -z ${NOTE["${NAMES[k]}: ${line#\# }"]-} ]]; then NOTE["${NAMES[k]}: ${line#\# }"]=1; NOTEL+=("${NAMES[k]}: ${line#\# }"); fi
+            continue
+        fi
         [[ $line == *' '[0-9]*.[0-9] ]] || continue
         VAL["$c|$k|${line% *}"]+="${line##* } "
         if [[ -z ${SEEN["$c|${line% *}"]-} ]]; then SEEN["$c|${line% *}"]=1; LABELS+=("$c|${line% *}"); fi
@@ -146,7 +155,9 @@ for suite in "${SUITES[@]}"; do
         call)  cases=("${CALL_CASES[@]}") script=cases.sh n=${N:-2000} ;;
         drift) cases=("${DRIFT_CASES[@]}") script=cases.sh n=${N:-2000} ;;
         fv)    cases=("${FV_CASES[@]}") script=fvcases.sh n=${N:-10} ;;
+        fvviews) cases=("${FVV_CASES[@]}") script=fvviewcases.sh n=${N:-10} ;;
     esac
+    NOTE=() NOTEL=()
     for (( r = 1; r <= ROUNDS; r++ )); do
         for c in "${cases[@]}"; do
             for (( k = 0; k < ${#NAMES[@]}; k++ )); do run_case "$k" "$c" "$script" "$n"; done
@@ -154,8 +165,8 @@ for suite in "${SUITES[@]}"; do
     done
 
     say ""
-    if [[ $suite == fv ]]; then
-        say "### fv: ms per action, median of $ROUNDS (min-max)"
+    if [[ $suite == fv || $suite == fvviews ]]; then
+        say "### $suite: ms per action, median of $ROUNDS (min-max)"
         say ""
         hdr="| action |" sep="|---|"
         for (( k = 0; k < ${#NAMES[@]}; k++ )); do hdr+=" ${NAMES[k]} |"; sep+="---|"; done
@@ -181,9 +192,9 @@ for suite in "${SUITES[@]}"; do
             done
             say "$row"
         done
-        if (( ${#NOTE[@]} )); then
+        if (( ${#NOTEL[@]} )); then
             say ""
-            for key in "${!NOTE[@]}"; do say "- side $key"; done
+            for key in "${NOTEL[@]}"; do say "- side $key"; done
         fi
     elif [[ $suite == call ]]; then
         say "### call: microseconds per call, median of $ROUNDS (min-max)"
