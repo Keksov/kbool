@@ -33,7 +33,7 @@ ROOT=$(cd "$HERE/../.." && pwd) || exit 1
 VER=16.0.0 UCD='' FETCH='' UNIT=$ROOT/kcl/fv.unicode/fv.unicode.sh OUT=unit AWKP=${AWK:-awk}
 FILES=(EastAsianWidth.txt UnicodeData.txt DerivedCoreProperties.txt HangulSyllableType.txt emoji-data.txt)
 
-usage() { sed -n '2,/^set -u/{/^set -u/d;s/^# \{0,1\}//;p}' "${BASH_SOURCE[0]}"; }
+usage() { sed -n '2,/^set -u/{/^set -u/d;s/^# \{0,1\}//;p;}' "${BASH_SOURCE[0]}"; }
 bad() { printf 'gen_width.sh: %s\n' "$1" >&2; exit 2; }
 fail() { printf 'gen_width.sh: %s\n' "$1" >&2; exit 1; }
 

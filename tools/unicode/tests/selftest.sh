@@ -38,6 +38,9 @@ PASS=0 FAIL=0 SKIP=0
 pass() { PASS=$(( PASS + 1 )); printf 'PASS: %s\n' "$1"; }
 fail() { FAIL=$(( FAIL + 1 )); printf 'FAIL: %s%s\n' "$1" "${2:+  -- $2}"; }
 skip() { SKIP=$(( SKIP + 1 )); printf 'SKIP: %s\n' "$1"; }
+# sedi EXPR FILE — FILE edited in place by sed EXPR (no `sed -i`: BSD and macOS
+# sed take the next word as a backup suffix)
+sedi() { sed "$1" "$2" > "$2.new" && mv -f "$2.new" "$2"; }
 
 # the fixtures' code points (hex) and their classes
 WANT='0041:n 00A9:x 00AA:n 00AD:n 0300:z 0488:z 0600:n 1100:w 115F:w 1160:z 11A7:z 11A8:z
@@ -167,11 +170,11 @@ expect 1 "bad code point range" "a malformed code point" --ucd "$TMP/part" "${V[
 cp "$FIX"/*.txt "$TMP/part/"; printf '# emoji-data.txt\n# Version: 1.2\n# only comments\n' > "$TMP/part/emoji-data.txt"
 expect 1 "none of the lines" "an input without data lines" --ucd "$TMP/part" "${V[@]}" --stdout
 expect 1 "not EastAsianWidth-1.2.4.txt" "inputs of another version than --version (first line)" --ucd "$FIX" --version 1.2.4 --stdout
-cp "$FIX"/*.txt "$TMP/part/"; sed -i '1s/.*/# HangulSyllableType.txt/' "$TMP/part/HangulSyllableType.txt"
+cp "$FIX"/*.txt "$TMP/part/"; sedi '1s/.*/# HangulSyllableType.txt/' "$TMP/part/HangulSyllableType.txt"
 expect 1 "names 'no version'" "a first line without the version" --ucd "$TMP/part" "${V[@]}" --stdout
-cp "$FIX"/*.txt "$TMP/part/"; sed -i 's/^# Version: 1.2$/# Version: 1.3/' "$TMP/part/emoji-data.txt"
+cp "$FIX"/*.txt "$TMP/part/"; sedi 's/^# Version: 1.2$/# Version: 1.3/' "$TMP/part/emoji-data.txt"
 expect 1 "says version '1.3', not 1.2" "emoji-data.txt of another version" --ucd "$TMP/part" "${V[@]}" --stdout
-cp "$FIX"/*.txt "$TMP/part/"; sed -i '/^# Version:/d' "$TMP/part/emoji-data.txt"
+cp "$FIX"/*.txt "$TMP/part/"; sedi '/^# Version:/d' "$TMP/part/emoji-data.txt"
 expect 1 "says version 'none'" "emoji-data.txt without a version line" --ucd "$TMP/part" "${V[@]}" --stdout
 printf 'x=1\n' > "$TMP/nm.sh"
 expect 1 "needs exactly one" "a unit without the markers" --ucd "$FIX" "${V[@]}" --unit "$TMP/nm.sh"
