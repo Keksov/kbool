@@ -10,9 +10,11 @@
 # override, calls inherited, as FV programs do; it also takes Ctrl+L as
 # "redraw everything"), the desktop, two TWindows side by side (each half the
 # screen wide, the desktop's height) with a TTestList list stand-in each (a
-# TView with TView's default EventMask: Draw = one writeBuf per visible row;
-# kbDown = two drawParts, the old and the new focused row; kbPgDn = a new
-# page and drawView), the status line (FV's StdStatusKeys). The overlap scene
+# TView with TView's default EventMask: Draw = one fv.views.writeLines call
+# for its visible rows, as P3's lists draw (kcl D21 stage E; a kcl without
+# writeLines: one writeLine per row, the old stand-in); kbDown = two
+# drawParts, the old and the new focused row; kbPgDn = a new page and
+# drawView), the status line (FV's StdStatusKeys). The overlap scene
 # puts the second window over half of the first. The P2 scene (D18's first
 # paint gate): the two windows of the tests (2 1 40 20, 30 5 70 22) with a
 # plain TView leaf each, no lists.
@@ -131,7 +133,35 @@ TTestList.HandleEvent() {
     fi
 }
 build TTestList
-# tlpaint V TOP FOCUSED -- rows FV_CLIP_Y1..Y2-1, one writeLine (writeBuf) each
+# tlpaint V TOP FOCUSED -- rows FV_CLIP_Y1..Y2-1 in one writeLines call (a single
+# row, kbDown's drawPart, with writeLine as a list's FocusItem repaint) (element
+# y = row y; one fv.video write per list); where the kcl has no writeLines
+# (before D21 stage E) the old stand-in, one writeLine (writeBuf) per row
+tlpaint() {
+    local -n __b_d=${1}_data
+    local y s a n=${FV_DRAW_PAL:5:1} f=${FV_DRAW_PAL:6:1} w=${__b_d[SizeX]:-0}
+    local -a tt=() aa=()
+    [[ -n $n ]] || n=${FV_DRAW_PAL:0:1}
+    [[ -n $f ]] || f=$n
+    if [[ -z ${TLA[$n$w]-} ]]; then printf -v a '%*s' "$w" ''; TLA[$n$w]=${a// /$n}; fi
+    if [[ -z ${TLA[$f$w]-} ]]; then printf -v a '%*s' "$w" ''; TLA[$f$w]=${a// /$f}; fi
+    if (( FV_CLIP_Y2 - FV_CLIP_Y1 == 1 )); then
+        # (one row, e.g. kbDown's drawPart: writeLine, as a list's FocusItem
+        # repaint does; writeLines pays ~50 us more for a single row)
+        y=$FV_CLIP_Y1
+        printf -v s '%-*s' "$w" " item $(( $2 + y ))"
+        if (( y == $3 )); then a=${TLA[$f$w]}; else a=${TLA[$n$w]}; fi
+        fv.views.writeLine 0 "$y" 1 "${s:0:w}" "$a"
+        return
+    fi
+    for (( y = FV_CLIP_Y1; y < FV_CLIP_Y2; y++ )); do
+        printf -v s '%-*s' "$w" " item $(( $2 + y ))"
+        tt[y]=${s:0:w}
+        if (( y == $3 )); then aa[y]=${TLA[$f$w]}; else aa[y]=${TLA[$n$w]}; fi
+    done
+    fv.views.writeLines 0 0 tt aa
+}
+if ! declare -F fv.views.writeLines >/dev/null; then
 tlpaint() {
     local -n __b_d=${1}_data
     local y s a n=${FV_DRAW_PAL:5:1} f=${FV_DRAW_PAL:6:1} w=${__b_d[SizeX]:-0}
@@ -145,6 +175,7 @@ tlpaint() {
         fv.views.writeLine 0 "$y" 1 "${s:0:w}" "$a"
     done
 }
+fi
 
 # win NAME AX AY BX BY TITLE NUM [LEAFCLASS] -- a TWindow with a selectable
 # leaf (default TTestList) over its interior, following it on a resize
@@ -172,7 +203,7 @@ scene() {
 # ---- the counters (kcl/fv.views/tests/fvw_testlib.sh's shims) ---------------
 CALLS=0 WRITES=0
 DISPATCHERS=(kk._exec kk._call kk._parent kk._constructor_exec)
-WRITERS=(fv.video.writeStr fv.video.writeBuf fv.video.writeCStr fv.video.writeChar fv.video.fillRect fv.video.shadeRect fv.video.fillColumns fv.video._shadef fv.video._wstr fv.video._fcf fv.video._wbf)
+WRITERS=(fv.video.writeStr fv.video.writeBuf fv.video.writeCStr fv.video.writeChar fv.video.fillRect fv.video.shadeRect fv.video.fillColumns fv.video._shadef fv.video._wstr fv.video._fcf fv.video._wbf fv.video._wrows)
 wrap() {
     local c=$1 f src
     shift

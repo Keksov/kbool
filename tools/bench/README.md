@@ -104,8 +104,10 @@ The scene is the P2 design's (§3.1): `TMyApp` (a `TApplication` whose
 Ctrl+L as "redraw everything"), the desktop, two windows side by side (half
 the screen wide, the desktop's height), each with a list stand-in
 `TTestList` (a `TView` with TView's default `EventMask`: `Draw` = one
-`writeBuf` per visible row, kbDown = two `drawPart`s, kbPgDn = a new page and
-`drawView`), and the status line. **Every action runs inside `app.Run`**: its
+`fv.views.writeLines` call for its visible rows, as kcl P3's lists draw;
+kbDown = two `drawPart`s, kbPgDn = a new page and `drawView`), and the status
+line. A kcl without `writeLines` (before kcl fv D21 stage E) gets the old
+stand-in, one `writeLine` per row. **Every action runs inside `app.Run`**: its
 keys (xterm bytes, SGR mouse reports) are written to a file read through
 `FV_KEY_FD` and `fv.drivers.getEvent`, as a program reads its terminal. One
 measurement is one Run over the action's keys repeated N times, minus a Run
@@ -134,7 +136,11 @@ timing each action runs once with kklass's dispatchers and fv.video's writes
 wrapped in counting shims (as `kcl/fv.views/tests/fvw_testlib.sh` does), and
 its effect is checked (the focused row moved, the other window focused, the
 bounds changed, ...): the report lists `# calls ACTION N` and `# writes
-ACTION N` per side under the table; an error output, a missing effect or a
+ACTION N` per side under the table (`# writes` counts one write per list a
+Draw paints since D21 stage E — `fv.video._wrows`, the call under
+`writeLines` — where the old stand-in counted one per row: at 80×24 paint /
+redraw 49 → 9, pgdn 21 → 1, move 27 → 7; at 200×50 paint / redraw 101 → 9,
+pgdn 47 → 1; `# calls` unchanged); an error output, a missing effect or a
 Run ended by the end of input stops the case (rc 3, `!!` in the report).
 Keys waiting in a file leave no idle tick between them, so the Idle work a
 window switch causes at the terminal's next pause (the `cmCommandSetChanged`
