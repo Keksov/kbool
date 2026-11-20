@@ -1,0 +1,65 @@
+// fixture: a Russian-like file. Exercises: the default section not first,
+// a hidden common section, include with a variant, keysym names, U+ and
+// 0x100 keysyms, `any` and NoSymbol (keep a level), an override of one key,
+// a `#` comment, a multi-line key, symbols[Group1]= and type= forms, two
+// groups (only the first counts), a character met twice (first key wins),
+// the Lat* aliases, an augment include and a replace key.
+
+hidden partial alphanumeric_keys
+xkb_symbols "common" {
+    key <TLDE> {[ Cyrillic_io, Cyrillic_IO ]};
+    key <AD01> {[ Cyrillic_shorti, Cyrillic_SHORTI ]};
+    key <AD02> {[ U0446, U0426 ]};                      # tse by code point
+    key <AC04> {[ 0x1000430, 0x1000410 ]};              // a by 0x100 keysym
+    key <AC10> {[ Cyrillic_zhe, Cyrillic_ZHE ]};
+    key <AB02> {
+        type[Group1] = "ALPHABETIC",
+        [ Cyrillic_che, Cyrillic_CHE ]
+    };
+    key <AB08> { symbols[Group1] = [ Cyrillic_be, Cyrillic_BE ] };
+    key <AB09> {[ Cyrillic_yu, Cyrillic_YU ], [ x, X ]};
+    key <AE03> {[ 3, numerosign ]};
+};
+
+default partial alphanumeric_keys
+xkb_symbols "winkeys" {
+    include "ru(common)"
+    name[Group1]= "Russian";
+    key <AE03> {[ any, NoSymbol ]};                     // keeps 3 / numerosign
+    key <AB10> {[ period, comma ]};
+};
+
+partial alphanumeric_keys
+xkb_symbols "phonetic" {
+    include "ru(common)"
+    name[Group1]= "Russian (phonetic)";
+    key <LatQ> {[ Cyrillic_ya, Cyrillic_YA ]};
+    key <LatF> {[ Cyrillic_ef, Cyrillic_EF ]};
+    key <AC04> {[ Cyrillic_ef, Cyrillic_EF ]};          // the same key twice: one entry
+    key <LatA> {[ Cyrillic_a, Cyrillic_A ]};
+    key <AC12> {[ Cyrillic_e, Cyrillic_E ]};            // the BKSL alias
+    key <AD08> {[ Cyrillic_a, Cyrillic_A ]};            // а again: AD08 comes before AC01 in the key order: i wins
+    key <AD03> {[ Cyrillic_ie, Cyrillic_IE ]};
+    key <AD04> {[ Cyrillic_er, Cyrillic_ER ]};
+    key <AD05> {[ Cyrillic_te, Cyrillic_TE ]};
+    key <AD06> {[ Cyrillic_yeru, Cyrillic_YERU ]};
+    key <AD07> {[ Cyrillic_u, Cyrillic_U ]};
+    key <AD09> {[ Cyrillic_o, Cyrillic_O ]};
+    key <AD10> {[ Cyrillic_pe, Cyrillic_PE ]};
+};
+
+partial alphanumeric_keys
+xkb_symbols "aug" {
+    include "ru(winkeys)|ru(phonetic)"
+    replace key <AD01> {[ NoSymbol, NoSymbol ]};        // emptied
+};
+
+partial alphanumeric_keys
+xkb_symbols "broken" {
+    include "ru(winkeys)+nosuchfile(x)"
+};
+
+partial modifier_keys
+xkb_symbols "notalayout" {
+    key <AD05> {[ Cyrillic_ha ]};
+};

@@ -1,0 +1,22 @@
+// fixture: Greek. The default section includes another one and keeps its
+// levels with `any`; an override include; a level-2 character on two keys.
+
+default partial alphanumeric_keys
+xkb_symbols "basic" {
+    include "gr(simple)"
+    key <AC04> {[ any, any, ae, AE ]};
+    override "gr(extra)"
+};
+
+partial alphanumeric_keys
+xkb_symbols "simple" {
+    key <AD02> {[ Greek_finalsmallsigma, Greek_SIGMA ]};
+    key <AC02> {[ Greek_sigma, Greek_SIGMA ]};
+    key <AC04> {[ Greek_phi, Greek_PHI ]};
+    key <AD05> {[ Greek_tau, Greek_TAU ]};
+};
+
+hidden partial alphanumeric_keys
+xkb_symbols "extra" {
+    key <AD05> {[ Greek_theta, Greek_THETA ]};
+};
