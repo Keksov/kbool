@@ -37,6 +37,12 @@
 #   W.redraw     Ctrl+L -> fv.views.redraw $FV_APP (every cell sent again)
 #   W.down       kbDown to the focused stand-in (2 rows)
 #   W.pgdn       kbPgDn (every row of the stand-in, new texts)
+#   W.pgdn-cyr   the same with Cyrillic names (`Отчёт_квартал_N.txt   SIZE`),
+#   W.pgdn-cjk   or 4 CJK characters + `_N.txt   SIZE`, padded to the row's
+#                cells (kcl fv P3 design §8.2's fresh pages): every PgDn shows
+#                rows fv.video's text cache never saw (P3 levers 10.11 /
+#                10.12). Measured after every other action of the case (their
+#                numbers stay comparable with older runs)
 #   W.tab        F6 -> the status line -> cmNext -> the other window
 #   W.tab-in     kbTab between two controls inside the focused window (a
 #                second, one-row stand-in is inserted for this action only)
@@ -53,7 +59,8 @@
 #                one resize per Run
 # CASE:
 #   views-80, views-200  paint, paint+init, redraw, down, pgdn, tab, tab-in,
-#                        click, move, grow (80x24 / 200x50)
+#                        click, move, grow, pgdn-cyr, pgdn-cjk (80x24 /
+#                        200x50)
 #   views-overlap-80     overlap.80x24.tab, .click, .move
 #   views-resize         resize.80x24-200x50, resize.200x50-80x24
 #   views-p2-80          p2.80x24.paint, p2.80x24.paint+init
@@ -176,6 +183,62 @@ tlpaint() {
     done
 }
 fi
+# tlpaintk V TOP FOCUSED -- tlpaint with non-ASCII names (TLKIND cyr / cjk: the
+# pgdn-cyr / pgdn-cjk actions, which put it in tlpaint's place): row I is
+# `Отчёт_квартал_I.txt   SIZE` or 4 CJK characters + `_I.txt   SIZE`, padded
+# with blanks to the row's W cells (a CJK character takes 2; padded by
+# characters, not by printf, which pads by bytes in some bashes)
+TLKIND=cyr
+TLCJ='报告文件数据项目系统管理用户设置网络服务图像音乐视频文档表格演示代码测试结果版本历史记录备份恢复安全权限日志配置'
+printf -v TLB '%*s' 1100 ''
+# (fv.video's UTF-8 locale, found at its load; '' = none on this host: the two
+# actions are left out with a note)
+TLLOC=${__FV_VS_LOC:-}
+tlpaintk() {
+    local -n __b_d=${1}_data
+    local y a n=${FV_DRAW_PAL:5:1} f=${FV_DRAW_PAL:6:1} w=${__b_d[SizeX]:-0}
+    local -a tt=() aa=()
+    [[ -n $n ]] || n=${FV_DRAW_PAL:0:1}
+    [[ -n $f ]] || f=$n
+    if [[ -z ${TLA[$n$w]-} ]]; then printf -v a '%*s' "$w" ''; TLA[$n$w]=${a// /$n}; fi
+    if [[ -z ${TLA[$f$w]-} ]]; then printf -v a '%*s' "$w" ''; TLA[$f$w]=${a// /$f}; fi
+    tlrowsk "$2" "$3"
+    # (a refused row would time the refusal: the check pass reports it)
+    if (( FV_CLIP_Y2 - FV_CLIP_Y1 == 1 )) || ! declare -F fv.views.writeLines >/dev/null; then
+        for y in "${!tt[@]}"; do fv.views.writeLine 0 "$y" 1 "${tt[y]}" "${aa[y]}" || FAIL+=" [tlpaintk: writeLine rc $?]"; done
+        return
+    fi
+    fv.views.writeLines 0 0 tt aa || FAIL+=" [tlpaintk: writeLines rc $?]"
+}
+# tlrowsk TOP FOCUSED -- tlpaintk's rows (its tt, aa, w, n, f), built in a
+# UTF-8 locale whatever the caller's (characters, not bytes; critic 3a-1 M2:
+# a C locale built broken rows that writeLines refused); in ASCII mode a CJK
+# character is one cell, as fv.video counts it there
+tlrowsk() {
+    local LC_ALL=$TLLOC
+    # (a separate local: in one, ${#TLCJ} is taken before the locale switch)
+    local s i c k l=${#TLCJ}
+    for (( y = FV_CLIP_Y1; y < FV_CLIP_Y2; y++ )); do
+        i=$(( $1 + y ))
+        if [[ $TLKIND == cjk ]]; then
+            c=${TLCJ:i % l:1}${TLCJ:i * 7 % l:1}${TLCJ:i * 13 % l:1}${TLCJ:i * 29 % l:1}
+            s=" ${c}_$i.txt   $(( i * 37 % 100000 ))" k=$(( w - 4 ))
+            if (( ${FV_VIDEO_ASCII:-0} )); then k=$w; fi
+        else
+            s=" Отчёт_квартал_$i.txt   $(( i * 37 % 100000 ))" k=$w
+        fi
+        if (( ${#s} < k )); then s+=${TLB:0:k-${#s}}; else s=${s:0:k}; fi
+        tt[y]=$s
+        if (( y == $2 )); then aa[y]=${TLA[$f$w]}; else aa[y]=${TLA[$n$w]}; fi
+    done
+}
+TLP0=$(declare -f tlpaint)
+# tlkind ascii|cyr|cjk -- the stand-in's names from now on
+tlkind() {
+    if [[ $1 == ascii ]]; then eval "$TLP0"; return; fi
+    TLKIND=$1
+    tlpaint() { tlpaintk "$@"; }
+}
 
 # win NAME AX AY BX BY TITLE NUM [LEAFCLASS] -- a TWindow with a selectable
 # leaf (default TTestList) over its interior, following it on a resize
@@ -203,7 +266,7 @@ scene() {
 # ---- the counters (kcl/fv.views/tests/fvw_testlib.sh's shims) ---------------
 CALLS=0 WRITES=0
 DISPATCHERS=(kk._exec kk._call kk._parent kk._constructor_exec)
-WRITERS=(fv.video.writeStr fv.video.writeBuf fv.video.writeCStr fv.video.writeChar fv.video.fillRect fv.video.shadeRect fv.video.fillColumns fv.video._shadef fv.video._wstr fv.video._fcf fv.video._wbf fv.video._wrows)
+WRITERS=(fv.video.writeStr fv.video.writeBuf fv.video.writeCStr fv.video.writeChar fv.video.fillRect fv.video.shadeRect fv.video.fillColumns fv.video._shadef fv.video._wstr fv.video._fcf fv.video._wbf fv.video._wrows fv.video._wrowsu)
 wrap() {
     local c=$1 f src
     shift
@@ -379,6 +442,27 @@ case $CASE in
         timed "$L.click" '' "$c1" "$c2" ''
         timed "$L.move" "$K_RESIZE" "$K_RIGHT" "$K_LEFT" "$K_ENTER"
         timed "$L.grow" "$K_RESIZE" "$K_SRIGHT" "$K_SLEFT" "$K_ENTER"
+        # (the fresh non-ASCII pages, last, counts and times: every other
+        # action ran exactly as before these two existed; the stand-in's names
+        # change for these two only, in the scene of W.pgdn: the second window
+        # current, no w2b; its rows go on past every row shown before)
+        if [[ -n $TLLOC ]]; then
+            run "$c2"; app.Idle
+            tlkind cyr
+            count "$L.pgdn-cyr" '' "$K_PGDN" '' '' top $(( ${w2l_data[Top]:-0} + H - 3 ))
+            tlkind cjk
+            count "$L.pgdn-cjk" '' "$K_PGDN" '' '' top $(( ${w2l_data[Top]:-0} + H - 3 ))
+            tlkind ascii
+            if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+            tlkind cyr
+            timed "$L.pgdn-cyr" '' "$K_PGDN" "$K_PGDN" ''
+            tlkind cjk
+            timed "$L.pgdn-cjk" '' "$K_PGDN" "$K_PGDN" ''
+            tlkind ascii
+            if [[ -n $FAIL ]]; then echo "fvviewcases.sh: $CASE: the timed pgdn-cyr / pgdn-cjk failed:$FAIL" >&3; exit 3; fi
+        else
+            echo "# note: no UTF-8 locale on this host: $L.pgdn-cyr and $L.pgdn-cjk not measured"
+        fi
         ;;
     views-overlap-80)
         L=overlap.${W}x$H

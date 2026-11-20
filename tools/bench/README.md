@@ -126,6 +126,7 @@ N.
 | `W.click` | a mouse press + release on the other window, alternately on each |
 | `W.move` | one keyboard drag step: Ctrl+F5 (`cmResize`) once, then Right / Left alternately, Enter after. A mouse drag read from a file is not measured per step: fv.views drains the waiting moves and draws the last (design R10) |
 | `W.grow` | the same with Shift+Right / Shift+Left |
+| `W.pgdn-cyr`, `W.pgdn-cjk` | `W.pgdn` with non-ASCII names on fresh pages (kcl fv P3 design §8.2): `Отчёт_квартал_N.txt   SIZE`, or 4 CJK characters + `_N.txt   SIZE`, padded with blanks to the row's cells; every PgDn shows rows fv.video's text cache never saw (the P3 levers 10.11 / 10.12). Timed after every other action of the case, so that theirs stay comparable with runs from before these two |
 | `overlap.80x24.*` | `tab`, `click`, `move` with the second window over half of the first (the window brought to the front is repainted whole) |
 | `resize.A-B` | `cmResizeApp` 80×24 ↔ 200×50 through the real event path: fv.video's resize flag set before the Run, its size source `fv.video.querySize` overridden (the documented hook), one resize per Run |
 | `p2.80x24.paint`, `.paint+init` | the P2 scene of D18's first-paint gate: the tests' two overlapping windows (2 1 40 20, 30 5 70 22) with a plain `TView` leaf each, no lists |
@@ -140,7 +141,9 @@ ACTION N` per side under the table (`# writes` counts one write per list a
 Draw paints since D21 stage E — `fv.video._wrows`, the call under
 `writeLines` — where the old stand-in counted one per row: at 80×24 paint /
 redraw 49 → 9, pgdn 21 → 1, move 27 → 7; at 200×50 paint / redraw 101 → 9,
-pgdn 47 → 1; `# calls` unchanged); an error output, a missing effect or a
+pgdn 47 → 1; `# calls` unchanged; `pgdn-cyr` / `pgdn-cjk` count 1 write
+since kcl fv P3 stage 3a-1, where an older kcl adds one `writeBuf` per fresh
+non-ASCII row); an error output, a missing effect or a
 Run ended by the end of input stops the case (rc 3, `!!` in the report).
 Keys waiting in a file leave no idle tick between them, so the Idle work a
 window switch causes at the terminal's next pause (the `cmCommandSetChanged`
