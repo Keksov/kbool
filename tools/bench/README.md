@@ -139,12 +139,17 @@ N.
 | `W.list.pgdn-marks` | prefix F11, PgDn (ascii) with every other item marked (`Marks`, D26: read inline; design §5 wants ≤ 1.05 × `list.pgdn.ascii`) |
 | `W.standin.down`, `W.standin.pgdn` | after F6 (untimed) to the stand-in window: its Down / PgDn, the D21 numbers in the list's process (the design's same-process calibration) |
 | `W.standin.pgdn-cjk` | the stand-in's PgDn while the list beside it shows the `cjk` names (kcl P3 3v): the stand-in's rows share the screen rows with wide cells, so its writes and the frame take the wide paths (needs a UTF-8 locale, as `cyr` / `cjk`) |
-| `dlg.80x24.open-close` | kcl P3 stage 3c's dialog scene (design P3 §8.3, §9.2): the `views-80` scene with `TDlgApp` (as `TMyApp`; F2 runs the pre-built test dialog modally in the desktop, F3 the pre-built paint dialog, F4 builds the 8-control dialog, runs it and destroys it). The test dialog is 60 × 14: a static text, two labels, check boxes (3), radio buttons (2), OK (default), Cancel, Help — the design's 8-control dialog with a static text and radio buttons in the input lines' place until 3d. `open-close`: F2 + Ctrl+F4 (cmCancel), the pre-built dialog opened and closed |
+| `dlg.80x24.open-close` | kcl P3 stage 3c's dialog scene (design P3 §8.3, §9.2): the `views-80` scene with `TDlgApp` (as `TMyApp`; F2 runs the pre-built test dialog modally in the desktop, F3 the pre-built paint dialog, F4 builds the 8-control dialog, runs it and destroys it). The test dialog is 60 × 14, the design's 8-control dialog: two input lines (MaxLen 255) with their labels, check boxes (3), OK (default), Cancel, Help (kcl P3 3d; before 3d a static text and radio buttons stood in the input lines' places: the row names stayed, the numbers are not comparable across that change). `open-close`: F2 + Ctrl+F4 (cmCancel), the pre-built dialog opened and closed |
 | `dlg.80x24.tab` | prefix F2, Tab between the dialog's controls (the focus, the labels' Light, the default button's look), suffix Ctrl+F4 |
 | `dlg.80x24.key` | prefix F2, a plain key nobody takes (`x`: the focused check boxes have no `x` item, the labels and buttons are skipped by the hot-key map), suffix Ctrl+F4 |
 | `dlg.80x24.fkey` | the same with F9 (no hot letter at all: every mapped control skipped) |
 | `dlg.80x24.paint` | prefix F3, F3 inside the paint dialog (a `TDialog` class whose `HandleEvent` override draws it on F3: `drawView`, the dialog's full draw), suffix Ctrl+F4 |
 | `dlg.80x24.build-run-destroy` | F4 + Ctrl+F4: the 8-control dialog built (9 objects), run, closed and destroyed |
+| `dlg.80x24.type` | kcl P3 3d (design P3 §8.3's typing rows): prefix F2 with the first input line the dialog's Current, typing `a` / `b`, suffix Ctrl+F4. The line's text is selected as the dialog opens (FV's SelectAll on focus), so each Run's first key replaces it. `# calls` 0, `# writes` 1 (one `writeLine` per key) |
+| `dlg.80x24.type-cyr` / `type-cjk` | the same with `ж` / `ы` and `中` / `文` (a UTF-8 locale needed; none: a note, no rows) |
+| `dlg.80x24.type-back` | prefix F2, `a` and Backspace alternately |
+| `dlg.80x24.type-scrolled` | prefix F2 + End over a 70-character line (set before each measurement): typing `a` / `b` into a scrolled line |
+| `dlg.80x24.shift-left` | the same line: Shift+Left, extending the selection (`# writes` 1) |
 | `paint.80x24.paint`, `.paint+init` | the two-panel scene with a real list in each window (60 000 items, standard bars; the inactive panel's bar hidden: FV ShowSBar) at 80×24: **F-1's P3 number** (design §8.5, D31: ≤ 15 ms on CI; `p2.80x24.paint` with the stand-ins is the "today" number) |
 | `paint.200x50.paint`, `.paint+init` | the same scene at 200×50 |
 
@@ -156,7 +161,8 @@ and `views-paint-80` / `views-paint` (`paint.80x24.*` / `paint.200x50.*`),
 and (kcl P3 3c) `views-dialog-80` (`dlg.80x24.*`).
 A kcl without `TListViewer` (before P3 3b) prints a note
 and no rows for those four; a kcl without `fv.dialogs` (before P3 3c) a
-note and no rows for `views-dialog-80`. The list actions' check pass counts what follows
+note and no rows for `views-dialog-80`; a kcl without `TInputLine` (before
+P3 3d) no typing rows. The list actions' check pass counts what follows
 the prefix only (F12 / F11 zero the counters: the jump's own draws differ
 from run to run, the bar's indicator moving or not). Before the
 timing each action runs once with kklass's dispatchers and fv.video's writes
