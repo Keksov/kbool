@@ -57,6 +57,36 @@
 #                fv.video's resize flag set before the Run and the size source
 #                fv.video.querySize overridden (fv.video's documented hook),
 #                one resize per Run
+# The list scene (kcl P3 stage 3b, design P3 §8, §9.2): the application
+# TListApp (as TMyApp, and F12 / F11 move the list to a FRESH page: TopItem
+# 400 items further than before, the focus on its top / bottom row — the
+# rows fv.video's text cache never saw, design H1), the left half a TWindow
+# with a TListViewer of 60 000 items and its standard vertical bar (FV's
+# file panel; the list's palette in a plain window, D25), the right half the
+# stand-in window (TTestList) as in views-80. KIND = the names: ascii
+# `file_report_N.txt   4096`, cyr `Отчёт_квартал_N.txt   4096`, cjk 4 CJK
+# characters + `_N.txt   4096` (narrow / wide fresh rows: P3 10.11 / 10.12):
+#   W.list.down.KIND       PREFIX F12, Down inside the page (rule 4: one
+#                          drawPart over the two rows)
+#   W.list.down-edge.KIND  PREFIX F11, Down at the bottom row: a scroll by one
+#                          (one fresh row, the bar's indicator when it moves)
+#   W.list.pgdn.KIND       PREFIX F11, PgDn: every page fresh
+#   W.list.wheel.KIND      PREFIX F12, a wheel-down report over the list (a
+#                          scroll by one)
+#   W.list.click.KIND      PREFIX F12, a press + release on row 3 / row 8
+#                          alternately
+#   W.list.end-home.KIND   End / Home alternately (cached pages)
+#   W.list.pgdn-marks      PREFIX F11, PgDn with every other item marked
+#                          (Marks, D26: read inline, design §5: <= 1.05x)
+#   W.standin.down, W.standin.pgdn
+#                          F6 to the stand-in window first (untimed), then its
+#                          Down / PgDn: the D21 numbers in the same process
+#   paint.W.paint, paint.W.paint+init
+#                          (views-paint-80, views-paint) the two-panel scene
+#                          with a real list
+#                          in each window, the inactive one's bar hidden (FV
+#                          ShowSBar): F-1's P3 number (D31: 80x24, <= 15 ms on
+#                          CI; p2.80x24.paint is the stand-ins' "today")
 # CASE:
 #   views-80, views-200  paint, paint+init, redraw, down, pgdn, tab, tab-in,
 #                        click, move, grow, pgdn-cyr, pgdn-cjk (80x24 /
@@ -64,6 +94,11 @@
 #   views-overlap-80     overlap.80x24.tab, .click, .move
 #   views-resize         resize.80x24-200x50, resize.200x50-80x24
 #   views-p2-80          p2.80x24.paint, p2.80x24.paint+init
+#   views-list-80, views-list-200
+#                        the list scene's actions (80x24 / 200x50); a kcl
+#                        without TListViewer (before P3 3b): a note, no rows
+#   views-paint-80       paint.80x24.paint, paint.80x24.paint+init
+#   views-paint          paint.200x50.paint, paint.200x50.paint+init
 # N (default 10) = actions per measurement. Before the timing every action runs
 # once with the dispatch and write counters on (kklass's dispatchers and
 # fv.video's writes wrapped in counting shims, as kcl/fv.views/tests'
@@ -86,11 +121,15 @@ source "$ROOT/kbool.sh" || exit 2
 kk.uses fv.app || exit 2
 
 case $CASE in
-    views-80|views-overlap-80|views-p2-80) W=80 H=24 ;;
-    views-200) W=200 H=50 ;;
+    views-80|views-overlap-80|views-p2-80|views-list-80|views-paint-80) W=80 H=24 ;;
+    views-200|views-list-200|views-paint) W=200 H=50 ;;
     views-resize) W=80 H=24 ;;
     *) echo "fvviewcases.sh: unknown case '$CASE'" >&2; exit 2 ;;
 esac
+if [[ $CASE == views-list-* || $CASE == views-paint* ]] && ! declare -F TListViewer.new >/dev/null; then
+    echo "# note: no TListViewer in this kcl (before P3 3b): $CASE not measured"
+    exit 0
+fi
 
 exec {OUTFD}>/dev/null
 FV_VIDEO_OUT_FD=$OUTFD FV_APP_HEADLESS=1
@@ -111,6 +150,54 @@ TMyApp.HandleEvent() {
     fi
 }
 build TMyApp
+
+# (P3 3b) the list scene's application: TMyApp's Ctrl+L, and F12 / F11: the
+# list w1l on a fresh page (fresh)
+class TListApp : TApplication
+    public
+        override proc HandleEvent
+end
+TListApp.HandleEvent() {
+    inherited HandleEvent "$@"
+    if [ "$FV_EV_WHAT" = evKeyDown ]; then
+        if [ "$FV_EV_KEY" = kbCtrlL ]; then fv.views.redraw "$FV_APP"; fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF12 ] || [ "$FV_EV_KEY" = kbF11 ]; then fresh "$FV_EV_KEY"; fv.views.clearEvent "$this"; fi
+    fi
+}
+build TListApp
+# fresh KEY -- w1l's TopItem 400 items further (FRESH_T; wrapping before the
+# last 1000), the focus on that page's top row (kbF12) or bottom row (kbF11)
+FRESH_T=0
+fresh() {
+    local -n __b_l=w1l_data
+    local t=$(( (${__b_l[TopItem]:-0} + 400) % (${__b_l[Range]:-1001} - 1000) ))
+    FRESH_T=$t
+    if [ "$1" = kbF11 ]; then __b_l[Focused]=$(( t + ${__b_l[SizeY]:-1} - 1 )); else __b_l[Focused]=$t; fi
+    fv.views.listSetTopItem w1l "$t"
+    # (the check pass counts what follows the prefix only: the jump's own
+    # draws differ from run to run, the bar's indicator moving or not)
+    CALLS=0 WRITES=0
+}
+# listdata [ascii] -- the 60 000 names of each kind: LA, LC, LJ (header)
+listdata() {
+    LA=("file_report_"{0..59999}".txt   4096")
+    [[ ${1-} == ascii ]] && return 0
+    LC=("Отчёт_квартал_"{0..59999}".txt   4096")
+    LJ=({报,告,文,件,数,据,项,目,系,统}{管,理,用,户,设,置,网,络,服,务}{图,像,音,乐,视,频,文,档,表,格}{演,示,代,码,测,试,结,果,版,本}_{0..5}.txt)
+    LJ=("${LJ[@]/%/   4096}")
+}
+# lwin NAME AX AY BX BY TITLE NUM ARRAY -- a TWindow with a TListViewer over
+# ARRAY on its interior and the standard vertical bar (FV's file panel)
+lwin() {
+    TWindow.new "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+    fv.views.standardScrollBar "$1" "$FV_SB_VERTICAL"
+    TListViewer.new "${1}l" 1 1 $(( $4 - $2 - 1 )) $(( $5 - $3 - 1 )) 1 '' "$RESULT"
+    local -n __b_l=${1}l_data __b_a=$8
+    __b_l[GrowMode]=$(( FV_GF_GROWHIX | FV_GF_GROWHIY )) __b_l[List]=$8
+    fv.views.listSetRange "${1}l" "${#__b_a[@]}"
+    fv.views.insert "$1" "${1}l"
+    fv.views.insert "$FV_DESKTOP" "$1"
+}
 
 declare -A TLA=()
 class TTestList : TView
@@ -254,12 +341,17 @@ win() {
 # scene side|overlap|p2 -- the application at W x H (not drawn yet)
 scene() {
     FV_SCREEN_W=$W FV_SCREEN_H=$H
-    TMyApp.new app || exit 2
+    local cls=TMyApp
+    if [ "$1" = list ]; then cls=TListApp; fi
+    "$cls.new" app || exit 2
     local hw=$(( W / 2 )) wh=$(( H - 1 ))
     case $1 in
         side)    win w1 0 0 "$hw" "$wh" 'Files' 1; win w2 "$hw" 0 "$W" "$wh" 'Panel two' 2 ;;
         overlap) win w1 0 0 "$hw" "$wh" 'Files' 1; win w2 $(( W / 4 )) 0 $(( W / 4 + hw )) "$wh" 'Panel two' 2 ;;
         p2)      win w1 2 1 40 20 'Files' 1 TView; win w2 30 5 70 22 'Panel two' 2 TView ;;
+        # (P3 3b) the stand-in window, then the list window in front of it
+        list)    win w2 "$hw" 0 "$W" "$wh" 'Panel two' 2; lwin w1 0 0 "$hw" "$wh" 'Files' 1 LA ;;
+        lists)   lwin w1 0 0 "$hw" "$wh" 'Files' 1 LA; lwin w2 "$hw" 0 "$W" "$wh" 'Panel two' 2 LA ;;
     esac
 }
 
@@ -398,9 +490,35 @@ top() { [ "${w2l_data[Top]}" = "$1" ]; }
 cur2() { ! [ "${w2_data[Current]}" = "$1" ]; }
 bounds() { fv.views.getBounds "$1"; [ "$RESULT" = "$2" ]; }
 yes() { :; }
+# (P3 3b) lst F T: w1l's Focused / TopItem = FRESH_T + F / + T; lend: End reached
+lst() { [ "${w1l_data[Focused]}" = "$(( FRESH_T + $1 ))" ] && [ "${w1l_data[TopItem]}" = "$(( FRESH_T + $2 ))" ]; }
+lend() { [ "${w1l_data[Focused]}" = "$(( ${w1l_data[Range]} - 1 ))" ]; }
+# lkind ascii|cyr|cjk: w1l's names from now on (the list redrawn)
+lkind() {
+    case $1 in ascii) w1l_data[List]=LA ;; cyr) w1l_data[List]=LC ;; cjk) w1l_data[List]=LJ ;; esac
+    fv.views.drawView w1l
+}
+# listacts LABEL KIND -- the counts, then the times, of one kind's actions
+listacts() {
+    local l=$1 k=$2 r=$(( H - 3 ))
+    count "$l.list.down.$k" "$K_F12" "$K_DOWN" '' '' lst 1 0
+    count "$l.list.down-edge.$k" "$K_F11" "$K_DOWN" '' '' lst "$r" 1
+    count "$l.list.pgdn.$k" "$K_F11" "$K_PGDN" '' '' lst $(( 2 * r - 1 )) "$r"
+    count "$l.list.wheel.$k" "$K_F12" "$LWHEEL" '' '' lst 0 1
+    count "$l.list.click.$k" "$K_F12" "$LC1" '' '' lst 3 0
+    count "$l.list.end-home.$k" '' "$K_END" '' '' lend
+    if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+    timed "$l.list.down.$k" "$K_F12" "$K_DOWN" "$K_DOWN" ''
+    timed "$l.list.down-edge.$k" "$K_F11" "$K_DOWN" "$K_DOWN" ''
+    timed "$l.list.pgdn.$k" "$K_F11" "$K_PGDN" "$K_PGDN" ''
+    timed "$l.list.wheel.$k" "$K_F12" "$LWHEEL" "$LWHEEL" ''
+    timed "$l.list.click.$k" "$K_F12" "$LC1" "$LC2" ''
+    timed "$l.list.end-home.$k" '' "$K_END" "$K_HOME" ''
+}
 
 K_DOWN=$'\e[B' K_PGDN=$'\e[6~' K_F6=$'\e[17~' K_TAB=$'\t' K_CTRLL=$'\x0c'
 K_RESIZE=$'\e[15;5~' K_RIGHT=$'\e[C' K_LEFT=$'\e[D' K_SRIGHT=$'\e[1;2C' K_SLEFT=$'\e[1;2D' K_ENTER=$'\r'
+K_F12=$'\e[24~' K_F11=$'\e[23~' K_END=$'\e[F' K_HOME=$'\e[H'
 
 exec 3>&2 2>"$ERRF"
 case $CASE in
@@ -487,6 +605,48 @@ case $CASE in
         scene p2
         run ''; app.Idle   # (the first paint; the Idle a terminal gives between keys: the initial cmCommandSetChanged)
         paintcount "$L"
+        if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+        paints "$L"
+        ;;
+    views-list-80|views-list-200)
+        L=${W}x$H
+        listdata
+        scene list
+        run ''; app.Idle   # (the first paint; the Idle a terminal gives between keys)
+        # (the list's rows 3 and 8 are screen rows 4 and 9; the wheel report
+        # over the list's middle)
+        sgr 5 4; LC1=$REPLY; sgr 5 9; LC2=$REPLY
+        LWHEEL=$'\e[<65;6;'"$(( H / 2 + 1 ))M"
+        listacts "$L" ascii
+        # (every other item marked: Marks read inline, design §5)
+        MKS=(); for (( i = 0; i < 60000; i += 2 )); do MKS[i]=1; done
+        w1l_data[Marks]=MKS
+        count "$L.list.pgdn-marks" "$K_F11" "$K_PGDN" '' '' lst $(( 2 * (H - 3) - 1 )) $(( H - 3 ))
+        if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+        timed "$L.list.pgdn-marks" "$K_F11" "$K_PGDN" "$K_PGDN" ''
+        w1l_data[Marks]=''
+        if [[ -n $TLLOC ]]; then
+            lkind cyr; listacts "$L" cyr
+            lkind cjk; listacts "$L" cjk
+            lkind ascii
+        else
+            echo "# note: no UTF-8 locale on this host: the cyr and cjk list actions not measured"
+        fi
+        # (the stand-in beside the list, in this process: F6 makes w2 current)
+        run "$K_F6"; app.Idle
+        count "$L.standin.down" '' "$K_DOWN" '' '' cur w2
+        count "$L.standin.pgdn" '' "$K_PGDN" '' '' cur w2
+        if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+        timed "$L.standin.down" '' "$K_DOWN" "$K_DOWN" ''
+        timed "$L.standin.pgdn" '' "$K_PGDN" "$K_PGDN" ''
+        ;;
+    views-paint|views-paint-80)
+        L=paint.${W}x$H
+        listdata ascii
+        scene lists
+        run ''; app.Idle   # (the first paint; the Idle a terminal gives between keys)
+        paintcount "$L"
+        checked "$L.paint: one bar shown" test "$(( w1__fvsb1_data[State] & FV_SF_VISIBLE )):$(( w2__fvsb1_data[State] & FV_SF_VISIBLE ))" = "0:$FV_SF_VISIBLE"
         if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
         paints "$L"
         ;;

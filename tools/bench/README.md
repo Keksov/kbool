@@ -130,9 +130,26 @@ N.
 | `overlap.80x24.*` | `tab`, `click`, `move` with the second window over half of the first (the window brought to the front is repainted whole) |
 | `resize.A-B` | `cmResizeApp` 80×24 ↔ 200×50 through the real event path: fv.video's resize flag set before the Run, its size source `fv.video.querySize` overridden (the documented hook), one resize per Run |
 | `p2.80x24.paint`, `.paint+init` | the P2 scene of D18's first-paint gate: the tests' two overlapping windows (2 1 40 20, 30 5 70 22) with a plain `TView` leaf each, no lists |
+| `W.list.down.KIND` | kcl P3 stage 3b's list scene (design P3 §8, §9.2): the application `TListApp` (as `TMyApp`, and F12 / F11 move the list to a **fresh page** — `TopItem` 400 items further than before, the focus on its top / bottom row — rows fv.video's text cache never saw), the left window a `TListViewer` of 60 000 items with its standard vertical bar (FV's file panel; a plain window's palette, D25), the right one the stand-in. KIND = the names: `ascii` `file_report_N.txt   4096`, `cyr` `Отчёт_квартал_N.txt   4096`, `cjk` 4 CJK characters + `_N.txt   4096`. `down`: prefix F12, Down inside the page (rule 4: one `drawPart` over the two rows) |
+| `W.list.down-edge.KIND` | prefix F11, Down at the bottom row: a scroll by one (one fresh row; the bar's indicator when it moves) |
+| `W.list.pgdn.KIND` | prefix F11, PgDn: every page fresh |
+| `W.list.wheel.KIND` | prefix F12, a wheel-down report over the list: a scroll by one |
+| `W.list.click.KIND` | prefix F12, a press + release on the list's row 3 / row 8 alternately |
+| `W.list.end-home.KIND` | End / Home alternately (the last and the first page, cached) |
+| `W.list.pgdn-marks` | prefix F11, PgDn (ascii) with every other item marked (`Marks`, D26: read inline; design §5 wants ≤ 1.05 × `list.pgdn.ascii`) |
+| `W.standin.down`, `W.standin.pgdn` | after F6 (untimed) to the stand-in window: its Down / PgDn, the D21 numbers in the list's process (the design's same-process calibration) |
+| `paint.80x24.paint`, `.paint+init` | the two-panel scene with a real list in each window (60 000 items, standard bars; the inactive panel's bar hidden: FV ShowSBar) at 80×24: **F-1's P3 number** (design §8.5, D31: ≤ 15 ms on CI; `p2.80x24.paint` with the stand-ins is the "today" number) |
+| `paint.200x50.paint`, `.paint+init` | the same scene at 200×50 |
 
 The cases are `views-80` and `views-200` (every `W.*` action at 80×24 /
-200×50), `views-overlap-80`, `views-resize` and `views-p2-80`. Before the
+200×50), `views-overlap-80`, `views-resize`, `views-p2-80`, and (kcl P3
+3b) `views-list-80` / `views-list-200` (the `W.list.*` and `W.standin.*`
+actions at 80×24 / 200×50; `cyr` / `cjk` need a UTF-8 locale, else a note)
+and `views-paint-80` / `views-paint` (`paint.80x24.*` / `paint.200x50.*`).
+A kcl without `TListViewer` (before P3 3b) prints a note
+and no rows for those four. The list actions' check pass counts what follows
+the prefix only (F12 / F11 zero the counters: the jump's own draws differ
+from run to run, the bar's indicator moving or not). Before the
 timing each action runs once with kklass's dispatchers and fv.video's writes
 wrapped in counting shims (as `kcl/fv.views/tests/fvw_testlib.sh` does), and
 its effect is checked (the focused row moved, the other window focused, the
