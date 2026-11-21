@@ -116,6 +116,14 @@
 #     dlg.W.type-scrolled  PREFIX F2 End over a 70-character line (set before
 #                          the Run), typing a / b
 #     dlg.W.shift-left     the same line, Shift+Left (extending the selection)
+#     dlg.W.history-open-close (kcl P3 3h) PREFIX F7 (TDlgApp runs the
+#                          pre-built history dialog: an input line with its
+#                          THistory, 10 strings in its list), Down on the
+#                          line (the history window built and run modal),
+#                          Esc (closed and destroyed), SUFFIX Ctrl+F4. Esc is
+#                          sent in its CSI u form ESC [ 27 u: a bare ESC
+#                          followed by the next key's ESC reads as Alt + that
+#                          key
 #   paint.W.paint, paint.W.paint+init
 #                          (views-paint-80, views-paint) the two-panel scene
 #                          with a real list
@@ -134,9 +142,11 @@
 #                        without TListViewer (before P3 3b): a note, no rows
 #   views-dialog-80      dlg.80x24.open-close, .tab, .key, .fkey, .paint,
 #                        .build-run-destroy, .type, .type-back,
-#                        .type-scrolled, .shift-left, .type-cyr, .type-cjk;
+#                        .type-scrolled, .shift-left, .type-cyr, .type-cjk,
+#                        .history-open-close;
 #                        a kcl without fv.dialogs (before P3 3c): a note; a
-#                        kcl without TInputLine (before 3d): no typing rows
+#                        kcl without TInputLine (before 3d): no typing rows;
+#                        without THistory (before 3h): no history row
 #   views-paint-80       paint.80x24.paint, paint.80x24.paint+init
 #   views-paint          paint.200x50.paint, paint.200x50.paint+init
 # N (default 10) = actions per measurement. Before the timing every action runs
@@ -225,6 +235,7 @@ TDlgApp.HandleEvent() {
         if [ "$FV_EV_KEY" = kbCtrlL ]; then fv.views.redraw "$FV_APP"; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF2 ]; then fv.views.execView "$FV_DESKTOP" dlg; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF3 ]; then fv.views.execView "$FV_DESKTOP" pdlg; fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF7 ]; then fv.views.execView "$FV_DESKTOP" hdlg; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF4 ]; then
             mkdlg dlg8 e TDialog
             fv.views.execView "$FV_DESKTOP" dlg8
@@ -825,6 +836,30 @@ case $CASE in
             else
                 echo "# note: no UTF-8 locale on this host: dlg.type-cyr / type-cjk not measured"
             fi
+        fi
+        # (kcl P3 3h) the history window: Down on the history dialog's line,
+        # Esc (CSI u: see the header); the check: the window gone (no view of
+        # it left), the line's text and the list as they were, the dialog closed
+        if ! declare -F THistory.new >/dev/null; then
+            echo "# note: no THistory in this kcl (before P3 3h): dlg.history-open-close not measured"
+        else
+            K_F7=$'\e[18~' K_ESCU=$'\e[27u'
+            TDialog.new hdlg 10 4 70 18 'History'
+            TInputLine.new h_in 3 2 40 3 255
+            THistory.new h_hi 40 2 43 3 h_in 1
+            TButton.new h_ok 14 10 24 12 'O~K~' cmOK "$FV_BF_DEFAULT"
+            for v in h_in h_hi h_ok; do fv.views.insert hdlg "$v"; done
+            fv.views.select h_in
+            for (( i = 1; i <= 10; i++ )); do fv.histlist.historyAdd 1 "search text $i"; done
+            fv.dialogs.setText h_in 'search text 10'
+            hclosed() {
+                fv.dialogs.getText h_in
+                [ "$RESULT" = 'search text 10' ] && ! fv.views.isView h_hi__fvhw1 && [[ -z ${hdlg_data[Owner]-} ]] \
+                    && fv.histlist.historyCount 1 && [ "$RESULT" = 10 ]
+            }
+            count "$L.history-open-close" "$K_F7" "$K_DOWN$K_ESCU" '' "$K_CF4" hclosed
+            if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+            timed "$L.history-open-close" "$K_F7" "$K_DOWN$K_ESCU" "$K_DOWN$K_ESCU" "$K_CF4"
         fi
         ;;
     views-paint|views-paint-80)

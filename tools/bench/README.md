@@ -150,6 +150,7 @@ N.
 | `dlg.80x24.type-back` | prefix F2, `a` and Backspace alternately |
 | `dlg.80x24.type-scrolled` | prefix F2 + End over a 70-character line (set before each measurement): typing `a` / `b` into a scrolled line |
 | `dlg.80x24.shift-left` | the same line: Shift+Left, extending the selection (`# writes` 1) |
+| `dlg.80x24.history-open-close` | kcl P3 3h (design P3 §15): prefix F7 (the pre-built history dialog: an input line with its `THistory`, 10 strings in its list), Down on the line (the line's text recorded, the history window built — window, frame, two bars, viewer — and run modal), Esc (closed, destroyed), suffix Ctrl+F4. Esc goes in as its CSI u form `ESC [ 27 u` (a bare ESC followed by the next key's ESC reads as Alt + that key). `# calls` 10 (the constructors), `# writes` 16 |
 | `paint.80x24.paint`, `.paint+init` | the two-panel scene with a real list in each window (60 000 items, standard bars; the inactive panel's bar hidden: FV ShowSBar) at 80×24: **F-1's P3 number** (design §8.5, D31: ≤ 15 ms on CI; `p2.80x24.paint` with the stand-ins is the "today" number) |
 | `paint.200x50.paint`, `.paint+init` | the same scene at 200×50 |
 
@@ -162,7 +163,8 @@ and (kcl P3 3c) `views-dialog-80` (`dlg.80x24.*`).
 A kcl without `TListViewer` (before P3 3b) prints a note
 and no rows for those four; a kcl without `fv.dialogs` (before P3 3c) a
 note and no rows for `views-dialog-80`; a kcl without `TInputLine` (before
-P3 3d) no typing rows. The list actions' check pass counts what follows
+P3 3d) no typing rows; a kcl without `THistory` (before P3 3h) no
+history row. The list actions' check pass counts what follows
 the prefix only (F12 / F11 zero the counters: the jump's own draws differ
 from run to run, the bar's indicator moving or not). Before the
 timing each action runs once with kklass's dispatchers and fv.video's writes
