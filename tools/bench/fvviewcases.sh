@@ -89,11 +89,13 @@
 #                          pre-built test dialog modally in the desktop, F3
 #                          the pre-built paint dialog, F4 builds the
 #                          8-control dialog, runs it and destroys it). The
-#                          test dialog: 60 x 14, a static text, two labels,
-#                          check boxes (3), radio buttons (2), OK (default),
-#                          Cancel, Help — the design's 8-control dialog with
+#                          test dialog: 60 x 14, the design's 8-control
+#                          dialog — two input lines (MaxLen 255) with their
+#                          labels, check boxes (3), OK (default), Cancel,
+#                          Help (kcl P3 3d; a kcl before 3d: 3c's stand-ins,
 #                          a static text and radio buttons in the input
-#                          lines' place until 3d:
+#                          lines' places; the row names are the same, the
+#                          dialog is not: 3c's numbers are not comparable):
 #     dlg.W.open-close     F2 + Ctrl+F4 (cmCancel): open and close, pre-built
 #     dlg.W.tab            PREFIX F2, Tab between the controls, SUFFIX Ctrl+F4
 #     dlg.W.key            PREFIX F2, a plain key nobody takes (x: the focused
@@ -104,6 +106,16 @@
 #                          class whose HandleEvent, an override, draws the
 #                          dialog on F3: drawView), SUFFIX Ctrl+F4
 #     dlg.W.build-run-destroy  F4 + Ctrl+F4: the 8-control dialog end to end
+#     dlg.W.type, .type-cyr, .type-cjk (kcl P3 3d, design §8.3's typing
+#                          rows; the first input line the dialog's Current):
+#                          PREFIX F2, typing a / b (ж / ы, 中 / 文: a UTF-8
+#                          locale needed), SUFFIX Ctrl+F4 (the text is
+#                          selected as the dialog opens: each Run's first key
+#                          replaces it, FV's SelectAll on focus)
+#     dlg.W.type-back      PREFIX F2, `a` and Backspace alternately
+#     dlg.W.type-scrolled  PREFIX F2 End over a 70-character line (set before
+#                          the Run), typing a / b
+#     dlg.W.shift-left     the same line, Shift+Left (extending the selection)
 #   paint.W.paint, paint.W.paint+init
 #                          (views-paint-80, views-paint) the two-panel scene
 #                          with a real list
@@ -121,8 +133,10 @@
 #                        the list scene's actions (80x24 / 200x50); a kcl
 #                        without TListViewer (before P3 3b): a note, no rows
 #   views-dialog-80      dlg.80x24.open-close, .tab, .key, .fkey, .paint,
-#                        .build-run-destroy;
-#                        a kcl without fv.dialogs (before P3 3c): a note
+#                        .build-run-destroy, .type, .type-back,
+#                        .type-scrolled, .shift-left, .type-cyr, .type-cjk;
+#                        a kcl without fv.dialogs (before P3 3c): a note; a
+#                        kcl without TInputLine (before 3d): no typing rows
 #   views-paint-80       paint.80x24.paint, paint.80x24.paint+init
 #   views-paint          paint.200x50.paint, paint.200x50.paint+init
 # N (default 10) = actions per measurement. Before the timing every action runs
@@ -230,21 +244,34 @@ TPaintDlg.HandleEvent() {
 }
 build TPaintDlg
 fi
-# mkdlg NAME P CLASS -- the test dialog (kcl fv.dialogs' tests: fvg_mkdlg)
-# with its controls named P_st, P_l1, ... (not inserted anywhere)
+# mkdlg NAME P CLASS -- the test dialog with its controls named P_in1,
+# P_l1, ... (not inserted anywhere): the design's 8-control dialog (P3 §8):
+# two input lines (MaxLen 255) with their labels, check boxes (3), OK
+# (default), Cancel, Help (kcl P3 3d). A kcl without TInputLine (3c): 3c's
+# stand-ins, a static text and radio buttons in the input lines' places
+# (kcl fv.dialogs' tests: fvg_mkdlg)
 mkdlg() {
-    local p=${2}_
+    local p=${2}_ v
     "$3.new" "$1" 10 4 70 18 'Find'
-    TStaticText.new "${p}st" 3 1 57 3 $'\x03''Search options'
-    TLabel.new "${p}l1" 2 3 14 4 '~T~ext' "${p}opts"
-    TCheckBoxes.new "${p}opts" 3 4 30 7 '~C~ase sensitive' '~W~hole words' 'Re~g~ex'
-    TLabel.new "${p}l2" 32 3 46 4 '~D~irection' "${p}dir"
-    TRadioButtons.new "${p}dir" 32 4 56 6 '~F~orward' '~B~ackward'
+    if declare -F TInputLine.new >/dev/null; then
+        TInputLine.new "${p}in1" 15 1 57 2 255
+        TLabel.new "${p}l1" 2 1 14 2 '~T~ext' "${p}in1"
+        TCheckBoxes.new "${p}opts" 3 4 30 7 '~C~ase sensitive' '~W~hole words' 'Re~g~ex'
+        TLabel.new "${p}l2" 32 3 46 4 '~R~eplace' "${p}in2"
+        TInputLine.new "${p}in2" 32 4 57 5 255
+        DLGV=(in1 l1 opts l2 in2 ok cn hp)
+    else
+        TStaticText.new "${p}st" 3 1 57 3 $'\x03''Search options'
+        TLabel.new "${p}l1" 2 3 14 4 '~T~ext' "${p}opts"
+        TCheckBoxes.new "${p}opts" 3 4 30 7 '~C~ase sensitive' '~W~hole words' 'Re~g~ex'
+        TLabel.new "${p}l2" 32 3 46 4 '~D~irection' "${p}dir"
+        TRadioButtons.new "${p}dir" 32 4 56 6 '~F~orward' '~B~ackward'
+        DLGV=(st l1 opts l2 dir ok cn hp)
+    fi
     TButton.new "${p}ok" 14 10 24 12 'O~K~' cmOK "$FV_BF_DEFAULT"
     TButton.new "${p}cn" 26 10 38 12 'Cancel' cmCancel
     TButton.new "${p}hp" 40 10 50 12 '~H~elp' cmHelp
-    local v
-    for v in st l1 opts l2 dir ok cn hp; do fv.views.insert "$1" "$p$v"; done
+    for v in "${DLGV[@]}"; do fv.views.insert "$1" "$p$v"; done
     fv.views.select "${p}opts"
 }
 # fresh KEY -- w1l's TopItem 400 items further (FRESH_T; wrapping before the
@@ -762,6 +789,43 @@ case $CASE in
         timed "$L.fkey" "$K_F2" "$K_F9" "$K_F9" "$K_CF4"
         timed "$L.paint" "$K_F3" "$K_F3" "$K_F3" "$K_CF4"
         timed "$L.build-run-destroy" '' "$K_F4$K_CF4" "$K_F4$K_CF4" ''
+        # (kcl P3 3d) typing into the dialog's first input line (made the
+        # dialog's Current: its text is selected as the dialog opens, FV's
+        # SelectAll on focus, so each Run's first key replaces it); the
+        # scrolled cases start each Run on a 70-character line, End first
+        if ! declare -F TInputLine.new >/dev/null; then
+            echo "# note: no TInputLine in this kcl (before P3 3d): the dlg typing actions not measured"
+        else
+            K_END=$'\e[F' K_BS=$'\x7f' K_SLEFT=$'\e[1;2D'
+            printf -v LONG70 '%70s' ''
+            LONG70=${LONG70// /w}
+            typed() { fv.dialogs.getText d_in1; [[ -n $RESULT && $RESULT != w* ]] && [ "${dlg_data[Current]}" = d_in1 ] && closed; }
+            long() { fv.dialogs.getText d_in1; (( ${#RESULT} >= 70 )) && closed; }
+            fv.views.select d_in1
+            count "$L.type" "$K_F2" a '' "$K_CF4" typed
+            count "$L.type-back" "${K_F2}a" "$K_BS" '' "$K_CF4" closed
+            fv.dialogs.setText d_in1 "$LONG70"
+            count "$L.type-scrolled" "$K_F2$K_END" a '' "$K_CF4" long
+            fv.dialogs.setText d_in1 "$LONG70"
+            count "$L.shift-left" "$K_F2$K_END" "$K_SLEFT" '' "$K_CF4" long
+            if [[ -n $TLLOC ]]; then
+                count "$L.type-cyr" "$K_F2" 'ж' '' "$K_CF4" typed
+                count "$L.type-cjk" "$K_F2" '中' '' "$K_CF4" typed
+            fi
+            if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+            timed "$L.type" "$K_F2" a b "$K_CF4"
+            timed "$L.type-back" "$K_F2" a "$K_BS" "$K_CF4"
+            fv.dialogs.setText d_in1 "$LONG70"
+            timed "$L.type-scrolled" "$K_F2$K_END" a b "$K_CF4"
+            fv.dialogs.setText d_in1 "$LONG70"
+            timed "$L.shift-left" "$K_F2$K_END" "$K_SLEFT" "$K_SLEFT" "$K_CF4"
+            if [[ -n $TLLOC ]]; then
+                timed "$L.type-cyr" "$K_F2" 'ж' 'ы' "$K_CF4"
+                timed "$L.type-cjk" "$K_F2" '中' '文' "$K_CF4"
+            else
+                echo "# note: no UTF-8 locale on this host: dlg.type-cyr / type-cjk not measured"
+            fi
+        fi
         ;;
     views-paint|views-paint-80)
         L=paint.${W}x$H
