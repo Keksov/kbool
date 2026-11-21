@@ -81,6 +81,9 @@
 #   W.standin.down, W.standin.pgdn
 #                          F6 to the stand-in window first (untimed), then its
 #                          Down / PgDn: the D21 numbers in the same process
+#   W.standin.pgdn-cjk     the stand-in's PgDn while the list beside it shows
+#                          the cjk names (kcl P3 3v: its rows share the screen
+#                          rows with wide cells; needs a UTF-8 locale)
 #   paint.W.paint, paint.W.paint+init
 #                          (views-paint-80, views-paint) the two-panel scene
 #                          with a real list
@@ -630,7 +633,7 @@ case $CASE in
             lkind cjk; listacts "$L" cjk
             lkind ascii
         else
-            echo "# note: no UTF-8 locale on this host: the cyr and cjk list actions not measured"
+            echo "# note: no UTF-8 locale on this host: the cyr and cjk list actions and standin.pgdn-cjk not measured"
         fi
         # (the stand-in beside the list, in this process: F6 makes w2 current)
         run "$K_F6"; app.Idle
@@ -639,6 +642,15 @@ case $CASE in
         if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
         timed "$L.standin.down" '' "$K_DOWN" "$K_DOWN" ''
         timed "$L.standin.pgdn" '' "$K_PGDN" "$K_PGDN" ''
+        # (kcl P3 3v: the stand-in's PgDn while the list beside it shows CJK
+        # names -- its rows share the screen rows with wide cells)
+        if [[ -n $TLLOC ]]; then
+            lkind cjk
+            count "$L.standin.pgdn-cjk" '' "$K_PGDN" '' '' cur w2
+            if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+            timed "$L.standin.pgdn-cjk" '' "$K_PGDN" "$K_PGDN" ''
+            lkind ascii
+        fi
         ;;
     views-paint|views-paint-80)
         L=paint.${W}x$H

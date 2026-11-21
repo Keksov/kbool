@@ -138,6 +138,7 @@ N.
 | `W.list.end-home.KIND` | End / Home alternately (the last and the first page, cached) |
 | `W.list.pgdn-marks` | prefix F11, PgDn (ascii) with every other item marked (`Marks`, D26: read inline; design §5 wants ≤ 1.05 × `list.pgdn.ascii`) |
 | `W.standin.down`, `W.standin.pgdn` | after F6 (untimed) to the stand-in window: its Down / PgDn, the D21 numbers in the list's process (the design's same-process calibration) |
+| `W.standin.pgdn-cjk` | the stand-in's PgDn while the list beside it shows the `cjk` names (kcl P3 3v): the stand-in's rows share the screen rows with wide cells, so its writes and the frame take the wide paths (needs a UTF-8 locale, as `cyr` / `cjk`) |
 | `paint.80x24.paint`, `.paint+init` | the two-panel scene with a real list in each window (60 000 items, standard bars; the inactive panel's bar hidden: FV ShowSBar) at 80×24: **F-1's P3 number** (design §8.5, D31: ≤ 15 ms on CI; `p2.80x24.paint` with the stand-ins is the "today" number) |
 | `paint.200x50.paint`, `.paint+init` | the same scene at 200×50 |
 
