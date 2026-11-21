@@ -84,6 +84,26 @@
 #   W.standin.pgdn-cjk     the stand-in's PgDn while the list beside it shows
 #                          the cjk names (kcl P3 3v: its rows share the screen
 #                          rows with wide cells; needs a UTF-8 locale)
+#   dlg.W.* (views-dialog-80, kcl P3 3c, design P3 §8.3 / §9.2): the scene of
+#                          views-80 with TDlgApp (as TMyApp; F2 runs the
+#                          pre-built test dialog modally in the desktop, F3
+#                          the pre-built paint dialog, F4 builds the
+#                          8-control dialog, runs it and destroys it). The
+#                          test dialog: 60 x 14, a static text, two labels,
+#                          check boxes (3), radio buttons (2), OK (default),
+#                          Cancel, Help — the design's 8-control dialog with
+#                          a static text and radio buttons in the input
+#                          lines' place until 3d:
+#     dlg.W.open-close     F2 + Ctrl+F4 (cmCancel): open and close, pre-built
+#     dlg.W.tab            PREFIX F2, Tab between the controls, SUFFIX Ctrl+F4
+#     dlg.W.key            PREFIX F2, a plain key nobody takes (x: the focused
+#                          check boxes have no x item; every label and button
+#                          skipped by the hot-key map), SUFFIX Ctrl+F4
+#     dlg.W.fkey           the same with F9 (no hot letter at all)
+#     dlg.W.paint          PREFIX F3, F3 inside the paint dialog (a TDialog
+#                          class whose HandleEvent, an override, draws the
+#                          dialog on F3: drawView), SUFFIX Ctrl+F4
+#     dlg.W.build-run-destroy  F4 + Ctrl+F4: the 8-control dialog end to end
 #   paint.W.paint, paint.W.paint+init
 #                          (views-paint-80, views-paint) the two-panel scene
 #                          with a real list
@@ -100,6 +120,9 @@
 #   views-list-80, views-list-200
 #                        the list scene's actions (80x24 / 200x50); a kcl
 #                        without TListViewer (before P3 3b): a note, no rows
+#   views-dialog-80      dlg.80x24.open-close, .tab, .key, .fkey, .paint,
+#                        .build-run-destroy;
+#                        a kcl without fv.dialogs (before P3 3c): a note
 #   views-paint-80       paint.80x24.paint, paint.80x24.paint+init
 #   views-paint          paint.200x50.paint, paint.200x50.paint+init
 # N (default 10) = actions per measurement. Before the timing every action runs
@@ -124,7 +147,7 @@ source "$ROOT/kbool.sh" || exit 2
 kk.uses fv.app || exit 2
 
 case $CASE in
-    views-80|views-overlap-80|views-p2-80|views-list-80|views-paint-80) W=80 H=24 ;;
+    views-80|views-overlap-80|views-p2-80|views-list-80|views-paint-80|views-dialog-80) W=80 H=24 ;;
     views-200|views-list-200|views-paint) W=200 H=50 ;;
     views-resize) W=80 H=24 ;;
     *) echo "fvviewcases.sh: unknown case '$CASE'" >&2; exit 2 ;;
@@ -132,6 +155,13 @@ esac
 if [[ $CASE == views-list-* || $CASE == views-paint* ]] && ! declare -F TListViewer.new >/dev/null; then
     echo "# note: no TListViewer in this kcl (before P3 3b): $CASE not measured"
     exit 0
+fi
+if [[ $CASE == views-dialog-* ]]; then
+    if [[ ! -f $ROOT/kcl/fv.dialogs/fv.dialogs.sh ]]; then
+        echo "# note: no fv.dialogs in this kcl (before P3 3c): $CASE not measured"
+        exit 0
+    fi
+    kk.uses fv.dialogs || exit 2
 fi
 
 exec {OUTFD}>/dev/null
@@ -168,6 +198,55 @@ TListApp.HandleEvent() {
     fi
 }
 build TListApp
+# (P3 3c) the dialog scene's application: TMyApp's Ctrl+L, and F2 / F3 / F4
+# (the header); the paint dialog draws itself on F3
+if [[ $CASE == views-dialog-* ]]; then
+class TDlgApp : TApplication
+    public
+        override proc HandleEvent
+end
+TDlgApp.HandleEvent() {
+    inherited HandleEvent "$@"
+    if [ "$FV_EV_WHAT" = evKeyDown ]; then
+        if [ "$FV_EV_KEY" = kbCtrlL ]; then fv.views.redraw "$FV_APP"; fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF2 ]; then fv.views.execView "$FV_DESKTOP" dlg; fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF3 ]; then fv.views.execView "$FV_DESKTOP" pdlg; fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF4 ]; then
+            mkdlg dlg8 e TDialog
+            fv.views.execView "$FV_DESKTOP" dlg8
+            dlg8.delete
+            fv.views.clearEvent "$this"
+        fi
+    fi
+}
+build TDlgApp
+class TPaintDlg : TDialog
+    public
+        override proc HandleEvent
+end
+TPaintDlg.HandleEvent() {
+    if [ "$FV_EV_WHAT" = evKeyDown ] && [ "$FV_EV_KEY" = kbF3 ]; then fv.views.drawView "$this"; fv.views.clearEvent "$this"; return; fi
+    inherited HandleEvent "$@"
+}
+build TPaintDlg
+fi
+# mkdlg NAME P CLASS -- the test dialog (kcl fv.dialogs' tests: fvg_mkdlg)
+# with its controls named P_st, P_l1, ... (not inserted anywhere)
+mkdlg() {
+    local p=${2}_
+    "$3.new" "$1" 10 4 70 18 'Find'
+    TStaticText.new "${p}st" 3 1 57 3 $'\x03''Search options'
+    TLabel.new "${p}l1" 2 3 14 4 '~T~ext' "${p}opts"
+    TCheckBoxes.new "${p}opts" 3 4 30 7 '~C~ase sensitive' '~W~hole words' 'Re~g~ex'
+    TLabel.new "${p}l2" 32 3 46 4 '~D~irection' "${p}dir"
+    TRadioButtons.new "${p}dir" 32 4 56 6 '~F~orward' '~B~ackward'
+    TButton.new "${p}ok" 14 10 24 12 'O~K~' cmOK "$FV_BF_DEFAULT"
+    TButton.new "${p}cn" 26 10 38 12 'Cancel' cmCancel
+    TButton.new "${p}hp" 40 10 50 12 '~H~elp' cmHelp
+    local v
+    for v in st l1 opts l2 dir ok cn hp; do fv.views.insert "$1" "$p$v"; done
+    fv.views.select "${p}opts"
+}
 # fresh KEY -- w1l's TopItem 400 items further (FRESH_T; wrapping before the
 # last 1000), the focus on that page's top row (kbF12) or bottom row (kbF11)
 FRESH_T=0
@@ -346,10 +425,11 @@ scene() {
     FV_SCREEN_W=$W FV_SCREEN_H=$H
     local cls=TMyApp
     if [ "$1" = list ]; then cls=TListApp; fi
+    if [ "$1" = dialog ]; then cls=TDlgApp; fi
     "$cls.new" app || exit 2
     local hw=$(( W / 2 )) wh=$(( H - 1 ))
     case $1 in
-        side)    win w1 0 0 "$hw" "$wh" 'Files' 1; win w2 "$hw" 0 "$W" "$wh" 'Panel two' 2 ;;
+        side|dialog) win w1 0 0 "$hw" "$wh" 'Files' 1; win w2 "$hw" 0 "$W" "$wh" 'Panel two' 2 ;;
         overlap) win w1 0 0 "$hw" "$wh" 'Files' 1; win w2 $(( W / 4 )) 0 $(( W / 4 + hw )) "$wh" 'Panel two' 2 ;;
         p2)      win w1 2 1 40 20 'Files' 1 TView; win w2 30 5 70 22 'Panel two' 2 TView ;;
         # (P3 3b) the stand-in window, then the list window in front of it
@@ -651,6 +731,37 @@ case $CASE in
             timed "$L.standin.pgdn-cjk" '' "$K_PGDN" "$K_PGDN" ''
             lkind ascii
         fi
+        ;;
+    views-dialog-80)
+        L=dlg.${W}x$H
+        scene dialog
+        mkdlg dlg d TDialog
+        mkdlg pdlg p TPaintDlg
+        run ''; app.Idle   # (the first paint; the Idle a terminal gives between keys)
+        K_F2=$'\e[12~' K_F3=$'\e[13~' K_F4=$'\e[14~' K_CF4=$'\e[1;5S' K_F9=$'\e[20~'
+        # (the checks: the dialog closed again and out of the desktop; Tab moved
+        # the focus from opts; a key nobody takes left the focus and the check
+        # boxes as they were; the 8-control dialog and its controls gone)
+        closed() { [[ -z ${dlg_data[Owner]-} && -z ${pdlg_data[Owner]-} ]]; }
+        moved() { ! [ "${dlg_data[Current]}" = d_opts ] && closed; }
+        stay() { [ "${dlg_data[Current]}" = d_opts ] && [ "${d_opts_data[Value]}" = 0 ] && closed; }
+        gone() { ! fv.views.isView dlg8 && ! fv.views.isView e_ok && closed; }
+        count "$L.open-close" '' "$K_F2$K_CF4" '' '' closed
+        fv.views.select d_opts
+        count "$L.tab" "$K_F2" "$K_TAB" '' "$K_CF4" moved
+        fv.views.select d_opts
+        count "$L.key" "$K_F2" x '' "$K_CF4" stay
+        count "$L.fkey" "$K_F2" "$K_F9" '' "$K_CF4" stay
+        count "$L.paint" "$K_F3" "$K_F3" '' "$K_CF4" closed
+        count "$L.build-run-destroy" '' "$K_F4$K_CF4" '' '' gone
+        if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+        timed "$L.open-close" '' "$K_F2$K_CF4" "$K_F2$K_CF4" ''
+        timed "$L.tab" "$K_F2" "$K_TAB" "$K_TAB" "$K_CF4"
+        fv.views.select d_opts
+        timed "$L.key" "$K_F2" x x "$K_CF4"
+        timed "$L.fkey" "$K_F2" "$K_F9" "$K_F9" "$K_CF4"
+        timed "$L.paint" "$K_F3" "$K_F3" "$K_F3" "$K_CF4"
+        timed "$L.build-run-destroy" '' "$K_F4$K_CF4" "$K_F4$K_CF4" ''
         ;;
     views-paint|views-paint-80)
         L=paint.${W}x$H
