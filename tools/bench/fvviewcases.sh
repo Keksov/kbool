@@ -124,6 +124,12 @@
 #                          sent in its CSI u form ESC [ 27 u: a bare ESC
 #                          followed by the next key's ESC reads as Alt + that
 #                          key
+#     dlg.W.msgbox.e2e     (kcl P3 3e, design P3 §6 / §9.2) F8: TDlgApp calls
+#                          fv.msgbox.messageBox (Error, OK; the 40 x 9 box
+#                          built, run, closed by Ctrl+F4 and destroyed)
+#     dlg.W.msgbox.standin F11: the design's stand-in (M3) of the same box —
+#                          its dialog, text and OK button built by hand,
+#                          execView, Ctrl+F4, destroyed — for comparison
 #   paint.W.paint, paint.W.paint+init
 #                          (views-paint-80, views-paint) the two-panel scene
 #                          with a real list
@@ -143,10 +149,11 @@
 #   views-dialog-80      dlg.80x24.open-close, .tab, .key, .fkey, .paint,
 #                        .build-run-destroy, .type, .type-back,
 #                        .type-scrolled, .shift-left, .type-cyr, .type-cjk,
-#                        .history-open-close;
+#                        .history-open-close, .msgbox.standin, .msgbox.e2e;
 #                        a kcl without fv.dialogs (before P3 3c): a note; a
 #                        kcl without TInputLine (before 3d): no typing rows;
-#                        without THistory (before 3h): no history row
+#                        without THistory (before 3h): no history row;
+#                        without fv.msgbox (before 3e): no msgbox rows
 #   views-paint-80       paint.80x24.paint, paint.80x24.paint+init
 #   views-paint          paint.200x50.paint, paint.200x50.paint+init
 # N (default 10) = actions per measurement. Before the timing every action runs
@@ -186,6 +193,8 @@ if [[ $CASE == views-dialog-* ]]; then
         exit 0
     fi
     kk.uses fv.dialogs || exit 2
+    # (kcl P3 3e) fv.msgbox, when this kcl has it (the msgbox rows)
+    if [[ -f $ROOT/kcl/fv.msgbox/fv.msgbox.sh ]]; then kk.uses fv.msgbox || exit 2; fi
 fi
 
 exec {OUTFD}>/dev/null
@@ -236,6 +245,16 @@ TDlgApp.HandleEvent() {
         elif [ "$FV_EV_KEY" = kbF2 ]; then fv.views.execView "$FV_DESKTOP" dlg; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF3 ]; then fv.views.execView "$FV_DESKTOP" pdlg; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF7 ]; then fv.views.execView "$FV_DESKTOP" hdlg; fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF8 ]; then
+            fv.msgbox.messageBox 'File not found: %s' $(( FV_MF_ERROR | FV_MF_OKBUTTON )) -- report.txt
+            MBR=$RESULT
+            fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF11 ]; then
+            mkbox
+            fv.views.execView "$FV_DESKTOP" sbox
+            MBR=$RESULT
+            sbox.delete
+            fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF4 ]; then
             mkdlg dlg8 e TDialog
             fv.views.execView "$FV_DESKTOP" dlg8
@@ -284,6 +303,18 @@ mkdlg() {
     TButton.new "${p}hp" 40 10 50 12 '~H~elp' cmHelp
     for v in "${DLGV[@]}"; do fv.views.insert "$1" "$p$v"; done
     fv.views.select "${p}opts"
+}
+# mkbox -- the message box stand-in (design P3 §6, M3: the dialog, the text
+# and the OK button of fv.msgbox.messageBox's Error / OK box, built by hand;
+# not inserted anywhere)
+mkbox() {
+    local -n __b_dd=${FV_DESKTOP}_data
+    local x=$(( (__b_dd[SizeX] - 40) / 2 )) y=$(( (__b_dd[SizeY] - 9) / 2 ))
+    TDialog.new sbox "$x" "$y" $(( x + 40 )) $(( y + 9 )) 'Error'
+    TStaticText.new sbox_t 3 2 38 6 'File not found: report.txt'
+    TButton.new sbox_ok 15 6 25 8 'O~k~' cmOK
+    fv.views.insert sbox sbox_t; fv.views.insert sbox sbox_ok
+    fv.views.selectNext sbox 0
 }
 # fresh KEY -- w1l's TopItem 400 items further (FRESH_T; wrapping before the
 # last 1000), the focus on that page's top row (kbF12) or bottom row (kbF11)
@@ -860,6 +891,25 @@ case $CASE in
             count "$L.history-open-close" "$K_F7" "$K_DOWN$K_ESCU" '' "$K_CF4" hclosed
             if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
             timed "$L.history-open-close" "$K_F7" "$K_DOWN$K_ESCU" "$K_DOWN$K_ESCU" "$K_CF4"
+        fi
+        # (kcl P3 3e) the message box end to end: F8 = a real
+        # fv.msgbox.messageBox (Error, OK; built, run, closed by Ctrl+F4,
+        # destroyed), F11 = the design's stand-in (M3: the same dialog, text
+        # and OK built by hand, execView, destroyed); the check: the answer
+        # cmCancel, no box left, the test dialogs closed
+        if ! declare -F fv.msgbox.messageBox >/dev/null; then
+            echo "# note: no fv.msgbox in this kcl (before P3 3e): dlg.msgbox.e2e / msgbox.standin not measured"
+        else
+            K_F8=$'\e[19~'
+            MBR=''
+            mbgone() {
+                [ "$MBR" = cmCancel ] && ! fv.views.isView "${FV_DESKTOP}__fvmsgbox" && ! fv.views.isView sbox && closed
+            }
+            count "$L.msgbox.standin" '' "$K_F11$K_CF4" '' '' mbgone
+            count "$L.msgbox.e2e" '' "$K_F8$K_CF4" '' '' mbgone
+            if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+            timed "$L.msgbox.standin" '' "$K_F11$K_CF4" "$K_F11$K_CF4" ''
+            timed "$L.msgbox.e2e" '' "$K_F8$K_CF4" "$K_F8$K_CF4" ''
         fi
         ;;
     views-paint|views-paint-80)
