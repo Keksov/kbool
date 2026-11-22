@@ -150,6 +150,7 @@ N.
 | `dlg.80x24.type-back` | prefix F2, `a` and Backspace alternately |
 | `dlg.80x24.type-scrolled` | prefix F2 + End over a 70-character line (set before each measurement): typing `a` / `b` into a scrolled line |
 | `dlg.80x24.shift-left` | the same line: Shift+Left, extending the selection (`# writes` 1) |
+| `dlg.80x24.tab-20` / `type-20` | kcl P3 3g (design P3 R1): the 20-control dialog (76 × 21: a labelled input line, check boxes, labelled radio buttons, six more labelled input lines, OK / Cancel / Help; pre-built, F12 runs it): prefix F12, Tab between its controls / typing `a` / `b` into its first input line, suffix Ctrl+F4. Compare with `tab` / `type`: the hot-key map keeps keys off the extra controls (kcl `fv.dialogs/tests/013_CallBudget.sh` checks the counts against the 8-control dialog); a focus change still reaches every label (FV's focus broadcasts), without a write |
 | `dlg.80x24.history-open-close` | kcl P3 3h (design P3 §15): prefix F7 (the pre-built history dialog: an input line with its `THistory`, 10 strings in its list), Down on the line (the line's text recorded, the history window built — window, frame, two bars, viewer — and run modal), Esc (closed, destroyed), suffix Ctrl+F4. Esc goes in as its CSI u form `ESC [ 27 u` (a bare ESC followed by the next key's ESC reads as Alt + that key). `# calls` 10 (the constructors), `# writes` 16 |
 | `dlg.80x24.msgbox.e2e` | kcl P3 3e (design P3 §6, §9.2): F8 makes `TDlgApp` call `fv.msgbox.messageBox` (Error, OK: the 40 × 9 box centred on the desktop, its text and button built, run modal, closed by Ctrl+F4, destroyed) — a real message box end to end. `# calls` 13, `# writes` 15 (design §8.1's limit 16 / 20) |
 | `dlg.80x24.msgbox.standin` | F11: the design's stand-in of the same box (M3: the dialog, the text and the OK button built by hand, `execView`, Ctrl+F4, destroyed), kept beside `msgbox.e2e` for comparison: the difference is fv.msgbox's own work (checks, the name, the format) |
@@ -170,7 +171,7 @@ and (kcl P3 3c) `views-dialog-80` (`dlg.80x24.*`), and (kcl P3 3f)
 A kcl without `TListViewer` (before P3 3b) prints a note
 and no rows for those four; a kcl without `fv.dialogs` (before P3 3c) a
 note and no rows for `views-dialog-80`; a kcl without `TInputLine` (before
-P3 3d) no typing rows; a kcl without `THistory` (before P3 3h) no
+P3 3d) no typing rows (nor `tab-20` / `type-20`); a kcl without `THistory` (before P3 3h) no
 history row; a kcl without `fv.msgbox` (before P3 3e) no msgbox rows; a kcl
 without `TMenuBar` (before P3 3f) a note and no rows for `views-menu-80`. The list actions' check pass counts what follows
 the prefix only (F12 / F11 zero the counters: the jump's own draws differ

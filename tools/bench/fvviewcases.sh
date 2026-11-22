@@ -116,6 +116,14 @@
 #     dlg.W.type-scrolled  PREFIX F2 End over a 70-character line (set before
 #                          the Run), typing a / b
 #     dlg.W.shift-left     the same line, Shift+Left (extending the selection)
+#     dlg.W.tab-20, .type-20 (kcl P3 3g, design R1) the 20-control dialog
+#                          (76 x 21: the test dialog's kinds of control plus
+#                          six labelled input lines, mkdlg20; F12 runs it,
+#                          pre-built): PREFIX
+#                          F12, Tab between its controls / typing a / b into
+#                          its first input line, SUFFIX Ctrl+F4 — against
+#                          .tab / .type: the hot-key map keeps keys off the
+#                          extra controls (counts: kcl fv.dialogs 013)
 #     dlg.W.history-open-close (kcl P3 3h) PREFIX F7 (TDlgApp runs the
 #                          pre-built history dialog: an input line with its
 #                          THistory, 10 strings in its list), Down on the
@@ -177,9 +185,11 @@
 #   views-dialog-80      dlg.80x24.open-close, .tab, .key, .fkey, .paint,
 #                        .build-run-destroy, .type, .type-back,
 #                        .type-scrolled, .shift-left, .type-cyr, .type-cjk,
+#                        .tab-20, .type-20,
 #                        .history-open-close, .msgbox.standin, .msgbox.e2e;
 #                        a kcl without fv.dialogs (before P3 3c): a note; a
-#                        kcl without TInputLine (before 3d): no typing rows;
+#                        kcl without TInputLine (before 3d): no typing rows
+#                        (and no .tab-20 / .type-20);
 #                        without THistory (before 3h): no history row;
 #                        without fv.msgbox (before 3e): no msgbox rows
 #   views-menu-80        menu.80x24.open-drop-close, .down, .down-nohint, .idle; a kcl
@@ -279,6 +289,7 @@ TDlgApp.HandleEvent() {
         elif [ "$FV_EV_KEY" = kbF2 ]; then fv.views.execView "$FV_DESKTOP" dlg; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF3 ]; then fv.views.execView "$FV_DESKTOP" pdlg; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF7 ]; then fv.views.execView "$FV_DESKTOP" hdlg; fv.views.clearEvent "$this"
+        elif [ "$FV_EV_KEY" = kbF12 ]; then fv.views.execView "$FV_DESKTOP" dlg20; fv.views.clearEvent "$this"
         elif [ "$FV_EV_KEY" = kbF8 ]; then
             fv.msgbox.messageBox 'File not found: %s' $(( FV_MF_ERROR | FV_MF_OKBUTTON )) -- report.txt
             MBR=$RESULT
@@ -337,6 +348,31 @@ mkdlg() {
     TButton.new "${p}hp" 40 10 50 12 '~H~elp' cmHelp
     for v in "${DLGV[@]}"; do fv.views.insert "$1" "$p$v"; done
     fv.views.select "${p}opts"
+}
+# mkdlg20 -- the 20-control dialog of design P3 R1 (kcl P3 3g; kcl
+# fv.dialogs' 013_CallBudget builds the same): dlg20, 76 x 21, controls t_*
+# — a label + input line (Current), check boxes (3), a label + radio
+# buttons (2), six more labels + input lines, OK (default), Cancel, Help
+mkdlg20() {
+    local p=t_ v i
+    local -a c=(l1 in1 opts l2 dir) hot=(N P M E S A)
+    TDialog.new dlg20 2 1 78 22 'Find'
+    TLabel.new "${p}l1" 2 1 14 2 '~T~ext' "${p}in1"
+    TInputLine.new "${p}in1" 15 1 57 2 255
+    TCheckBoxes.new "${p}opts" 3 3 30 6 '~C~ase sensitive' '~W~hole words' 'Re~g~ex'
+    TLabel.new "${p}l2" 32 2 46 3 '~D~irection' "${p}dir"
+    TRadioButtons.new "${p}dir" 32 3 56 5 '~F~orward' '~B~ackward'
+    for (( i = 0; i < 6; i++ )); do
+        TLabel.new "${p}x$i" 2 $(( 7 + i * 2 )) 14 $(( 8 + i * 2 )) "Field ~${hot[i]}~" "${p}y$i"
+        TInputLine.new "${p}y$i" 15 $(( 7 + i * 2 )) 57 $(( 8 + i * 2 )) 255
+        c+=("x$i" "y$i")
+    done
+    TButton.new "${p}ok" 14 18 24 20 'O~K~' cmOK "$FV_BF_DEFAULT"
+    TButton.new "${p}cn" 26 18 38 20 'Cancel' cmCancel
+    TButton.new "${p}hp" 40 18 50 20 '~H~elp' cmHelp
+    c+=(ok cn hp)
+    for v in "${c[@]}"; do fv.views.insert dlg20 "$p$v"; done
+    fv.views.select "${p}in1"
 }
 # mkbox -- the message box stand-in (design P3 §6, M3: the dialog, the text
 # and the OK button of fv.msgbox.messageBox's Error / OK box, built by hand;
@@ -932,6 +968,20 @@ case $CASE in
             else
                 echo "# note: no UTF-8 locale on this host: dlg.type-cyr / type-cjk not measured"
             fi
+            # (kcl P3 3g, design R1) the 20-control dialog (F12): Tab and
+            # typing as in the 8-control one, from its first input line
+            mkdlg20
+            closed20() { [[ -z ${dlg20_data[Owner]-} ]] && closed; }
+            moved20() { ! [ "${dlg20_data[Current]}" = t_in1 ] && closed20; }
+            typed20() { fv.dialogs.getText t_in1; [[ -n $RESULT ]] && [ "${dlg20_data[Current]}" = t_in1 ] && closed20; }
+            count "$L.tab-20" "$K_F12" "$K_TAB" '' "$K_CF4" moved20
+            fv.views.select t_in1
+            count "$L.type-20" "$K_F12" a '' "$K_CF4" typed20
+            if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+            fv.views.select t_in1
+            timed "$L.tab-20" "$K_F12" "$K_TAB" "$K_TAB" "$K_CF4"
+            fv.views.select t_in1
+            timed "$L.type-20" "$K_F12" a b "$K_CF4"
         fi
         # (kcl P3 3h) the history window: Down on the history dialog's line,
         # Esc (CSI u: see the header); the check: the window gone (no view of
