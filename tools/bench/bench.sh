@@ -32,7 +32,7 @@ ROUNDS=5 N="" OUT="" TITLE=""
 CALL_CASES=(plain call1 call14 long inherited nested prop newdel)
 DRIFT_CASES=(drift-short drift-helper drift-nest drift-up drift-newdel)
 FV_CASES=(fv-80 fv-200 fv-resize fv-wide-80 fv-wide-200)
-FVV_CASES=(views-80 views-200 views-overlap-80 views-resize views-p2-80 views-list-80 views-list-200 views-paint-80 views-paint views-dialog-80)
+FVV_CASES=(views-80 views-200 views-overlap-80 views-resize views-p2-80 views-list-80 views-list-200 views-paint-80 views-paint views-dialog-80 views-menu-80)
 
 die() { echo "bench.sh: $*" >&2; exit 2; }
 

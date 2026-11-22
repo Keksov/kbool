@@ -153,6 +153,10 @@ N.
 | `dlg.80x24.history-open-close` | kcl P3 3h (design P3 §15): prefix F7 (the pre-built history dialog: an input line with its `THistory`, 10 strings in its list), Down on the line (the line's text recorded, the history window built — window, frame, two bars, viewer — and run modal), Esc (closed, destroyed), suffix Ctrl+F4. Esc goes in as its CSI u form `ESC [ 27 u` (a bare ESC followed by the next key's ESC reads as Alt + that key). `# calls` 10 (the constructors), `# writes` 16 |
 | `dlg.80x24.msgbox.e2e` | kcl P3 3e (design P3 §6, §9.2): F8 makes `TDlgApp` call `fv.msgbox.messageBox` (Error, OK: the 40 × 9 box centred on the desktop, its text and button built, run modal, closed by Ctrl+F4, destroyed) — a real message box end to end. `# calls` 13, `# writes` 15 (design §8.1's limit 16 / 20) |
 | `dlg.80x24.msgbox.standin` | F11: the design's stand-in of the same box (M3: the dialog, the text and the OK button built by hand, `execView`, Ctrl+F4, destroyed), kept beside `msgbox.e2e` for comparison: the difference is fv.msgbox's own work (checks, the name, the format) |
+| `menu.80x24.open-drop-close` | kcl P3 3f (design P3 §8.4, §9.2): FV's layout with a bar (D23: `fv.menus.menuBar` before the windows, the desktop from row 1), the `views-80` scene's two stand-in windows below it, `TMyApp`. The File box is 28 × 12 with a shadow (10 items, each with a help context and a hint in the status line's table; Exit is Alt+X `cmQuit`, so the Runs' Alt-X quits through the bar as in FV). F9 stands for "the user pauses": the case's event hook turns it into an idle tick (evNothing + the application's Idle, as fv.app's GetEvent does on a timeout), so the status line's hint follows the menu. The unit: F10, F9, Down, F9, Esc (`ESC [ 27 u`), F9 — the status line → `cmMenu` → the bar run modal by the application → the box dropped by the bar's owner and destroyed → Esc closes the box and the bar (FV). `# calls` 22 (2 F10 + 2 `cmMenu` + the focus broadcasts to `TMyApp` + the box's constructor / destructor), `# writes` 11 (design §8.1's limit 24 / 28) |
+| `menu.80x24.down` | prefix Alt+F F9 (the File box at once: the bar's Default moves from Run to Run), a highlight move (Down, F9: two one-row `drawPart`s + the status line's new hint), suffix Esc F9. `# calls` 0, `# writes` 3 (limit 2 / 3) |
+| `menu.80x24.down-nohint` | the same in the Edit box (prefix Alt+E F9): no hint change, no status line redraw. `# writes` 2 |
+| `menu.80x24.idle` | prefix Alt+F F9, an F9 alone: the idle tick's own cost (the key, Idle, the status line's Update without a change), the part of `down` / `down-nohint` that is not the move. `# writes` 0 |
 | `paint.80x24.paint`, `.paint+init` | the two-panel scene with a real list in each window (60 000 items, standard bars; the inactive panel's bar hidden: FV ShowSBar) at 80×24: **F-1's P3 number** (design §8.5, D31: ≤ 15 ms on CI; `p2.80x24.paint` with the stand-ins is the "today" number) |
 | `paint.200x50.paint`, `.paint+init` | the same scene at 200×50 |
 
@@ -161,12 +165,14 @@ The cases are `views-80` and `views-200` (every `W.*` action at 80×24 /
 3b) `views-list-80` / `views-list-200` (the `W.list.*` and `W.standin.*`
 actions at 80×24 / 200×50; `cyr` / `cjk` need a UTF-8 locale, else a note)
 and `views-paint-80` / `views-paint` (`paint.80x24.*` / `paint.200x50.*`),
-and (kcl P3 3c) `views-dialog-80` (`dlg.80x24.*`).
+and (kcl P3 3c) `views-dialog-80` (`dlg.80x24.*`), and (kcl P3 3f)
+`views-menu-80` (`menu.80x24.*`).
 A kcl without `TListViewer` (before P3 3b) prints a note
 and no rows for those four; a kcl without `fv.dialogs` (before P3 3c) a
 note and no rows for `views-dialog-80`; a kcl without `TInputLine` (before
 P3 3d) no typing rows; a kcl without `THistory` (before P3 3h) no
-history row; a kcl without `fv.msgbox` (before P3 3e) no msgbox rows. The list actions' check pass counts what follows
+history row; a kcl without `fv.msgbox` (before P3 3e) no msgbox rows; a kcl
+without `TMenuBar` (before P3 3f) a note and no rows for `views-menu-80`. The list actions' check pass counts what follows
 the prefix only (F12 / F11 zero the counters: the jump's own draws differ
 from run to run, the bar's indicator moving or not). Before the
 timing each action runs once with kklass's dispatchers and fv.video's writes

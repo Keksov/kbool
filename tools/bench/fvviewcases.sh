@@ -130,6 +130,34 @@
 #     dlg.W.msgbox.standin F11: the design's stand-in (M3) of the same box —
 #                          its dialog, text and OK button built by hand,
 #                          execView, Ctrl+F4, destroyed — for comparison
+#   menu.W.* (views-menu-80, kcl P3 3f, design P3 §8.4 / §9.2): FV's layout
+#                          with a bar (D23: fv.menus.menuBar before the
+#                          windows, the desktop from row 1), the views-80
+#                          scene's two stand-in windows below it, TMyApp. The
+#                          File box is 28 x 12 with a shadow (10 items, each
+#                          with a help context and a hint in the status
+#                          line's table); the Edit box's items have no hint.
+#                          Keys in a file leave no idle tick, so F9 stands for
+#                          "the user pauses": the case's event hook (fv.views'
+#                          __FV_VW_GETEVENT) turns an F9 into evNothing and
+#                          runs the application's Idle there, as fv.app's
+#                          GetEvent does on a timeout (the status line's
+#                          Update: the hint follows the menu). Esc is sent as
+#                          ESC [ 27 u (a bare ESC before the next key's ESC
+#                          reads as Alt + that key):
+#     menu.W.open-drop-close  F10, F9, Down, F9, Esc, F9: the status line ->
+#                          cmMenu -> the bar run modal by the application ->
+#                          the box dropped by the bar's owner, destroyed ->
+#                          Esc closes the box and the bar (FV)
+#     menu.W.down          PREFIX Alt+F F9 (the File box at once: the bar's
+#                          Default moves with each Run, so not F10 + Right),
+#                          a highlight move (Down, F9: two one-row drawParts
+#                          + the status line's new hint), SUFFIX Esc F9
+#     menu.W.down-nohint   the same in the Edit box (PREFIX Alt+E F9): no hint
+#                          change, no status line redraw
+#     menu.W.idle          PREFIX Alt+F F9, an F9 alone (the idle tick's own
+#                          cost: the key, Idle, the status line's Update with
+#                          no change): the moves' part that is not the move
 #   paint.W.paint, paint.W.paint+init
 #                          (views-paint-80, views-paint) the two-panel scene
 #                          with a real list
@@ -154,6 +182,8 @@
 #                        kcl without TInputLine (before 3d): no typing rows;
 #                        without THistory (before 3h): no history row;
 #                        without fv.msgbox (before 3e): no msgbox rows
+#   views-menu-80        menu.80x24.open-drop-close, .down, .down-nohint, .idle; a kcl
+#                        without TMenuBar (before P3 3f): a note
 #   views-paint-80       paint.80x24.paint, paint.80x24.paint+init
 #   views-paint          paint.200x50.paint, paint.200x50.paint+init
 # N (default 10) = actions per measurement. Before the timing every action runs
@@ -178,13 +208,17 @@ source "$ROOT/kbool.sh" || exit 2
 kk.uses fv.app || exit 2
 
 case $CASE in
-    views-80|views-overlap-80|views-p2-80|views-list-80|views-paint-80|views-dialog-80) W=80 H=24 ;;
+    views-80|views-overlap-80|views-p2-80|views-list-80|views-paint-80|views-dialog-80|views-menu-80) W=80 H=24 ;;
     views-200|views-list-200|views-paint) W=200 H=50 ;;
     views-resize) W=80 H=24 ;;
     *) echo "fvviewcases.sh: unknown case '$CASE'" >&2; exit 2 ;;
 esac
 if [[ $CASE == views-list-* || $CASE == views-paint* ]] && ! declare -F TListViewer.new >/dev/null; then
     echo "# note: no TListViewer in this kcl (before P3 3b): $CASE not measured"
+    exit 0
+fi
+if [[ $CASE == views-menu-* ]] && ! declare -F TMenuBar.new >/dev/null; then
+    echo "# note: no TMenuBar in this kcl (before P3 3f): $CASE not measured"
     exit 0
 fi
 if [[ $CASE == views-dialog-* ]]; then
@@ -504,7 +538,38 @@ scene() {
         # (P3 3b) the stand-in window, then the list window in front of it
         list)    win w2 "$hw" 0 "$W" "$wh" 'Panel two' 2; lwin w1 0 0 "$hw" "$wh" 'Files' 1 LA ;;
         lists)   lwin w1 0 0 "$hw" "$wh" 'Files' 1 LA; lwin w2 "$hw" 0 "$W" "$wh" 'Panel two' 2 LA ;;
+        # (P3 3f) the bar first (the desktop from row 1), the windows below it
+        menu)    menubar; win w1 0 0 "$hw" $(( wh - 1 )) 'Files' 1; win w2 "$hw" 0 "$W" $(( wh - 1 )) 'Panel two' 2 ;;
     esac
+}
+
+# menubar -- (P3 3f) the menu scene's bar: File (10 items, each with a help
+# context 1001.. and a hint; Exit Alt+X cmQuit, so the Runs' Alt-X quits
+# through the bar as in FV), Edit (4 items, no hints), Window
+menubar() {
+    local -a f=() e=()
+    local i
+    local -a nm=('~N~ew' '~O~pen...' '~S~ave' 'Save ~a~s...' 'Save a~l~l' '~C~lose' '~P~rint...' 'P~r~int setup' '~D~os shell' 'E~x~it')
+    local -a pa=(F4 F3 F2 Shift+F2 '' Alt+F3 '' '' '' Alt+X)
+    local -a ky=(kbF4 kbF3 kbF2 kbShiftF2 '' kbAltF3 '' '' '' kbAltX)
+    local -a cm=(cmFile0 cmFile1 cmFile2 cmFile3 cmFile4 cmFile5 cmFile6 cmFile7 cmFile8 cmQuit)
+    for (( i = 0; i < 10; i++ )); do
+        f+=(item "${nm[i]}" "${pa[i]}" "${ky[i]}" "${cm[i]}" $(( 1001 + i )))
+        fv.menus.setHint "$FV_STATUSLINE" $(( 1001 + i )) "File command $i"
+    done
+    for (( i = 0; i < 4; i++ )); do e+=(item "Edit ~$i~" '' '' "cmEdit$i" 0); done
+    fv.menus.menuBar sub '~F~ile' "${f[@]}" end sub '~E~dit' "${e[@]}" end sub '~W~indow' item '~T~ile' '' '' cmTile 0 end
+}
+# menuev [TIMEOUT] -- (P3 3f) the menu case's event source: fv.app's, with an
+# F9 turned into an idle tick (evNothing + the application's Idle: the
+# header's "the user pauses")
+menuev() {
+    fv.app._getEvent "$@" || return
+    if [ "$FV_EV_WHAT" = evKeyDown ] && [ "$FV_EV_KEY" = kbF9 ]; then
+        FV_EV_WHAT=evNothing
+        fv.views._virt "$FV_APP" Idle || :
+        fv.views._showNow
+    fi
 }
 
 # ---- the counters (kcl/fv.views/tests/fvw_testlib.sh's shims) ---------------
@@ -911,6 +976,25 @@ case $CASE in
             timed "$L.msgbox.standin" '' "$K_F11$K_CF4" "$K_F11$K_CF4" ''
             timed "$L.msgbox.e2e" '' "$K_F8$K_CF4" "$K_F8$K_CF4" ''
         fi
+        ;;
+    views-menu-80)
+        L=menu.${W}x$H
+        scene menu
+        run ''; app.Idle   # (the first paint; the Idle a terminal gives between keys)
+        __FV_VW_GETEVENT=menuev
+        K_F10=$'\e[21~' K_F9=$'\e[20~' K_ESCU=$'\e[27u' K_ALTF=$'\ef' K_ALTE=$'\ee'
+        # (the checks: no box left, the bar not current, the status line back
+        # on the application's context; the hint shown while the box was open)
+        mclosed() { ! fv.views.isView "${FV_MENUBAR}__fvbox" && [ "${app__fvmenubar_data[Current]}" = -1 ] && [ "${app__fvstatus_data[HelpCtx]}" = 0 ]; }
+        count "$L.open-drop-close" '' "$K_F10$K_F9$K_DOWN$K_F9$K_ESCU$K_F9" '' '' mclosed
+        count "$L.down" "$K_ALTF$K_F9" "$K_DOWN$K_F9" '' "$K_ESCU$K_F9" mclosed
+        count "$L.down-nohint" "$K_ALTE$K_F9" "$K_DOWN$K_F9" '' "$K_ESCU$K_F9" mclosed
+        count "$L.idle" "$K_ALTF$K_F9" "$K_F9" '' "$K_ESCU$K_F9" mclosed
+        if [[ -n $FAIL ]] || [[ -s $ERRF ]]; then echo "fvviewcases.sh: $CASE: the check failed:$FAIL $(head -c 600 "$ERRF")" >&3; exit 3; fi
+        timed "$L.open-drop-close" '' "$K_F10$K_F9$K_DOWN$K_F9$K_ESCU$K_F9" "$K_F10$K_F9$K_DOWN$K_F9$K_ESCU$K_F9" ''
+        timed "$L.down" "$K_ALTF$K_F9" "$K_DOWN$K_F9" "$K_DOWN$K_F9" "$K_ESCU$K_F9"
+        timed "$L.down-nohint" "$K_ALTE$K_F9" "$K_DOWN$K_F9" "$K_DOWN$K_F9" "$K_ESCU$K_F9"
+        timed "$L.idle" "$K_ALTF$K_F9" "$K_F9" "$K_F9" "$K_ESCU$K_F9"
         ;;
     views-paint|views-paint-80)
         L=paint.${W}x$H
