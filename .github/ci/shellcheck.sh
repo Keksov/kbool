@@ -7,12 +7,13 @@
 # all of them kbool's own idioms ($this.Method, `obj.Prop = v`, nameref locals,
 # ${a[@]@a} guards, `>&$fd`). It runs only checks that are clean today, so a
 # finding is new code bringing back a known bug pattern:
-#   BASE    every .sh of the tree, tests included (not docs/: review repros):
+#   BASE    every .sh of the tree, tests included (not docs/: review repros), and
+#           the bash scripts in bin/ (by their shebang):
 #           bug patterns -- unquoted "$@"/$*, `for f in $(ls)`, `2>&1 >f`,
 #           reading and writing one file in a pipeline, `local` outside a
 #           function, impossible tests, unreachable case branches, `x=x`, ...
 #   STRICT  kbool.sh, kkore/*.sh, kklass/*.sh (the core, not its examples/),
-#           every kcl unit folder, examples/*.sh: also the
+#           every kcl unit folder, examples/*.sh, the commands in bin/: also the
 #           kcl contract's rc rules and plain-script hazards -- `local x=$(cmd)`
 #           (SC2155, hides cmd's rc), `cd` without a check (SC2164), `read`
 #           without -r (SC2162), word-split $(cmd) (SC2046, SC2207), `ls`
@@ -42,12 +43,29 @@ lint() {
     shift
     find "$@" -print0 | xargs -0 -r "$SC" -s bash -f gcc -i "$list"
 }
+# lintbin LIST : the same over the files in bin/ whose first line is a bash
+# shebang (the commands have no .sh suffix: fvdlg; a file there that is not
+# a bash script is never linted)
+lintbin() {
+    local f l
+    for f in bin/*; do
+        [[ -f $f ]] || continue
+        l=''
+        IFS= read -r l < "$f" || :
+        case ${l%$'\r'} in
+            '#!/usr/bin/env bash'|'#!/usr/bin/env bash '*|'#!/bin/bash'|'#!/bin/bash '*|'#!/usr/bin/bash'|'#!/usr/bin/bash '*) printf '%s\0' "$f" ;;
+        esac
+    done | xargs -0 -r "$SC" -s bash -f gcc -i "$1"
+}
 
 out=$(
     lint "$BASE" . -name '*.sh' -not -path '*/.git/*' -not -path '*/docs/*' -not -path './.tmp/*'
     lint "$STRICT" kbool.sh kkore examples kcl -maxdepth 2 -name '*.sh' -type f \
         -not -path '*/tests/*'
     lint "$STRICT" kklass -maxdepth 1 -name '*.sh' -type f
+    # the commands in bin/ (bash scripts by their shebang), both lists
+    lintbin "$BASE"
+    lintbin "$STRICT"
 )
 if [[ -z $out ]]; then
     echo "shellcheck.sh: clean"

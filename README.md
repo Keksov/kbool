@@ -101,7 +101,9 @@ git clone --recurse-submodules https://github.com/Keksov/kbool.git
 ```
 
 Nothing is built or installed: scripts `source` `kbool.sh` from wherever the tree lives, then
-name the units they need. How loading works (`KBOOL_HOME`, sourcing a unit file directly) is
+name the units they need. The commands live in `bin/` (today `fvdlg`, [whiptail-style
+dialogs](kcl/fv.dlg/README.md#the-command-binfvdlg)): `export PATH=/path/to/kbool/bin:$PATH`,
+or call `/path/to/kbool/bin/fvdlg`. How loading works (`KBOOL_HOME`, sourcing a unit file directly) is
 described in [Loading kbool](docs/reference.md#loading-kbool).
 
 ## Requirements

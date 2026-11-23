@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# fvdlg — Free Vision dialogs for shell scripts: whiptail / dialog flags on
+# kbool's text UI (the command face of kcl/fv.dlg; its README has the flags,
+# the answers and the differences from whiptail / dialog).
+#
+#     fvdlg --title Disk --yesno 'Format /dev/sdb1?' 0 0 && format_it
+#     name=$(fvdlg --stdout --inputbox 'Your name:' 0 0 "$USER") || exit
+#     pick=$(fvdlg --menu 'Pick' 0 0 0 a Apple b Banana 3>&1 1>&2 2>&3)
+#
+# Status 0 OK / Yes, 1 Cancel / No, 255 Esc / no terminal / an error (one
+# line on stderr); 130 / 143 / 129 after Ctrl+C / SIGTERM / SIGHUP (the
+# terminal restored). Nothing is installed: put kbool's bin/ on PATH
+# (export PATH=/path/to/kbool/bin:$PATH) or call this file by its path; it
+# finds kbool from its own location (a symlink to it is followed).
+#
+# In order (design kcl/docs/dev/fv/P4_DESIGN.md §7.1, P4-5, D36):
+#   1. the bash check in POSIX syntax (macOS's /bin/bash 3.2, or sh, may run
+#      this file: they get one line and 255, never a syntax error);
+#   2. kbool's root from this file's path (a symlink: one readlink fork);
+#      the file missing named (under kcl/: the submodule hint);
+#   3. --help / --version as the first argument: printed without the load
+#      (a failed write: printf's status);
+#   4. no terminal (FV_TTY, default /dev/tty, missing or does not open; TERM
+#      unset or dumb unless FVDLG_FORCE=1): 255 before the load — only when
+#      the call is sure to be refused: no --no-tty word anywhere in the line
+#      (also after --, also as an option's value), FVDLG_NOTTY not default,
+#      no --fv-headless / --help / --version anywhere (the unit's parser
+#      decides those; it refuses with the same words);
+#   5. source kbool.sh, kk.uses fv.dlg, fv.dlg.main "$@" (FVDLG_NOTTY's
+#      value first, as --no-tty=VALUE: a --no-tty on the call wins), exit
+#      with its status.
+# No fork on these paths but the load's own (and readlink for a symlink).
+
+# ---- 1. the bash-3.2-safe prologue: POSIX syntax only up to its end mark ----
+case ${BASH_VERSION-} in
+    '')
+        echo 'fvdlg: needs bash 5.1 or later (this shell is not bash)' >&2
+        exit 255 ;;
+    [1234].*|5.0*)
+        echo "fvdlg: needs bash 5.1 or later (this is ${BASH_VERSION%%(*})" >&2
+        exit 255 ;;
+esac
+case :${SHELLOPTS-}: in
+    *:posix:*)
+        echo 'fvdlg: bash in POSIX mode (sh, --posix, POSIXLY_CORRECT) is not supported; run it as bash' >&2
+        exit 255 ;;
+esac
+# ---- the end of the bash-3.2-safe prologue ----
+
+# ---- 2. the kbool root: this file's folder's parent (BASH_SOURCE holds the
+# path bash ran: absolute through a PATH lookup, as typed otherwise; no
+# slash = the current folder). `..` is left to the kernel, which takes it
+# after a symlinked folder (~/bin -> kbool/bin) the physical way
+__fvdlg_s=${BASH_SOURCE[0]}
+if [[ -L $__fvdlg_s ]]; then
+    __fvdlg_s=$(readlink -f -- "$__fvdlg_s" 2>/dev/null) || __fvdlg_s=${BASH_SOURCE[0]}   # fork: a symlink only
+fi
+if [[ $__fvdlg_s == */* ]]; then __fvdlg_r=${__fvdlg_s%/*}/..; else __fvdlg_r=..; fi
+# (the first file missing named; kcl/ is a submodule: a clone made without
+# --recurse-submodules has the folder empty)
+for __fvdlg_a in kbool.sh kcl/fv.dlg/fv.dlg.usage.sh; do
+    if [[ ! -f $__fvdlg_r/$__fvdlg_a ]]; then
+        __fvdlg_why=''
+        if [[ $__fvdlg_a == kcl/* ]]; then __fvdlg_why="; kcl/ is a git submodule: run git submodule update --init in $__fvdlg_r"; fi
+        printf 'fvdlg: cannot find kbool next to %s (no %s/%s%s)\n' "$__fvdlg_s" "$__fvdlg_r" "$__fvdlg_a" "$__fvdlg_why" >&2
+        exit 255
+    fi
+done
+
+# ---- 3. --help / --version first: the unit's text file, no load ----
+if [[ ${1-} == --help || ${1-} == --version ]]; then
+    source "$__fvdlg_r/kcl/fv.dlg/fv.dlg.usage.sh" "$1"
+    exit
+fi
+
+# ---- 4. no terminal (P4-5, design §3.4 / §3.6; D36) ----
+# The words that change the guard, anywhere in the line (a scan, not the
+# parse: a TEXT or an option's value that reads like one only costs a load,
+# the unit's parser decides and refuses with the guard's words)
+__fvdlg_hd=0 __fvdlg_hv=0 __fvdlg_ntw=0 __fvdlg_nt=${FVDLG_NOTTY-}
+for __fvdlg_a; do
+    case $__fvdlg_a in
+        --fv-headless) __fvdlg_hd=1 ;;
+        --help|--version) __fvdlg_hv=1 ;;
+        --no-tty|--no-tty=*) __fvdlg_ntw=1 ;;
+    esac
+done
+# (FVDLG_NOTTY: default | refuse; another value is refused — ignored when
+# the call says it itself: a --no-tty word, or --fv-headless)
+case $__fvdlg_nt in
+    ''|default|refuse) ;;
+    *)
+        if (( ! __fvdlg_ntw && ! __fvdlg_hd )); then
+            printf "fvdlg: FVDLG_NOTTY must be default or refuse (got '%s')\n" "$__fvdlg_nt" >&2
+            exit 255
+        fi
+        __fvdlg_nt='' ;;
+esac
+if (( ! __fvdlg_hd && ! __fvdlg_hv && ! __fvdlg_ntw )) && [[ ${FV_APP_HEADLESS-} != 1 && $__fvdlg_nt != default ]]; then
+    __fvdlg_why=''
+    # (-e first: `<>` would create a missing path)
+    if [[ ! -e ${FV_TTY:-/dev/tty} ]] || ! { : <>"${FV_TTY:-/dev/tty}"; } 2>/dev/null; then
+        __fvdlg_why=${FV_TTY:-/dev/tty}
+    elif [[ -z ${TERM-} || $TERM == dumb ]] && [[ ${FVDLG_FORCE-} != 1 ]]; then
+        if [[ -z ${TERM-} ]]; then __fvdlg_why='TERM is empty'; else __fvdlg_why='TERM is dumb'; fi
+        __fvdlg_why+='; FVDLG_FORCE=1 overrides'
+    fi
+    if [[ -n $__fvdlg_why ]]; then
+        printf 'fvdlg: no terminal (%s)\n' "$__fvdlg_why" >&2
+        exit 255
+    fi
+fi
+
+# ---- 5. the load and the call ----
+if [[ -n $__fvdlg_nt ]]; then set -- "--no-tty=$__fvdlg_nt" "$@"; fi
+__fvdlg_k=$__fvdlg_r/kbool.sh
+unset __fvdlg_s __fvdlg_r __fvdlg_hd __fvdlg_hv __fvdlg_ntw __fvdlg_nt __fvdlg_a __fvdlg_why
+if ! source "$__fvdlg_k" || ! kk.uses fv.dlg; then
+    printf 'fvdlg: cannot load kbool fv.dlg (%s)\n' "$__fvdlg_k" >&2
+    exit 255
+fi
+unset __fvdlg_k
+fv.dlg.main "$@"
+exit
