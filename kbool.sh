@@ -63,6 +63,15 @@ if [ "${BASH_VERSINFO[0]}" -lt "${__KK_BASH_MIN%.*}" ] || {
 fi
 __KK_BASH_OK=1
 
+# The kbool release (kklass/docs/dev/IMAGE_PLAN.md §7.6): the newest `## X.Y.Z`
+# heading of CHANGELOG.md, bumped with it (CONTRIBUTING.md "Releasing"; a kkore
+# test compares the two). Not exported: a child shell sources kbool.sh itself.
+# A preset exported or integer KBOOL_VERSION (or `set -a`) is turned back into a
+# plain string; a READONLY preset is not supported (bash refuses the assignment,
+# and under `set -e` that ends the shell).
+declare -g +x +i KBOOL_VERSION=0.1.1
+export -n KBOOL_VERSION
+
 # Executed instead of sourced? Exact: a function called from a SOURCED file's top
 # level sees FUNCNAME[1] == source (also for `bash -c 'source "$0"' kbool.sh`);
 # called from an executed script's top level it sees `main`.

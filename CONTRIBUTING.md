@@ -200,3 +200,11 @@ failed: packages, docker pull), 124 (timeout), and 3 or 4 without a `__GATE__` l
   with AI agents, checked by the maintainer and the gate), and every
   contribution is reviewed the same way, whether or not AI tools helped write it.
 * Security problems: [SECURITY.md](SECURITY.md). Licence: each repo's `LICENSE`.
+
+## Releasing
+
+A release of kbool gets a new `## X.Y.Z — DATE` heading at the top of the root
+[CHANGELOG.md](CHANGELOG.md). In the same commit, `KBOOL_VERSION` near the top
+of [`kbool.sh`](kbool.sh) is set to the same `X.Y.Z`: a later load image keys
+on it, so a release unpacked with old file dates is still noticed. The kkore
+test `020_KboolVersion.sh` fails while the two differ.
