@@ -39,8 +39,14 @@ case $rc in
     *) verdict="red"; mapped=$rc ;;
 esac
 
+# a manual run with suites (ci.yml input, .github/ci/suites.sh): a PARTIAL gate
+partial=
+suites=$(sh "$(dirname "$0")/suites.sh" 2>/dev/null) || suites="(invalid: ${GATE_SUITES:-})"
+[ "$suites" = all ] || partial="PARTIAL gate (suites: $suites): a quick check, not the gate that closes a phase"
+
 {
     echo "### gate ($name): exit $rc, $verdict"
+    [ -z "$partial" ] || echo "**$partial**"
     echo '```'
     if [ -f "$prog" ]; then
         grep -hE '^gate [0-9]|^ *\[FAIL\]|FLAKY|^__GATE__' "$prog" 2>/dev/null | tail -40
@@ -51,6 +57,7 @@ esac
 } >> "$sum" 2>/dev/null
 
 echo "gate ($name): exit $rc, $verdict; ${line:-no __GATE__ line}"
+[ -z "$partial" ] || echo "::warning::gate ($name): $partial"
 
 case $rc:$mapped in
     3:0 | 4:0) echo "::warning::gate ($name) verdict ${line:-exit $rc} (ENV/FLAKY do not fail CI, DL11)" ;;

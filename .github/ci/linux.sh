@@ -82,8 +82,14 @@ bash --version | head -1
 if [ -r /etc/os-release ]; then ( . /etc/os-release; echo "$PRETTY_NAME" ); fi
 
 set +e
-su kb -c 'cd ~/kbool && bash ktests/tools/gate.sh --out ~/gate-out --rerun-failed 1 --timeout 900 all'
-rc=$?
+# GATE_SUITES (docker run -e): the manual run's suites; suites.sh validates them (letters,
+# digits, _ . / - only: safe inside the command) and makes empty `all`
+if suites=$(sh /src/.github/ci/suites.sh); then
+    su kb -c "cd ~/kbool && bash ktests/tools/gate.sh --out ~/gate-out --rerun-failed 1 --timeout 900 $suites"
+    rc=$?
+else
+    rc=2
+fi
 set -e
 cp -a /home/kb/gate-out/. /out/ 2>/dev/null || true
 exit "$rc"

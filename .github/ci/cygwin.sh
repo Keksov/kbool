@@ -36,4 +36,7 @@ for t in sed gawk grep nc; do
     printf '%-5s %s\n' "$t" "$(cygcheck -f "$(command -v "$t")" 2>/dev/null)"
 done
 
-bash ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 all
+# GATE_SUITES (inherited from the step): the manual run's suites, validated by suites.sh
+suites=$(sh .github/ci/suites.sh) || exit 2
+# shellcheck disable=SC2086 # suites: validated words, split on purpose
+bash ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 $suites

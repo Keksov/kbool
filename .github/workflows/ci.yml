@@ -32,6 +32,11 @@ on:
     paths-ignore: ['.github/workflows/diag.yml']
   pull_request:
   workflow_dispatch:
+    inputs:
+      suites:
+        description: "gate suites, space or comma separated (e.g. `kkore kcl`); empty = all. Anything but all is a PARTIAL gate: a quick check, never the gate that closes a phase"
+        type: string
+        default: ""
   workflow_call:
     inputs:
       component:
@@ -45,6 +50,11 @@ on:
 
 permissions:
   contents: read
+
+# the gate's suites (.github/ci/suites.sh validates them and makes empty `all`): only a
+# manual run sets them; push, pull_request and workflow_call always run every suite
+env:
+  GATE_SUITES: ${{ github.event_name == 'workflow_dispatch' && inputs.suites || '' }}
 
 # in a called run `github` is the caller's context: the repository keeps this group apart
 # from the caller's own group (ci-<ref>) and from other callers
@@ -177,8 +187,13 @@ jobs:
           echo "out=$out" >> "$GITHUB_OUTPUT"
           set +e
           if [ -z "$IMAGE" ]; then
-            bash ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 all
-            rc=$?
+            if suites=$(sh .github/ci/suites.sh); then
+              # shellcheck disable=SC2086 # suites: validated words, split on purpose
+              bash ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 $suites
+              rc=$?
+            else
+              rc=2
+            fi
           else
             chmod 0777 "$out"
             rc=5
@@ -189,7 +204,7 @@ jobs:
               n=$((n + 1)); echo "docker pull $IMAGE: retry $n/3"; sleep 5
             done
             if [ "$rc" -eq 0 ]; then
-              docker run --rm -v "$PWD:/src:ro" -v "$out:/out" "$IMAGE" sh /src/.github/ci/linux.sh
+              docker run --rm -e GATE_SUITES -v "$PWD:/src:ro" -v "$out:/out" "$IMAGE" sh /src/.github/ci/linux.sh
               rc=$?
             fi
           fi
@@ -297,8 +312,13 @@ jobs:
           # from /usr/bin (timeout, ...) resolve there; ktool finds the g-names in brew's bin
           if [ "$GNUBIN" = yes ]; then PATH="$PATH:$(brew --prefix coreutils)/libexec/gnubin"; export PATH; fi
           set +e
-          "$brewbash" ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 all
-          rc=$?
+          if suites=$(sh .github/ci/suites.sh); then
+            # shellcheck disable=SC2086 # suites: validated words, split on purpose
+            "$brewbash" ktests/tools/gate.sh --out "$out" --rerun-failed 1 --timeout 900 $suites
+            rc=$?
+          else
+            rc=2
+          fi
           sh .github/ci/verdict.sh "$out" "$rc" "$NAME"
 
       - name: bash 3.2 guard (bsd row)
@@ -394,7 +414,7 @@ jobs:
           usesh: true
           sync: rsync
           copyback: true
-          envs: ""
+          envs: "GATE_SUITES"
           prepare: |
             retry() {
               n=1
@@ -427,8 +447,11 @@ jobs:
             set +e   # the action runs the script under `sh -e`: the gate's rc must not end it
             ws=$(pwd)
             rc=5
-            if rm -rf /home/kb/kbool && cp -a "$ws" /home/kb/kbool && chown -R kb:kb /home/kb/kbool; then
-              su -m kb -c 'export HOME=/home/kb USER=kb LOGNAME=kb; cd /home/kb/kbool && /usr/local/bin/bash ktests/tools/gate.sh --out /home/kb/gate-out --rerun-failed 1 --timeout 900 all'
+            if ! suites=$(sh .github/ci/suites.sh); then
+              rc=2
+            elif rm -rf /home/kb/kbool && cp -a "$ws" /home/kb/kbool && chown -R kb:kb /home/kb/kbool; then
+              # (suites: validated words — letters, digits, _ . / - — safe inside the command)
+              su -m kb -c "export HOME=/home/kb USER=kb LOGNAME=kb; cd /home/kb/kbool && /usr/local/bin/bash ktests/tools/gate.sh --out /home/kb/gate-out --rerun-failed 1 --timeout 900 $suites"
               rc=$?
             else
               echo "run: cannot copy the workspace to /home/kb/kbool"
@@ -561,8 +584,13 @@ jobs:
           "$GBASH" --version | sed -n 1p
           set +e
           "$KCL_NC" -h 2>&1 | sed -n 1p
-          "$GBASH" ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 all
-          rc=$?
+          if suites=$(sh .github/ci/suites.sh); then
+            # shellcheck disable=SC2086 # suites: validated words, split on purpose
+            "$GBASH" ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 $suites
+            rc=$?
+          else
+            rc=2
+          fi
           sh .github/ci/verdict.sh "$OUT" "$rc" "$NAME"
 
       - name: MSYS2 (msys2 row)
@@ -585,8 +613,13 @@ jobs:
           export KT_GATE_BASHES=/usr/bin/bash
           /usr/bin/bash --version | sed -n 1p
           set +e
-          /usr/bin/bash ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 all
-          rc=$?
+          if suites=$(sh .github/ci/suites.sh); then
+            # shellcheck disable=SC2086 # suites: validated words, split on purpose
+            /usr/bin/bash ktests/tools/gate.sh --out "$OUT" --rerun-failed 1 --timeout 900 $suites
+            rc=$?
+          else
+            rc=2
+          fi
           sh .github/ci/verdict.sh "$OUT" "$rc" "$NAME"
 
       # cygwin row: Cygwin's base packages + git, netcat (OpenBSD nc), openssl. Not on the
