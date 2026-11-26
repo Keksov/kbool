@@ -27,9 +27,16 @@
 #                     (hit / load, the chained hit minus tstringlist's load) and
 #                     the notes (forks, writes); its images live in one temp
 #                     folder (mktemp -d), removed at the end
+#            fvdlg -- bin/fvdlg spawned headless (fvdlgcases.sh; a skeleton P4
+#                     stage 4e extends): dlg1.proc.WIDGET.image (a hit) and
+#                     dlg1.proc.WIDGET (KBOOL_IMAGE=off), fvdlg.miss (the first
+#                     call: the background writer started, kk.image stage I5)
+#                     and fvdlg.miss.write (until the writer ends): launch ->
+#                     exit, ms as fv; then the derived rows (hit / plain,
+#                     miss / plain); images in the image suite's temp folder
 # --n N      calls (call, drift) or actions (fv, fvviews) per measurement;
 #            default 2000 for call and drift, 10 for fv and fvviews, 5 starts
-#            for image.
+#            for image and fvdlg.
 # Rounds interleave the sides (A B A B ...), so machine noise hits all sides alike.
 # Output: a Markdown report on stdout and in FILE. Plain bash, no tools but uname
 # (and mktemp / rm for the image suite's temp folder).
@@ -42,6 +49,7 @@ DRIFT_CASES=(drift-short drift-helper drift-nest drift-up drift-newdel)
 FV_CASES=(fv-80 fv-200 fv-resize fv-wide-80 fv-wide-200)
 FVV_CASES=(views-80 views-200 views-overlap-80 views-resize views-p2-80 views-list-80 views-list-200 views-paint-80 views-paint views-dialog-80 views-menu-80)
 IMG_CASES=(img-hit img-chain img-check img-miss img-alt img-forks)
+FVDLG_CASES=(dlg-proc dlg-miss)
 
 die() { echo "bench.sh: $*" >&2; exit 2; }
 
@@ -101,12 +109,13 @@ if [[ -r /proc/cpuinfo ]]; then
         [[ $line == "model name"* ]] && { cpu=${line#*: }; break; }
     done < /proc/cpuinfo
 fi
-has_kk=0 has_fv=0 has_img=0
+has_kk=0 has_fv=0 has_img=0 has_dlg=0
 for suite in "${SUITES[@]}"; do
     case $suite in
         call|drift) has_kk=1 ;;
         fv|fvviews) has_fv=1 ;;
         image) has_img=1 ;;
+        fvdlg) has_dlg=1 ;;
         *) die "unknown suite '$suite'" ;;
     esac
 done
@@ -116,10 +125,12 @@ if [[ -z $TITLE ]]; then
     (( has_fv && has_kk )) && TITLE="kklass + fv bench"
     (( has_img && ! has_fv && ! has_kk )) && TITLE="image bench"
     (( has_img && (has_fv || has_kk) )) && TITLE+=" + image"
+    (( has_dlg && ! has_img && ! has_fv && ! has_kk )) && TITLE="fvdlg bench"
+    (( has_dlg && (has_img || has_fv || has_kk) )) && TITLE+=" + fvdlg"
 fi
 # the image suite's temp folder (every image of its cases lives there, never
 # in the user's cache): made once, removed at the end
-if (( has_img )); then
+if (( has_img || has_dlg )); then
     IMGBENCH_TMP=$(mktemp -d "${TMPDIR:-/tmp}/kbimgbench.XXXXXX") || die "cannot make a temp folder for the image suite"
     export IMGBENCH_TMP
     trap 'rm -rf -- "$IMGBENCH_TMP"' EXIT
@@ -135,6 +146,7 @@ if (( has_fv && has_kk )); then say "fv       N=${N:-10} actions per measurement
 elif (( has_fv )); then say "rounds   $ROUNDS, N=${N:-10} actions per measurement"; fi
 if (( has_img && (has_fv || has_kk) )); then say "image    N=${N:-5} starts per measurement"
 elif (( has_img )); then say "rounds   $ROUNDS, N=${N:-5} starts per measurement"; fi
+(( has_dlg )) && say "fvdlg    N=${N:-5} spawned bin/fvdlg starts per measurement"
 for (( k = 0; k < ${#NAMES[@]}; k++ )); do
     revs=()
     [[ -r ${ROOTS[k]}/.bench_rev ]] && { mapfile -t revs < "${ROOTS[k]}/.bench_rev" || true; }
@@ -176,6 +188,26 @@ med() {
     set -- ${VAL[$1|$2|$3]-}
     if (( $# )); then median "$@"; else RESULT=0; fi
 }
+# fvdlg_derived — the fvdlg suite's derived rows (IMAGE_PLAN §11, stage I5),
+# per side from the medians: the hit / the plain load per widget, and the
+# first call (the background writer started) / the plain load (IMG-D10:
+# about 1, never the writer's seconds)
+fvdlg_derived() {
+    local k w h l m
+    say ""
+    say "| derived (medians) | side | value |"
+    say "|---|---|---|"
+    for (( k = 0; k < ${#NAMES[@]}; k++ )); do
+        for w in msgbox menu inputbox; do
+            med dlg-proc "$k" "dlg1.proc.$w.image"; h=$RESULT
+            med dlg-proc "$k" "dlg1.proc.$w"; l=$RESULT
+            if (( h && l )); then ratio "$l" "$h"; say "| dlg1.proc.$w.image / dlg1.proc.$w | ${NAMES[k]} | $RESULT |"; fi
+        done
+        med dlg-miss "$k" fvdlg.miss; m=$RESULT
+        med dlg-proc "$k" dlg1.proc.msgbox; l=$RESULT
+        if (( m && l )); then ratio "$l" "$m"; say "| fvdlg.miss / dlg1.proc.msgbox | ${NAMES[k]} | $RESULT |"; fi
+    done
+}
 # image_derived — the image suite's derived rows (IMAGE_PLAN §11), per side
 # from the medians: hit / load, the chained hit minus tstringlist's own load
 # and its ratio to the unchained hit, and (where measured) the share of the
@@ -213,6 +245,7 @@ for suite in "${SUITES[@]}"; do
         fv)    cases=("${FV_CASES[@]}") script=fvcases.sh n=${N:-10} ;;
         fvviews) cases=("${FVV_CASES[@]}") script=fvviewcases.sh n=${N:-10} ;;
         image) cases=("${IMG_CASES[@]}") script=imgcases.sh n=${N:-5} ;;
+        fvdlg) cases=("${FVDLG_CASES[@]}") script=fvdlgcases.sh n=${N:-5} ;;
     esac
     NOTE=() NOTEL=()
     for (( r = 1; r <= ROUNDS; r++ )); do
@@ -222,8 +255,10 @@ for suite in "${SUITES[@]}"; do
     done
 
     say ""
-    if [[ $suite == fv || $suite == fvviews || $suite == image ]]; then
-        if [[ $suite == image ]]; then
+    if [[ $suite == fv || $suite == fvviews || $suite == image || $suite == fvdlg ]]; then
+        if [[ $suite == fvdlg ]]; then
+            say "### fvdlg: ms per row (a spawned bin/fvdlg: launch -> exit), median of $ROUNDS (min-max)"
+        elif [[ $suite == image ]]; then
             say "### image: ms per row (a start: launch -> return), median of $ROUNDS (min-max)"
         else
             say "### $suite: ms per action, median of $ROUNDS (min-max)"
@@ -254,6 +289,7 @@ for suite in "${SUITES[@]}"; do
             say "$row"
         done
         [[ $suite != image ]] || image_derived
+        [[ $suite != fvdlg ]] || fvdlg_derived
         if (( ${#NOTEL[@]} )); then
             say ""
             for key in "${NOTEL[@]}"; do say "- side $key"; done

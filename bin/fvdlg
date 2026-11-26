@@ -26,10 +26,19 @@
 #      (also after --, also as an option's value), FVDLG_NOTTY not default,
 #      no --fv-headless / --help / --version anywhere (the unit's parser
 #      decides those; it refuses with the same words);
-#   5. source kbool.sh, kk.uses fv.dlg, fv.dlg.main "$@" (FVDLG_NOTTY's
-#      value first, as --no-tty=VALUE: a --no-tty on the call wins), exit
-#      with its status.
-# No fork on these paths but the load's own (and readlink for a symlink).
+#   5. source kbool.sh, kk.image --background fv.dlg (a load image, kkore
+#      README "Images"): a valid saved image of the load is sourced (a hit,
+#      4-5x faster than the load); else a normal load at once (the first call,
+#      the first after kbool or a unit changed) and a short-lived detached
+#      background process writes the image for the next call (a few seconds,
+#      at most 130 s; nothing waits for it); KBOOL_IMAGE=off: always the
+#      normal load, no image, no background process. Then fv.dlg.main "$@"
+#      (FVDLG_NOTTY's value first, as --no-tty=VALUE: a --no-tty on the call
+#      wins), exit with its status.
+# No fork on steps 1-4 (readlink for a symlink only). Step 5: a hit forks
+# per kk.image's check mode (none in `dates`, the Git-bash / MSYS2 / Cygwin
+# default; one stat in `stat`, elsewhere); a miss adds the load's own forks
+# and the writer's spawn (two forks).
 
 # ---- 1. the bash-3.2-safe prologue: POSIX syntax only up to its end mark ----
 case ${BASH_VERSION-} in
@@ -115,7 +124,7 @@ fi
 if [[ -n $__fvdlg_nt ]]; then set -- "--no-tty=$__fvdlg_nt" "$@"; fi
 __fvdlg_k=$__fvdlg_r/kbool.sh
 unset __fvdlg_s __fvdlg_r __fvdlg_hd __fvdlg_hv __fvdlg_ntw __fvdlg_nt __fvdlg_a __fvdlg_why
-if ! source "$__fvdlg_k" || ! kk.uses fv.dlg; then
+if ! source "$__fvdlg_k" || ! kk.image --background fv.dlg; then
     printf 'fvdlg: cannot load kbool fv.dlg (%s)\n' "$__fvdlg_k" >&2
     exit 255
 fi

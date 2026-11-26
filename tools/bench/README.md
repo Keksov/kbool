@@ -252,11 +252,38 @@ bash tools/bench/imgcases.sh . img-check 2                            # one case
 
 A kbool without `kk.image` (no `kkore/kimghit.sh`) stops each case with rc 2.
 
+## The fvdlg suite
+
+`bin/fvdlg` spawned headless (`bash ROOT/bin/fvdlg --fv-headless --fv-keys K
+--fv-size 80x24 --fv-out /dev/null WIDGET…`), timed **launch → exit** (bash's
+start and exit included) — an upper bound of launch → first frame, which P4
+stage 4e (`kcl/docs/dev/fv/P4_DESIGN.md` §6.2) will measure itself: this suite
+is the skeleton 4e extends. The command starts through `kk.image --background
+fv.dlg` (kk.image stage I5, IMAGE_PLAN §11). Images live in the image suite's
+temp folder; every background writer is waited for (its marker gone, at most
+150 s; one still running then is stopped and named in a note).
+
+| row | what is timed (mean of N spawns unless said) |
+|---|---|
+| `dlg1.proc.WIDGET.image` | a hit (the image warmed first: a first call, its writer waited for, checked valid); WIDGET `msgbox` (Enter), `menu` (Down Enter), `inputbox` (`xy` Enter) |
+| `dlg1.proc.WIDGET` | the same with `KBOOL_IMAGE=off` (the plain load), interleaved |
+| `fvdlg.miss` | the first call (an empty image folder): the plain load, the background writer started (one spawn per measurement) — IMG-D10: about the plain load, not the writer's seconds |
+| `fvdlg.miss.write` | from the same launch until the writer has ended (its marker gone) |
+
+Derived rows: `dlg1.proc.WIDGET.image / dlg1.proc.WIDGET` and
+`fvdlg.miss / dlg1.proc.msgbox`. Target (IMAGE_PLAN §11): the hit's first
+frame ≤ 0.3 s on CI Linux.
+
+```bash
+bash tools/bench/bench.sh --rounds 3 cur=. -- fvdlg
+bash tools/bench/fvdlgcases.sh . dlg-miss                              # one case
+```
+
 ## CI
 
 On GitHub, `bench.yml` runs the same on Linux (host and containers, bash 5.1 to
 5.3, musl and glibc), macOS and Windows (Git-bash, MSYS2, Cygwin). `ci.conf`
-holds the default sides and suites (`SUITES` may include `fv`, `fvviews` and `image`; for kcl
+holds the default sides and suites (`SUITES` may include `fv`, `fvviews`, `image` and `fvdlg`; for kcl
 comparisons pin kcl in `SIDES`, e.g. `main=kcl@main cur=pointer`, for the image suite
 kkore, e.g. `i3=kkore@<full sha> cur=pointer`); a manual run
 overrides them with its inputs. Runner timings vary by 10–30% between machines:
