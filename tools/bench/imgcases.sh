@@ -168,8 +168,9 @@ warm() {
 # nonce FILE -> NONCE: the plain header line's field 7 (a rewrite changes it)
 NONCE=""
 nonce() {
-    local l1 l2 IFS=$'\x1f'
+    local - l1 l2 IFS=$'\x1f'
     local -a a=()
+    set -f
     NONCE=""
     [[ -f $1 ]] || return 1
     { IFS= read -r l1; IFS= read -r l2; } < "$1" || return 1
@@ -183,11 +184,16 @@ case $CASE in
 img-hit)
     modes=("")
     (( POSIX )) && modes+=(dates)
-    ok=()
-    for m in "${modes[@]}"; do
-        if warm hit.sh "$D" "$m" -; then ok+=(1); else ok+=(0); echo "# image.hit.fvdlg${m:+.$m}: no valid image after three starts ($WHY)"; fi
+    ok=() n0=()
+    # (each mode its own image: its nonce taken after its warm, compared after the timing)
+    for (( k = 0; k < ${#modes[@]}; k++ )); do
+        m=${modes[k]}
+        if warm hit.sh "$D" "$m" -; then
+            ok[k]=1; nonce "$IMG"; n0[k]=$NONCE
+        else
+            ok[k]=0; n0[k]=""; echo "# image.hit.fvdlg${m:+.$m}: no valid image after three starts ($WHY)"
+        fi
     done
-    nonce "$IMG"; n0=$NONCE
     declare -A S=()
     for (( i = 0; i < N; i++ )); do
         for (( k = 0; k < ${#modes[@]}; k++ )); do
@@ -205,11 +211,13 @@ img-hit)
     (( ${#modes[@]} > 1 && ok[1] )) && mean image.hit.fvdlg.dates "${S[hitdates]}" "$N"
     mean image.kbool "${S[kbool]:-0}" "$N"
     mean image.bash "${S[bash]:-0}" "$N"
-    if (( ok[0] )); then
-        valid "$D" "" -
+    for (( k = 0; k < ${#modes[@]}; k++ )); do
+        (( ok[k] )) || continue
+        m=${modes[k]}
+        valid "$D" "$m" -
         nonce "$IMG"
-        [[ $NONCE == "$n0" ]] || echo "# image.hit.fvdlg: the image was written again during the timing (not every start was a hit)"
-    fi ;;
+        [[ $NONCE == "${n0[k]}" ]] || echo "# image.hit.fvdlg${m:+.$m}: the image was written again during the timing (not every start was a hit)"
+    done ;;
 img-chain)
     if ! warm chain.sh "$D" "" chain; then echo "# image.hit.chain: no valid image after three starts ($WHY)"; okc=0; else okc=1; fi
     nonce "$IMG"; n0=$NONCE
@@ -290,6 +298,8 @@ img-alt)
     mkdir -p "$A" "$B"
     for x in a b; do
         [[ -f $W/alt$x/$x.sh ]] || printf '%s\n' 'source "$1/kbool.sh" || exit 2' 'kk.image fv.dlg || exit 3' 'printf "%s\n" "$EPOCHREALTIME"' > "$W/alt$x/$x.sh"
+        # (its validity, from its own folder: the reason on stderr)
+        [[ -f $W/alt$x/p.sh ]] || printf '%s\n' 'source "$1/kbool.sh" || exit 2' 'kk._image_dbg() { printf "%s\n" "$*" >&2; }' 'kk.image --path fv.dlg' > "$W/alt$x/p.sh"
     done
     # (the original's mtime kept — a copy made "now" would be a racy stamp;
     # touch -r, not `cp -p`, which fails on Cygwin's ACL-less temp folders)
@@ -303,6 +313,13 @@ img-alt)
         if (( i % 2 )); then sc=alta/a.sh; else sc=altb/b.sh; fi
         run "$sc" "$M" "" "" || { echo "# image.alt: start $i failed"; exit 3; }
         if (( i <= 2 )); then s1=$(( s1 + US )); else s3=$(( s3 + US )); fi
+        if (( i == 2 )); then
+            # (after both misses: each script's image valid — else the starts after are no hits)
+            for x in a b; do
+                e=$(KBOOL_IMAGE_DIR=$M "$BASH" "$W/alt$x/p.sh" "$ROOT" 2>&1 >/dev/null) \
+                    || echo "# image.alt: after start 2 the image of $x.sh is not valid (${e##*$'\n'})"
+            done
+        fi
         for f in "$M"/*.img; do
             [[ -f $f ]] || continue
             nonce "$f"
