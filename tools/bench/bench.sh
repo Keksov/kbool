@@ -21,10 +21,18 @@
 #                     fv.menus, fv.app: every action inside app.Run, keys from a
 #                     file), reported as fv; its `# calls` / `# writes` notes
 #                     follow the table
+#            image -- kkore's load image (imgcases.sh: kk.image fv.dlg starts in
+#                     fresh processes, the checks alone, misses, alternating
+#                     callers, forks): ms per row as fv, then the derived rows
+#                     (hit / load, the chained hit minus tstringlist's load) and
+#                     the notes (forks, writes); its images live in one temp
+#                     folder (mktemp -d), removed at the end
 # --n N      calls (call, drift) or actions (fv, fvviews) per measurement;
-#            default 2000 for call and drift, 10 for fv and fvviews.
+#            default 2000 for call and drift, 10 for fv and fvviews, 5 starts
+#            for image.
 # Rounds interleave the sides (A B A B ...), so machine noise hits all sides alike.
-# Output: a Markdown report on stdout and in FILE. Plain bash, no tools but uname.
+# Output: a Markdown report on stdout and in FILE. Plain bash, no tools but uname
+# (and mktemp / rm for the image suite's temp folder).
 set -u
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -33,6 +41,7 @@ CALL_CASES=(plain call1 call14 long inherited nested prop newdel)
 DRIFT_CASES=(drift-short drift-helper drift-nest drift-up drift-newdel)
 FV_CASES=(fv-80 fv-200 fv-resize fv-wide-80 fv-wide-200)
 FVV_CASES=(views-80 views-200 views-overlap-80 views-resize views-p2-80 views-list-80 views-list-200 views-paint-80 views-paint views-dialog-80 views-menu-80)
+IMG_CASES=(img-hit img-chain img-check img-miss img-alt img-forks)
 
 die() { echo "bench.sh: $*" >&2; exit 2; }
 
@@ -92,11 +101,12 @@ if [[ -r /proc/cpuinfo ]]; then
         [[ $line == "model name"* ]] && { cpu=${line#*: }; break; }
     done < /proc/cpuinfo
 fi
-has_kk=0 has_fv=0
+has_kk=0 has_fv=0 has_img=0
 for suite in "${SUITES[@]}"; do
     case $suite in
         call|drift) has_kk=1 ;;
         fv|fvviews) has_fv=1 ;;
+        image) has_img=1 ;;
         *) die "unknown suite '$suite'" ;;
     esac
 done
@@ -104,6 +114,15 @@ if [[ -z $TITLE ]]; then
     TITLE="kklass bench"
     (( has_fv )) && TITLE="fv bench"
     (( has_fv && has_kk )) && TITLE="kklass + fv bench"
+    (( has_img && ! has_fv && ! has_kk )) && TITLE="image bench"
+    (( has_img && (has_fv || has_kk) )) && TITLE+=" + image"
+fi
+# the image suite's temp folder (every image of its cases lives there, never
+# in the user's cache): made once, removed at the end
+if (( has_img )); then
+    IMGBENCH_TMP=$(mktemp -d "${TMPDIR:-/tmp}/kbimgbench.XXXXXX") || die "cannot make a temp folder for the image suite"
+    export IMGBENCH_TMP
+    trap 'rm -rf -- "$IMGBENCH_TMP"' EXIT
 fi
 say "## $TITLE"
 say ""
@@ -114,6 +133,8 @@ say "system   $(uname -srm 2>/dev/null)"
 (( has_kk )) && say "rounds   $ROUNDS, N=${N:-2000} calls per measurement"
 if (( has_fv && has_kk )); then say "fv       N=${N:-10} actions per measurement"
 elif (( has_fv )); then say "rounds   $ROUNDS, N=${N:-10} actions per measurement"; fi
+if (( has_img && (has_fv || has_kk) )); then say "image    N=${N:-5} starts per measurement"
+elif (( has_img )); then say "rounds   $ROUNDS, N=${N:-5} starts per measurement"; fi
 for (( k = 0; k < ${#NAMES[@]}; k++ )); do
     revs=()
     [[ -r ${ROOTS[k]}/.bench_rev ]] && { mapfile -t revs < "${ROOTS[k]}/.bench_rev" || true; }
@@ -149,6 +170,41 @@ run_case() {  # SIDE-INDEX CASE SCRIPT N
 }
 # ms TENTHS-OF-US -> RESULT = milliseconds with two decimals
 ms() { printf -v RESULT '%d.%02d' $(( $1 / 10000 )) $(( $1 / 100 % 100 )); }
+# med CASE SIDE-INDEX LABEL -> RESULT = the median (tenths of us), 0 when none
+med() {
+    # shellcheck disable=SC2086
+    set -- ${VAL[$1|$2|$3]-}
+    if (( $# )); then median "$@"; else RESULT=0; fi
+}
+# image_derived — the image suite's derived rows (IMAGE_PLAN §11), per side
+# from the medians: hit / load, the chained hit minus tstringlist's own load
+# and its ratio to the unchained hit, and (where measured) the share of the
+# stat fork (the hit in stat mode minus the hit in dates mode)
+image_derived() {
+    local k h l c t d r hd
+    say ""
+    say "| derived (medians) | side | value |"
+    say "|---|---|---|"
+    for (( k = 0; k < ${#NAMES[@]}; k++ )); do
+        med img-hit "$k" image.hit.fvdlg; h=$RESULT
+        med img-hit "$k" image.load.fvdlg; l=$RESULT
+        med img-chain "$k" image.hit.chain; c=$RESULT
+        med img-chain "$k" image.load.tstringlist; t=$RESULT
+        med img-hit "$k" image.hit.fvdlg.dates; hd=$RESULT
+        if (( h && l )); then ratio "$l" "$h"; say "| image.hit.fvdlg / image.load.fvdlg | ${NAMES[k]} | $RESULT |"; fi
+        if (( c && t )); then
+            d=$(( c - t ))
+            if (( d >= 0 )); then ms "$d"; r=$RESULT; else ms $(( -d )); r="-$RESULT"; fi
+            say "| image.hit.chain - image.load.tstringlist (ms) | ${NAMES[k]} | $r |"
+            if (( h && d > 0 )); then ratio "$h" "$d"; say "| (image.hit.chain - image.load.tstringlist) / image.hit.fvdlg | ${NAMES[k]} | $RESULT |"; fi
+        fi
+        if (( h && hd )); then
+            d=$(( h - hd ))
+            if (( d >= 0 )); then ms "$d"; r=$RESULT; else ms $(( -d )); r="-$RESULT"; fi
+            say "| image.hit.fvdlg - image.hit.fvdlg.dates (ms: the stat fork) | ${NAMES[k]} | $r |"
+        fi
+    done
+}
 
 for suite in "${SUITES[@]}"; do
     case $suite in
@@ -156,6 +212,7 @@ for suite in "${SUITES[@]}"; do
         drift) cases=("${DRIFT_CASES[@]}") script=cases.sh n=${N:-2000} ;;
         fv)    cases=("${FV_CASES[@]}") script=fvcases.sh n=${N:-10} ;;
         fvviews) cases=("${FVV_CASES[@]}") script=fvviewcases.sh n=${N:-10} ;;
+        image) cases=("${IMG_CASES[@]}") script=imgcases.sh n=${N:-5} ;;
     esac
     NOTE=() NOTEL=()
     for (( r = 1; r <= ROUNDS; r++ )); do
@@ -165,8 +222,12 @@ for suite in "${SUITES[@]}"; do
     done
 
     say ""
-    if [[ $suite == fv || $suite == fvviews ]]; then
-        say "### $suite: ms per action, median of $ROUNDS (min-max)"
+    if [[ $suite == fv || $suite == fvviews || $suite == image ]]; then
+        if [[ $suite == image ]]; then
+            say "### image: ms per row (a start: launch -> return), median of $ROUNDS (min-max)"
+        else
+            say "### $suite: ms per action, median of $ROUNDS (min-max)"
+        fi
         say ""
         hdr="| action |" sep="|---|"
         for (( k = 0; k < ${#NAMES[@]}; k++ )); do hdr+=" ${NAMES[k]} |"; sep+="---|"; done
@@ -192,6 +253,7 @@ for suite in "${SUITES[@]}"; do
             done
             say "$row"
         done
+        [[ $suite != image ]] || image_derived
         if (( ${#NOTEL[@]} )); then
             say ""
             for key in "${NOTEL[@]}"; do say "- side $key"; done

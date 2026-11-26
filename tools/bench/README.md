@@ -14,8 +14,9 @@ alike.
 | `cases.sh ROOT CASE [N]` | one kklass case in this process; prints `NAME MICROSECONDS` lines |
 | `fvcases.sh ROOT CASE [N]` | one fv case in this process (ROOT's `kcl/fv.video`); prints `LABEL MICROSECONDS` lines and `# note` lines |
 | `fvviewcases.sh ROOT CASE [N]` | one fvviews case in this process (ROOT's `kcl/fv.app`, `fv.views`, `fv.menus`); prints `LABEL MICROSECONDS` lines and `# note` lines (`# calls` / `# writes`) |
-| `bench.sh [opts] NAME=ROOT... -- SUITE...` | the driver: suites `call`, `drift`, `fv`, `fvviews`; a Markdown report |
-| `prepare.sh DEST SPEC...` | builds sides: kbool copies with kklass and/or kcl at a ref (`pointer` = as checked out), optionally patched from `variants/` |
+| `imgcases.sh ROOT CASE [N]` | one image case (kkore's `kk.image`, ROOT's `kcl/fv.dlg`): starts in fresh processes; prints `LABEL MICROSECONDS` lines and `# note` lines |
+| `bench.sh [opts] NAME=ROOT... -- SUITE...` | the driver: suites `call`, `drift`, `fv`, `fvviews`, `image`; a Markdown report |
+| `prepare.sh DEST SPEC...` | builds sides: kbool copies with kklass, kcl and/or kkore at a ref (`pointer` = as checked out), optionally patched from `variants/` |
 | `ci.conf` | what `.github/workflows/bench.yml` runs on a push to the `perf` branch |
 
 Local use, from the kbool root:
@@ -26,8 +27,8 @@ bash tools/bench/prepare.sh /tmp/sides old=main cur=pointer   # prints the side 
 bash tools/bench/bench.sh old=/tmp/sides/old cur=/tmp/sides/cur -- call
 ```
 
-`--n N` sets the calls (call, drift) or actions (fv, fvviews) per measurement; without
-it call and drift take 2000, fv and fvviews 10.
+`--n N` sets the calls (call, drift), actions (fv, fvviews) or starts (image) per
+measurement; without it call and drift take 2000, fv and fvviews 10, image 5.
 
 ## Sides: `prepare.sh` specs
 
@@ -35,7 +36,8 @@ it call and drift take 2000, fv and fvviews 10.
 SPEC = NAME=PIN[,PIN...]      PIN = [SUB@]REF[+PATCH]
 ```
 
-* `SUB` is `kklass` (the default: a bare `REF` pins kklass, as before) or `kcl`;
+* `SUB` is `kklass` (the default: a bare `REF` pins kklass, as before), `kcl` or
+  `kkore` (the image suite);
 * `REF` is `pointer` (the submodule as checked out here) or any ref of the
   submodule's origin (a commit already present is used without a fetch). A
   short sha works only where that commit is already present: CI's submodules
@@ -50,8 +52,9 @@ bash tools/bench/prepare.sh /tmp/sides p1a=kcl@848c725 cur=pointer            # 
 bash tools/bench/prepare.sh /tmp/sides both=v0.1.1,kcl@main                   # both pinned
 ```
 
-Each side's `.bench_rev` names its kklass (line 1) and its kcl (line 2,
-`kcl <sha> <subject>`); the report's header shows both.
+Each side's `.bench_rev` names its kklass (line 1), its kcl (line 2,
+`kcl <sha> <subject>`) and its kkore (line 3, `kkore <sha> <subject>`); the
+report's header shows them.
 
 ## The fv suite
 
@@ -200,12 +203,62 @@ bash tools/bench/bench.sh --rounds 5 old=/tmp/sides/old cur=/tmp/sides/cur -- fv
 
 A kcl without `fv.app` (before kcl fv P2) stops each case with rc 2.
 
+## The image suite
+
+kkore's load image (`kk.image`, `kklass/docs/dev/IMAGE_PLAN.md` §11) with
+`kcl/fv.dlg` as the request. A **start** is a fresh process, `bash SCRIPT ROOT`,
+whose script sources `kbool.sh`, runs the load and prints `$EPOCHREALTIME`:
+**launch → return** is that mark minus the time taken before the spawn (bash's
+own start included, its exit not). Every image lives in a temp folder
+(`KBOOL_IMAGE_DIR`; bench.sh makes one with `mktemp -d` and removes it at the
+end, a case run alone makes its own): the user's image cache is never read or
+written. The caller's `KBOOL_IMAGE*` and `VERBOSE_KKLASS` are dropped; the
+caller's locale is kept and named in a note (the hit path's text work costs
+more under a UTF-8 locale). Before timing, an image is warmed (up to three
+starts) and checked valid with `kk.image --path`; after a hit row, the image's
+nonce shows that no start wrote it again.
+
+| row | what is timed (mean of N, one process each unless said) |
+|---|---|
+| `image.hit.fvdlg` | `source kbool.sh; kk.image fv.dlg` through a valid image |
+| `image.load.fvdlg` | the same with `KBOOL_IMAGE=off`, interleaved with the hits |
+| `image.hit.fvdlg.dates` | Linux / macOS / BSD: the hit with `KBOOL_IMAGE_CHECK=dates` beside the default `stat` (the derived row shows the fork's share) |
+| `image.bash`, `image.kbool` | references: a bare bash start; a start that only sources `kbool.sh` |
+| `image.hit.chain` | `kk.uses tstringlist; kk.image fv.dlg` through a valid chained image |
+| `image.load.chain` | the same with `KBOOL_IMAGE=off` |
+| `image.load.tstringlist` | `kk.uses tstringlist` alone |
+| `image.check` | in a fresh process after `source kbool.sh`: the first `kk.image --path fv.dlg` — the hit path's checks (kimghit.sh parsed, prep, key, header, edges, staleness, the clash and base checks) without the source of the image and the hooks |
+| `image.check.warm` | the same call repeated in one process (calls 2..N+1) |
+| `image.check.chain` | the first call after `kk.uses tstringlist` |
+| `image.check.dates` | Linux / macOS / BSD: `image.check` with `KBOOL_IMAGE_CHECK=dates` |
+| `image.miss.fvdlg` | a first start with an empty image folder: the normal load, then the writer (one start per measurement); `image.miss.fvdlg.PART` = the writer's own profile (before, load, delta, simulation, text, write, rename, total; through the `__KK_IMG_PROF` seam of `kkore/kimage.sh`) |
+| `image.miss.chain` | the same on top of `kk.uses tstringlist` (`.PART` adds the fresh-process simulation) |
+| `image.alt.first`, `image.alt.start` | two scripts in two folders alternate over 10 starts (the second folder holds a copy of `fv.dlg.sh`, so its request is another image): the mean of starts 1–2 (the two misses) and of starts 3–10 (hits); a note counts the images written in starts 3–10 (must be 0) |
+
+Derived rows (from the medians, per side): `image.hit.fvdlg / image.load.fvdlg`,
+`image.hit.chain - image.load.tstringlist` and its ratio to `image.hit.fvdlg`,
+and `image.hit.fvdlg - image.hit.fvdlg.dates` (the `stat` fork) where measured.
+Notes: `image.forks.MODE` — the forks of one hit per check mode (`dates`,
+`stat`, `hash`), counted from an xtrace whose `PS4` holds `$BASHPID` (a traced
+line with another pid is a fork; a main-shell command word that is a file on
+`PATH` is listed too), as `kkore/tests/023` counts them.
+
+```bash
+bash tools/bench/bench.sh --rounds 3 cur=. -- image
+bash tools/bench/prepare.sh /tmp/sides i3=kkore@849161d cur=pointer   # kkore refs
+bash tools/bench/bench.sh --rounds 5 i3=/tmp/sides/i3 cur=/tmp/sides/cur -- image
+bash tools/bench/imgcases.sh . img-check 2                            # one case
+```
+
+A kbool without `kk.image` (no `kkore/kimghit.sh`) stops each case with rc 2.
+
 ## CI
 
 On GitHub, `bench.yml` runs the same on Linux (host and containers, bash 5.1 to
 5.3, musl and glibc), macOS and Windows (Git-bash, MSYS2, Cygwin). `ci.conf`
-holds the default sides and suites (`SUITES` may include `fv` and `fvviews`; for kcl
-comparisons pin kcl in `SIDES`, e.g. `main=kcl@main cur=pointer`); a manual run
+holds the default sides and suites (`SUITES` may include `fv`, `fvviews` and `image`; for kcl
+comparisons pin kcl in `SIDES`, e.g. `main=kcl@main cur=pointer`, for the image suite
+kkore, e.g. `i3=kkore@<full sha> cur=pointer`); a manual run
 overrides them with its inputs. Runner timings vary by 10–30% between machines:
 compare the sides of one row (the ratio columns), not absolute numbers across
 runs. Benchmarks give no pass/fail verdict.

@@ -4,9 +4,10 @@
 #
 # SPEC = NAME=PIN[,PIN...]      PIN = [SUB@]REF[+PATCH]
 #   SUB    the submodule the pin applies to: `kklass` (the default: a bare REF
-#          pins kklass, as before) or `kcl` (for the fv suite)
+#          pins kklass, as before), `kcl` (for the fv suite) or `kkore` (for the
+#          image suite)
 #   REF    `pointer` (the submodule as checked out in this tree) or any ref of
-#          its origin (Keksov/kklass, Keksov/kcl: branch, tag, sha): a commit
+#          its origin (Keksov/kklass, Keksov/kcl, Keksov/kkore: branch, tag, sha): a commit
 #          already present is used as is, anything else is fetched. A short
 #          sha works only where the commit is present; CI's submodules are
 #          shallow: there give a branch, a tag or a full 40-character sha
@@ -16,14 +17,14 @@
 # A submodule no pin names stays as checked out. Each side is a copy of the
 # kbool tree without .git at DEST/NAME, with DEST/NAME/.bench_rev naming what
 # it holds: line 1 its kklass ("<sha> <subject> [+PATCH]", as before), line 2
-# "kcl <sha> <subject> [+PATCH]".
+# "kcl <sha> <subject> [+PATCH]", line 3 "kkore <sha> <subject> [+PATCH]".
 # Prints `NAME=DEST/NAME` per side (the arguments for bench.sh).
 set -eu
 
 die() { echo "prepare.sh: $*" >&2; exit 2; }
 DEST=${1:?usage: prepare.sh DEST NAME=[SUB@]REF[+PATCH][,...]...}
 shift
-[[ -f kbool.sh && -d kklass && -d kcl ]] || die "run from the kbool root"
+[[ -f kbool.sh && -d kklass && -d kcl && -d kkore ]] || die "run from the kbool root"
 mkdir -p "$DEST"
 DEST=$(cd "$DEST" && pwd)
 
@@ -68,7 +69,7 @@ for spec in "$@"; do
     for p in "${pins[@]}"; do
         sub=kklass
         case $p in
-            kklass@*|kcl@*) sub=${p%%@*} p=${p#*@} ;;
+            kklass@*|kcl@*|kkore@*) sub=${p%%@*} p=${p#*@} ;;
         esac
         [[ -n $p && $p != +* ]] || die "bad spec '$spec': an empty $sub ref"
         [[ -z ${want[$sub]-} ]] || die "bad spec '$spec': $sub pinned twice"
@@ -79,13 +80,13 @@ for spec in "$@"; do
     mkdir -p "$side"
     tar --exclude=.git -cf - . | (cd "$side" && tar -xf -)
     revs=()
-    for sub in kklass kcl; do
+    for sub in kklass kcl kkore; do
         ref=${want[$sub]:-pointer} patch=""
         if [[ $ref == *+* ]]; then patch=${ref#*+}; ref=${ref%%+*}; fi
         pin "$side" "$sub" "$ref" "$patch"
         revs+=("$REV")
     done
     unset want
-    printf '%s\nkcl %s\n' "${revs[0]}" "${revs[1]}" > "$side/.bench_rev"
+    printf '%s\nkcl %s\nkkore %s\n' "${revs[0]}" "${revs[1]}" "${revs[2]}" > "$side/.bench_rev"
     printf '%s=%s\n' "$name" "$side"
 done
